@@ -1,13 +1,13 @@
 {
   "type": "module",
-  "name": "@signpostmarv/nodejs-template",
-  "description": "nodejs template",
+  "name": "@satisfactory-dev/mods",
+  "description": "ficsit.app mods directory fork",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SignpostMarv/nodejs-template.git"
+    "url": "git+https://github.com/satisfactory-dev/mods.git"
   },
-  "funding": "https://github.com/SignpostMarv/nodejs-template?sponsor=1",
+  "funding": "https://github.com/satisfactory-dev/mods?sponsor=1",
   "exports": "./index.js",
   "types": "./index.d.ts",
   "devDependencies": {

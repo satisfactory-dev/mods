@@ -1,5 +1,5 @@
 {
-	"name": "nodejs template",
+	"name": "mods",
 	"dockerComposeFile": "./docker-compose.yml",
 	"service": "devcontainer",
 	"workspaceFolder": "/app/",
