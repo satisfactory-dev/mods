@@ -1,13 +1,23 @@
 import upstream from './run.ts';
 
-function run(operation: string, iterate_on: string, sub_query: string, limit: number, offset: number) {
+function run(
+	operation: string,
+	iterate_on: string,
+	sub_query: string,
+	limit: number,
+	offset: number,
+) {
 	return upstream(`${operation}(filter: {
 		limit: ${limit},
 		offset: ${offset},
 	})`, `${iterate_on} {${sub_query}} count`);
 }
 
-export default async function* (operation: string, iterate_on: string, sub_query: string) {
+export default async function* (
+	operation: string,
+	iterate_on: string,
+	sub_query: string,
+) {
 	let limit = 32;
 	let offset = 0;
 

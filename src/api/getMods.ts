@@ -1,6 +1,14 @@
-import { createWriteStream, existsSync } from 'node:fs';
+import {
+	createWriteStream,
+	existsSync,
+} from 'node:fs';
+
+import {
+	readFile,
+	unlink,
+} from 'node:fs/promises';
+
 import paginated from './helper/paginated.ts';
-import { readFile, unlink } from 'node:fs/promises';
 
 export type result = AsyncGenerator<number>;
 
@@ -15,7 +23,9 @@ export async function* live(): result {
 }
 
 export async function* cached(): result {
-	const cache_file = `${import.meta.dirname}/../../.cache/api/getMods/ids.json`;
+	const cache_file = `${
+		import.meta.dirname
+	}/../../.cache/api/getMods/ids.json`;
 
 	if (!existsSync(cache_file)) {
 		const buff = createWriteStream(cache_file);
