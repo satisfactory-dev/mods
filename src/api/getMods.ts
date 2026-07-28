@@ -10,19 +10,26 @@ import {
 
 import paginated from './helper/paginated.ts';
 
-export type result = AsyncGenerator<number>;
+import schema from '../../schema/getMods/ids.schema.json' with {
+	type: 'json',
+};
 
-export async function* live(): result {
-	for await (const mod of paginated(
+type return_type = AsyncGenerator<string>;
+
+export async function* live(): return_type {
+	for await (const mod of paginated<{
+		id: Exclude<string, ''>,
+	}>(
 		'getMods',
 		'mods',
 		'id',
+		schema,
 	)) {
 		yield mod.id;
 	}
 }
 
-export async function* cached(): result {
+export async function* cached(): return_type {
 	const cache_file = `${
 		import.meta.dirname
 	}/../../.cache/api/getMods/ids.json`;

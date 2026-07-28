@@ -13,6 +13,7 @@
   "devDependencies": {
     "@signpostmarv/oxlint-config": "^0.4.0",
     "@types/node": "^26.1.2",
+    "ajv": "^8.20.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^7.0.2001",
     "prettier": "^3.9.6",

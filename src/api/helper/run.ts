@@ -1,4 +1,4 @@
-export default (operation: string, sub_query: string) => {
+export default (operation: string, sub_query: string): Promise<unknown> => {
 	return fetch(
 		'https://api.ficsit.app/v2/query',
 		{

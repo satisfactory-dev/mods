@@ -1,0 +1,29 @@
+{
+	"type": "object",
+	"required": ["data"],
+	"additionalProperties": false,
+	"properties": {
+		"data": {
+			"type": "object",
+			"required": ["getMods", "count"],
+			"additionalProperties": false,
+			"properties": {
+				"getMods": {
+					"type": "object",
+					"required": ["id"],
+					"additionalProperties": false,
+					"properties": {
+						"id": {
+							"type": "string",
+							"pattern": "^[A-Za-z0-9]+$"
+						}
+					}
+				},
+				"count": {
+					"type": "integer",
+					"minimum": 0
+				}
+			}
+		}
+	}
+}
