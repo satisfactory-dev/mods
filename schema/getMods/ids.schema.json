@@ -5,10 +5,18 @@
 	"properties": {
 		"data": {
 			"type": "object",
-			"required": ["getMods", "count"],
+			"required": ["getMods"],
 			"additionalProperties": false,
 			"properties": {
 				"getMods": {
+					"type": "object",
+					"required": ["mods", "count"],
+					"additionalProperties": false,
+					"properties": {
+						"mods": {
+							"type": "array",
+							"items": {
+
 					"type": "object",
 					"required": ["id"],
 					"additionalProperties": false,
@@ -18,10 +26,13 @@
 							"pattern": "^[A-Za-z0-9]+$"
 						}
 					}
-				},
+							}
+						},
 				"count": {
 					"type": "integer",
 					"minimum": 0
+				}
+					}
 				}
 			}
 		}
