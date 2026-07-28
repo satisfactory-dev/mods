@@ -51,6 +51,7 @@ export default async function* paginated<
 
 	let yielded = 0;
 
+	async function get() {
 	let result = await run(operation, iterate_on, sub_query, limit, offset);
 
 	if (!validator(result)) {
@@ -59,6 +60,11 @@ export default async function* paginated<
 		throw new Error('Failed to validate response!');
 	}
 
+		return result;
+	}
+
+	let result = await get();
+
 	yield* result.data[operation][iterate_on];
 
 	yielded += result.data[operation][iterate_on].length;
@@ -66,13 +72,7 @@ export default async function* paginated<
 	while (result.data[operation].count > yielded) {
 		offset += limit;
 
-		result = await run(operation, iterate_on, sub_query, limit, offset);
-
-		if (!validator(result)) {
-			console.error(validator.errors);
-
-			throw new Error('Failed to validate response!');
-		}
+		result = await get();
 
 		yield* result.data[operation][iterate_on];
 
