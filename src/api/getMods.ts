@@ -10,7 +10,7 @@ import {
 
 import paginated from './helper/paginated.ts';
 
-import schema from '../../schema/getMods/ids.schema.json' with {
+import schema from '../../schema/getMods.schema.json' with {
 	type: 'json',
 };
 
