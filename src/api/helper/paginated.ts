@@ -1,9 +1,9 @@
 import type {
 	SchemaObject,
 } from 'ajv';
+import Ajv from 'ajv';
 
 import upstream from './run.ts';
-import Ajv from 'ajv';
 
 function run(
 	operation: string,
