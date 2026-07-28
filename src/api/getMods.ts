@@ -25,21 +25,21 @@ export async function* cached(): result {
 		let comma = false;
 
 		try {
-		for await (const id of live()) {
-			yield id;
+			for await (const id of live()) {
+				yield id;
 
-			if (comma) {
-				buff.write(',\n');
-			} else {
-				comma = true;
+				if (comma) {
+					buff.write(',\n');
+				} else {
+					comma = true;
+				}
+
+				buff.write(`\t${JSON.stringify(id)}`);
 			}
 
-			buff.write(`\t${JSON.stringify(id)}`);
-		}
+			buff.write('\n]\n');
 
-		buff.write('\n]\n');
-
-		buff.close();
+			buff.close();
 		} catch (err) {
 			await unlink(cache_file);
 
