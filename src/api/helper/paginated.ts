@@ -52,7 +52,13 @@ export default async function* paginated<
 	let yielded = 0;
 
 	async function get() {
-		let result = await run(operation, iterate_on, sub_query, limit, offset);
+		const result = await run(
+			operation,
+			iterate_on,
+			sub_query,
+			limit,
+			offset,
+		);
 
 		if (!validator(result)) {
 			console.error(validator.errors);
