@@ -58,7 +58,9 @@ export async function* cached(): return_type {
 
 			buff.close();
 		} catch (err) {
+			if (existsSync(cache_file)) {
 			await unlink(cache_file);
+			}
 
 			throw err;
 		}
