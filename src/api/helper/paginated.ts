@@ -52,13 +52,13 @@ export default async function* paginated<
 	let yielded = 0;
 
 	async function get() {
-	let result = await run(operation, iterate_on, sub_query, limit, offset);
+		let result = await run(operation, iterate_on, sub_query, limit, offset);
 
-	if (!validator(result)) {
-		console.error(validator.errors);
+		if (!validator(result)) {
+			console.error(validator.errors);
 
-		throw new Error('Failed to validate response!');
-	}
+			throw new Error('Failed to validate response!');
+		}
 
 		return result;
 	}
