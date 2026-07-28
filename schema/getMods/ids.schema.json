@@ -16,22 +16,21 @@
 						"mods": {
 							"type": "array",
 							"items": {
-
-					"type": "object",
-					"required": ["id"],
-					"additionalProperties": false,
-					"properties": {
-						"id": {
-							"type": "string",
-							"pattern": "^[A-Za-z0-9]+$"
-						}
-					}
+								"type": "object",
+								"required": ["id"],
+								"additionalProperties": false,
+								"properties": {
+									"id": {
+										"type": "string",
+										"pattern": "^[A-Za-z0-9]+$"
+									}
+								}
 							}
 						},
-				"count": {
-					"type": "integer",
-					"minimum": 0
-				}
+						"count": {
+							"type": "integer",
+							"minimum": 0
+						}
 					}
 				}
 			}
