@@ -1,6 +1,6 @@
 import { createWriteStream, existsSync } from 'node:fs';
 import paginated from './helper/paginated.ts';
-import { readFile, unlink, writeFile } from 'node:fs/promises';
+import { readFile, unlink } from 'node:fs/promises';
 
 export type result = AsyncGenerator<number>;
 
