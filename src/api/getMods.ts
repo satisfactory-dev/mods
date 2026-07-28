@@ -1,6 +1,6 @@
 import { createWriteStream, existsSync } from 'node:fs';
 import paginated from './helper/paginated.ts';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
 
 export type result = AsyncGenerator<number>;
 
@@ -24,6 +24,7 @@ export async function* cached(): result {
 
 		let comma = false;
 
+		try {
 		for await (const id of live()) {
 			yield id;
 
@@ -39,6 +40,11 @@ export async function* cached(): result {
 		buff.write('\n]\n');
 
 		buff.close();
+		} catch (err) {
+			await unlink(cache_file);
+
+			throw err;
+		}
 	} else {
 		const contents = await readFile(cache_file);
 
