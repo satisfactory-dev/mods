@@ -4,15 +4,15 @@ export default (operation: string, sub_query: string) => {
 		{
 			method: 'POST',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 				query: `{${operation} {
 					${sub_query}
 				}}`,
 			}),
-		}
+		},
 	).then((res) => {
 		return res.json();
 	});
-}
+};
