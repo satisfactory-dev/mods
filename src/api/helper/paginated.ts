@@ -3,6 +3,8 @@ import type {
 } from './ajv.ts';
 import Ajv from './ajv.ts';
 
+import count from './count.ts';
+
 import upstream from './run.ts';
 
 import validated from './validated.ts';
@@ -17,7 +19,7 @@ function run(
 	return upstream(`${operation}(filter: {
 		limit: ${limit},
 		offset: ${offset},
-	})`, `${iterate_on} {${sub_query}} count`);
+	})`, `${iterate_on} {${sub_query}}`);
 }
 
 export default async function* paginated<
@@ -45,10 +47,13 @@ export default async function* paginated<
 
 	const validator = Ajv.compile<T>(schema);
 
-	let limit = 32;
 	let offset = 0;
 
 	let yielded = 0;
+
+	const total = await count(operation);
+
+	const limit = Math.max(32, Math.min(100, total));
 
 	async function get() {
 		const result = await run(
@@ -68,7 +73,13 @@ export default async function* paginated<
 
 	yielded += result.data[operation][iterate_on].length;
 
-	while (result.data[operation].count > yielded) {
+	console.log(`fetching ${
+		total
+	} over ${
+		Math.ceil(total / limit)
+	} pages`);
+
+	while (total > yielded) {
 		offset += limit;
 
 		result = await get();

@@ -14,7 +14,7 @@ function run(
 ): Promise<unknown> {
 	return upstream(`${operation}(filter: {
 		ids: "${id}",
-	})`, `${iterate_on} {${sub_query}} count`);
+	})`, `${iterate_on} {${sub_query}}`);
 }
 
 export default async function record<

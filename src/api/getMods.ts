@@ -26,13 +26,68 @@ import type {
 type return_type = AsyncGenerator<result['id']>;
 
 export async function* live(): return_type {
+	const {
+		properties: {
+			data: {
+				properties: {
+					getMods: {
+						properties: {
+							mods: {
+								items: _,
+								...remaining
+							},
+							...remaining_properties_2
+						},
+						...remaining_getMods_0
+					},
+					...remaining_properties_1
+				},
+				...remaining_data_0
+			},
+			...remaining_properties_0
+		},
+		...fudged_schema
+	} = schema;
+
+	const shrunk = {
+		...fudged_schema,
+		properties: {
+			...remaining_properties_0,
+			data: {
+				...remaining_data_0,
+				properties: {
+					...remaining_properties_1,
+					getMods: {
+						...remaining_getMods_0,
+						properties: {
+							...remaining_properties_2,
+							mods: {
+								...remaining,
+								items: {
+									type: 'object',
+									required: ['id'],
+									additionalProperties: false,
+									properties: {
+										id: {
+											$ref: '#/$defs/id',
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	};
+
 	for await (const mod of paginated<{
 		id: result['id'],
 	}>(
 		'getMods',
 		'mods',
 		'id',
-		schema,
+		shrunk,
 	)) {
 		yield mod.id;
 	}

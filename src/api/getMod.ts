@@ -145,7 +145,7 @@ export type result<
 	}
 );
 
-const validator = Ajv.compile<{
+export const validator = Ajv.compile<{
 	data: {
 		getMods: {
 			mods: result[],
