@@ -1,6 +1,6 @@
 import type {
 	ValidateFunction,
-} from 'ajv';
+} from './ajv.ts';
 
 import upstream from './run.ts';
 

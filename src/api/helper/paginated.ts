@@ -1,7 +1,7 @@
 import type {
 	SchemaObject,
-} from 'ajv';
-import Ajv from 'ajv';
+} from './ajv.ts';
+import Ajv from './ajv.ts';
 
 import upstream from './run.ts';
 
@@ -43,10 +43,7 @@ export default async function* paginated<
 		},
 	};
 
-	const validator = (new Ajv({
-		strict: true,
-		verbose: true,
-	})).compile<T>(schema);
+	const validator = Ajv.compile<T>(schema);
 
 	let limit = 32;
 	let offset = 0;

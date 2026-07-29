@@ -7,7 +7,7 @@ import {
 	writeFile,
 } from 'node:fs/promises';
 
-import Ajv from 'ajv';
+import Ajv from './helper/ajv.ts';
 
 import get from './helper/single-record.ts';
 
@@ -43,18 +43,58 @@ type IdObject = {
 	id: Exclude<string, ''>,
 };
 
+type HasLogo<
+	Id extends Exclude<string, ''> = Exclude<string, ''>,
+> = {
+	logo: `https://storage.ficsit.app/file/smr-prod${'-s3'|''}/images/mods/${
+		Id
+	}/logo.webp`,
+	logo_thumbhash: Exclude<string, ''>,
+};
+
+type HasLogoBorked<
+	Id extends Exclude<string, ''> = Exclude<string, ''>,
+> = {
+	logo: `https://storage.ficsit.app/file/smr-prod${'-s3'|''}/images/mods/${
+		Id
+	}/logo.webp`,
+	logo_thumbhash: '',
+};
+
+type NoHasLogo = {
+	logo: '',
+	logo_thumbhash: '',
+};
+
+type CompatibilityInfo = {
+	EA: Compatibility,
+	EXP: Compatibility,
+	Controller: ControllerCompatibility,
+};
+
+type AiUseDisclosureInfo = {
+	message: string,
+	disclosure_type: (
+		| 'no_ai_usage'
+		| 'ai_usage'
+		| 'runtime_ai_usage'
+	),
+};
+
 export type result<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 	DateTimeType extends string | Date = string,
-> = {
+> = (
+	& (
+		| HasLogo<Id>
+		| HasLogoBorked<Id>
+		| NoHasLogo
+	)
+	& {
 	id: Id,
 	name: Exclude<string, ''>,
 	short_description: string,
 	full_description: string,
-	logo: `https://storage.ficsit.app/file/smr-prod-s3/images/mods/${
-		Id
-	}/logo.webp`,
-	logo_thumbhash: Exclude<string, ''>,
 	source_url: (
 		| ''
 		| `https://${string}`
@@ -73,23 +113,21 @@ export type result<
 	tags: {
 		id: Exclude<string, ''>,
 	}[],
-	compatibility: {
-		EA: Compatibility,
-		EXP: Compatibility,
-		Controller: ControllerCompatibility,
-	},
-	network_use_disclosure: string,
-	ai_use_disclosure: {
-		message: string,
-		disclosure_type: (
-			| 'no_ai_usage'
-			| 'ai_usage'
-			| 'runtime_ai_usage'
+		compatibility: (
+			| CompatibilityInfo
+			| null
 		),
-	},
+		network_use_disclosure: (
+			| string
+			| null
+		),
+		ai_use_disclosure: (
+			| AiUseDisclosureInfo
+			| null
+		),
 	toggle_explicit_content: boolean,
 	authors: [Author, ...Author[]],
-	versions: [IdObject, ...IdObject[]],
+		versions: IdObject[],
 	latestVersions: {
 		alpha: (
 			| null
@@ -104,12 +142,10 @@ export type result<
 			| IdObject
 		),
 	},
-};
+	}
+);
 
-const validator = (new Ajv({
-	strict: true,
-	verbose: true,
-})).compile<{
+const validator = Ajv.compile<{
 	data: {
 		getMods: {
 			mods: result[],
