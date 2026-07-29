@@ -91,28 +91,28 @@ export type result<
 		| NoHasLogo
 	)
 	& {
-	id: Id,
-	name: Exclude<string, ''>,
-	short_description: string,
-	full_description: string,
-	source_url: (
-		| ''
-		| `https://${string}`
-	),
-	creator_id: Exclude<string, ''>,
-	approved: boolean,
-	views: number,
-	downloads: number,
-	hotness: number,
-	popularity: number,
-	updated_at: DateTimeType,
-	created_at: DateTimeType,
-	last_version_date: DateTimeType,
-	mod_reference: Exclude<string, ''>,
-	hidden: boolean,
-	tags: {
-		id: Exclude<string, ''>,
-	}[],
+		id: Id,
+		name: Exclude<string, ''>,
+		short_description: string,
+		full_description: string,
+		source_url: (
+			| ''
+			| `https://${string}`
+		),
+		creator_id: Exclude<string, ''>,
+		approved: boolean,
+		views: number,
+		downloads: number,
+		hotness: number,
+		popularity: number,
+		updated_at: DateTimeType,
+		created_at: DateTimeType,
+		last_version_date: DateTimeType,
+		mod_reference: Exclude<string, ''>,
+		hidden: boolean,
+		tags: {
+			id: Exclude<string, ''>,
+		}[],
 		compatibility: (
 			| CompatibilityInfo
 			| null
@@ -125,23 +125,23 @@ export type result<
 			| AiUseDisclosureInfo
 			| null
 		),
-	toggle_explicit_content: boolean,
-	authors: [Author, ...Author[]],
+		toggle_explicit_content: boolean,
+		authors: [Author, ...Author[]],
 		versions: IdObject[],
-	latestVersions: {
-		alpha: (
-			| null
-			| IdObject
-		),
-		beta: (
-			| null
-			| IdObject
-		),
-		release: (
-			| null
-			| IdObject
-		),
-	},
+		latestVersions: {
+			alpha: (
+				| null
+				| IdObject
+			),
+			beta: (
+				| null
+				| IdObject
+			),
+			release: (
+				| null
+				| IdObject
+			),
+		},
 	}
 );
 
