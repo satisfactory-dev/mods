@@ -14,7 +14,11 @@ import schema from '../../schema/getMods.schema.json' with {
 	type: 'json',
 };
 
-type return_type = AsyncGenerator<string>;
+import type {
+	result,
+} from './getMod.ts';
+
+type return_type = AsyncGenerator<result['id']>;
 
 export async function* live(): return_type {
 	for await (const mod of paginated<{

@@ -5,6 +5,8 @@ import Ajv from 'ajv';
 
 import upstream from './run.ts';
 
+import validated from './validated.ts';
+
 function run(
 	operation: string,
 	iterate_on: string,
@@ -60,13 +62,7 @@ export default async function* paginated<
 			offset,
 		);
 
-		if (!validator(result)) {
-			console.error(validator.errors);
-
-			throw new Error('Failed to validate response!');
-		}
-
-		return result;
+		return validated(validator, result);
 	}
 
 	let result = await get();
