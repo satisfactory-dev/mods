@@ -4,6 +4,11 @@ import {
 } from 'node:fs';
 
 import {
+	basename,
+} from 'node:path';
+
+import {
+	glob,
 	readFile,
 	unlink,
 } from 'node:fs/promises';
@@ -75,4 +80,22 @@ export async function* cached(): return_type {
 			yield id;
 		}
 	}
+}
+
+export async function* from_single_record(): return_type {
+	for await (const path of glob(`${
+		import.meta.dirname
+	}/../../.cache/api/getMods/records/*.json`)) {
+		yield basename(path, '.json');
+	}
+}
+
+export async function from_single_record_as_set(): Promise<Set<result['id']>> {
+	const result = new Set<result['id']>();
+
+	for await (const id of from_single_record()) {
+		result.add(id);
+	}
+
+	return result;
 }
