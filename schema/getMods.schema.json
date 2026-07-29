@@ -18,11 +18,7 @@
 				},
 				"disclosure_type": {
 					"type": "string",
-					"enum": [
-						"no_ai_usage",
-						"ai_usage",
-						"runtime_ai_usage"
-					]
+					"enum": ["no_ai_usage", "ai_usage", "runtime_ai_usage"]
 				}
 			}
 		},
@@ -47,11 +43,7 @@
 			"properties": {
 				"state": {
 					"type": "string",
-					"enum": [
-						"Works",
-						"Damaged",
-						"Broken"
-					]
+					"enum": ["Works", "Damaged", "Broken"]
 				},
 				"note": {
 					"type": "string"
@@ -95,86 +87,86 @@
 			]
 		},
 		"Mod": {
-								"type": "object",
-								"required": ["id"],
-								"properties": {
-									"id": {
-										"$ref": "#/$defs/id"
-									},
-									"name": {
-										"type": "string",
-										"minLength": 1
-									},
-									"short_description": {
-										"type": "string"
-									},
-									"full_description": {
-										"type": "string"
-									},
-									"source_url": {
-										"oneOf": [
-											{
-												"type": "string",
-												"const": ""
-											},
-											{
-												"type": "string",
-												"pattern": "^https:\\/\\/"
-											}
-										]
-									},
-									"creator_id": {
-										"$ref": "#/$defs/id"
-									},
-									"approved": {
-										"type": "boolean"
-									},
-									"views": {
-										"type": "integer",
-										"minimum": 0
-									},
-									"downloads": {
-										"type": "integer",
-										"minimum": 0
-									},
-									"hotness": {
-										"type": "integer",
-										"minimum": 0
-									},
-									"popularity": {
-										"type": "integer",
-										"minimum": 0
-									},
-									"updated_at": {
-										"$ref": "#/$defs/datetime"
-									},
-									"created_at": {
-										"$ref": "#/$defs/datetime"
-									},
-									"last_version_date": {
-										"$ref": "#/$defs/datetime"
-									},
-									"mod_reference": {
-										"type": "string",
-										"minLength": 1
-									},
-									"hidden": {
-										"type": "boolean"
-									},
-									"tags": {
-										"type": "array",
-										"items": {
-											"type": "object",
-											"required": ["id"],
-											"additionalProperties": false,
-											"properties": {
-												"id": {
-													"$ref": "#/$defs/id"
-												}
-											}
-										}
-									},
-									"compatibility": {
+			"type": "object",
+			"required": ["id"],
+			"properties": {
+				"id": {
+					"$ref": "#/$defs/id"
+				},
+				"name": {
+					"type": "string",
+					"minLength": 1
+				},
+				"short_description": {
+					"type": "string"
+				},
+				"full_description": {
+					"type": "string"
+				},
+				"source_url": {
+					"oneOf": [
+						{
+							"type": "string",
+							"const": ""
+						},
+						{
+							"type": "string",
+							"pattern": "^https:\\/\\/"
+						}
+					]
+				},
+				"creator_id": {
+					"$ref": "#/$defs/id"
+				},
+				"approved": {
+					"type": "boolean"
+				},
+				"views": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"downloads": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"hotness": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"popularity": {
+					"type": "integer",
+					"minimum": 0
+				},
+				"updated_at": {
+					"$ref": "#/$defs/datetime"
+				},
+				"created_at": {
+					"$ref": "#/$defs/datetime"
+				},
+				"last_version_date": {
+					"$ref": "#/$defs/datetime"
+				},
+				"mod_reference": {
+					"type": "string",
+					"minLength": 1
+				},
+				"hidden": {
+					"type": "boolean"
+				},
+				"tags": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": ["id"],
+						"additionalProperties": false,
+						"properties": {
+							"id": {
+								"$ref": "#/$defs/id"
+							}
+						}
+					}
+				},
+				"compatibility": {
 					"oneOf": [
 						{
 							"$ref": "#/$defs/CompatibilityInfo"
@@ -183,8 +175,8 @@
 							"type": "null"
 						}
 					]
-									},
-									"network_use_disclosure": {
+				},
+				"network_use_disclosure": {
 					"oneOf": [
 						{
 							"type": "string"
@@ -193,8 +185,8 @@
 							"type": "null"
 						}
 					]
-									},
-									"ai_use_disclosure": {
+				},
+				"ai_use_disclosure": {
 					"oneOf": [
 						{
 							"$ref": "#/$defs/AiUseDisclosureInfo"
@@ -203,54 +195,54 @@
 							"type": "null"
 						}
 					]
-									},
-									"toggle_explicit_content": {
-										"type": "boolean"
-									},
-									"authors": {
-										"type": "array",
-										"minItems": 1,
-										"items": {
-											"type": "object",
-											"required": ["user_id"],
-											"additionalProperties": false,
-											"properties": {
-												"user_id": {
-													"$ref": "#/$defs/id"
-												}
-											}
-										}
-									},
-									"versions": {
-										"type": "array",
+				},
+				"toggle_explicit_content": {
+					"type": "boolean"
+				},
+				"authors": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["user_id"],
+						"additionalProperties": false,
+						"properties": {
+							"user_id": {
+								"$ref": "#/$defs/id"
+							}
+						}
+					}
+				},
+				"versions": {
+					"type": "array",
 					"minItems": 0,
-										"items": {
-											"type": "object",
-											"required": ["id"],
-											"properties": {
-												"id": {
-													"$ref": "#/$defs/id"
-												}
-											}
-										}
-									},
-									"latestVersions": {
-										"type": "object",
-										"required": ["alpha", "beta", "release"],
-										"additionalProperties": false,
-										"properties": {
-											"alpha": {
-												"$ref": "#/$defs/LatestVersion"
-											},
-											"beta": {
-												"$ref": "#/$defs/LatestVersion"
-											},
-											"release": {
-												"$ref": "#/$defs/LatestVersion"
-											}
-										}
-									}
-								}
+					"items": {
+						"type": "object",
+						"required": ["id"],
+						"properties": {
+							"id": {
+								"$ref": "#/$defs/id"
+							}
+						}
+					}
+				},
+				"latestVersions": {
+					"type": "object",
+					"required": ["alpha", "beta", "release"],
+					"additionalProperties": false,
+					"properties": {
+						"alpha": {
+							"$ref": "#/$defs/LatestVersion"
+						},
+						"beta": {
+							"$ref": "#/$defs/LatestVersion"
+						},
+						"release": {
+							"$ref": "#/$defs/LatestVersion"
+						}
+					}
+				}
+			}
 		},
 		"HasLogo": {
 			"type": "object",
