@@ -204,6 +204,10 @@ export async function live<
 export async function cached<
 	Id extends result['id'],
 >(id: Id): Promise<result<Id>> {
+	if (!/^[A-Za-z0-9]+$/.test(id)) {
+		throw new Error(`Id for mod does not match expected pattern: ${id}`);
+	}
+
 	const cache_file = `${
 		import.meta.dirname
 	}/../../.cache/api/getMods/records/${id}.json`;
