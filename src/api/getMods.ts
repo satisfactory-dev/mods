@@ -27,7 +27,7 @@ type return_type = AsyncGenerator<result['id']>;
 
 export async function* live(): return_type {
 	for await (const mod of paginated<{
-		id: Exclude<string, ''>,
+		id: result['id'],
 	}>(
 		'getMods',
 		'mods',
