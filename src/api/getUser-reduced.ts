@@ -28,6 +28,10 @@ import type {
 	result as getMod,
 } from './getMod.ts';
 
+import {
+	stringify,
+} from '../helper/json.ts';
+
 export type result<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = (
@@ -92,7 +96,7 @@ export async function cached<
 	if (!existsSync(cache_file)) {
 		const result = await live(id);
 
-		await writeFile(cache_file, JSON.stringify(result));
+		await writeFile(cache_file, stringify(result));
 
 		return result;
 	}

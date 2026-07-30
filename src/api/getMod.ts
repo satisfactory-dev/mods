@@ -17,6 +17,10 @@ import schema from '../../schema/getMods.schema.json' with {
 
 import type image_url from './helper/image-url.ts';
 
+import {
+	stringify,
+} from '../helper/json.ts';
+
 type Compatibility = {
 	state: (
 		| 'Works'
@@ -251,7 +255,7 @@ export async function cached<
 	if (!existsSync(cache_file)) {
 		const result = await live(id);
 
-		await writeFile(cache_file, JSON.stringify(result));
+		await writeFile(cache_file, stringify(result));
 
 		return result;
 	}
