@@ -1,5 +1,4 @@
 import {
-	from_single_record_as_set,
 	cached as getMods,
 } from './src/api/getMods.ts';
 
@@ -11,11 +10,11 @@ import {
 	cached as getUser,
 } from './src/api/getUser-reduced.ts';
 
-let pass = new Set<Exclude<string, ''>>(await from_single_record_as_set());
+import {
+	async_generator_to_set,
+} from './src/helper/async_generator_to_set.ts';
 
-for await (const id of getMods()) {
-	pass.add(id);
-}
+let pass = await async_generator_to_set(getMods());
 
 let passes = 0;
 
@@ -97,7 +96,7 @@ while (pass.size > 0) {
 		}
 	}
 
-	const current_state = await from_single_record_as_set();
+	const current_state = await async_generator_to_set(getMods());
 
 	pass = user_mod_ids.difference(current_state);
 }
