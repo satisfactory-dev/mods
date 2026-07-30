@@ -176,7 +176,7 @@ export async function* cached<
 
 				const cache_file = `${
 					import.meta.dirname
-				}/../../.cache/api/${cache_dir}/${result.id}.json`;
+				}/../../../.cache/api/${cache_dir}/${result.id}.json`;
 
 				await writeFile(cache_file, stringify(result));
 
