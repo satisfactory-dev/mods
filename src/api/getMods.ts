@@ -26,6 +26,10 @@ import {
 	stringify,
 } from '../helper/json.ts';
 
+import {
+	async_generator_to_set,
+} from '../helper/async_generator_to_set.ts';
+
 export async function* live<
 	Id extends result['id'],
 >(
@@ -45,7 +49,7 @@ export async function* cached<
 >(
 	ids: Iterable<Id>|AsyncIterable<Id>,
 ) {
-	const current_state = new Set(await Array.fromAsync(ids_in_cache()));
+	const current_state = await async_generator_to_set(ids_in_cache());
 
 	let current_defer_page: Id[] = [];
 
