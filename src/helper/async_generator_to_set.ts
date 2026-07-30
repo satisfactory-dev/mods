@@ -1,6 +1,6 @@
 
 export async function async_generator_to_set(
-	generator: AsyncGenerator<Exclude<string, ''>>
+	generator: AsyncGenerator<Exclude<string, ''>>,
 ): Promise<Set<Exclude<string, ''>>> {
 	const result = new Set<Exclude<string, ''>>();
 
