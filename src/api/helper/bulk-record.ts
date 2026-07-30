@@ -24,7 +24,12 @@ function run(
 	sub_query: string,
 	ids: [string, ...string[]],
 ): Promise<unknown> {
+	if (ids.length > 100) {
+		throw new Error('Too many records requested!');
+	}
+
 	return upstream(`${operation}(filter: {
+		limit: 100,
 		ids: ${JSON.stringify(ids)},
 	})`, (
 		iterate_on
