@@ -95,7 +95,7 @@ export async function* live(): return_type {
 export async function* cached(): return_type {
 	for await (const path of glob(`${
 		import.meta.dirname
-	}/../../.cache/api/getMods/records/*.json`)) {
+	}/../../.cache/api/getMods/*.json`)) {
 		yield basename(path, '.json');
 	}
 }
