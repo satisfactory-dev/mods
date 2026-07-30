@@ -1,11 +1,11 @@
 import {
-	cached as getMods,
+	cached as getMod_ids,
 	live,
-} from './src/api/getMods.ts';
+} from './src/api/getMods--ids-only.ts';
 
 import {
-	cached as getMod,
-} from './src/api/getMod.ts';
+	cached as getMods,
+} from './src/api/getMods.ts';
 
 import {
 	cached as getUser,
@@ -18,7 +18,7 @@ import {
 let pass = (
 	await async_generator_to_set(live())
 ).union(
-	await async_generator_to_set(getMods()),
+	await async_generator_to_set(getMod_ids()),
 );
 
 let passes = 0;
@@ -57,7 +57,7 @@ while (pass.size > 0) {
 
 	let mods = 0;
 
-	for (const id of pass) {
+	for await (const mod of getMods(pass)) {
 		++mods;
 
 		console.log(`Checking mod ${
@@ -65,10 +65,8 @@ while (pass.size > 0) {
 		} of ${
 			pass.size
 		} in current pass ${
-			id
+			mod.id
 		}`);
-
-		const mod = await getMod(id);
 
 		user_ids.add(mod.creator_id);
 
@@ -101,7 +99,7 @@ while (pass.size > 0) {
 		}
 	}
 
-	const current_state = await async_generator_to_set(getMods());
+	const current_state = await async_generator_to_set(getMod_ids());
 
 	pass = user_mod_ids.difference(current_state);
 }

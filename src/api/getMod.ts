@@ -167,13 +167,7 @@ function verify_id<
 	}
 }
 
-export async function live<
-	Id extends result['id'],
->(id: Id): Promise<result<Id>> {
-	const result = await get<result>(
-		'getMods',
-		'mods',
-		`id
+export const sub_query = `id
 		name
 		short_description
 		full_description
@@ -231,7 +225,15 @@ export async function live<
 			release {
 				id
 			}
-		}`,
+}`;
+
+export async function live<
+	Id extends result['id'],
+>(id: Id): Promise<result<Id>> {
+	const result = await get<result>(
+		'getMods',
+		'mods',
+		sub_query,
 		id,
 		validator,
 	);

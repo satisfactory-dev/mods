@@ -1,101 +1,85 @@
 import {
-	basename,
-} from 'node:path';
-
-import {
-	glob,
+	writeFile,
 } from 'node:fs/promises';
-
-import paginated from './helper/paginated.ts';
-
-import schema from '../../schema/getMods.schema.json' with {
-	type: 'json',
-};
 
 import type {
 	result,
 } from './getMod.ts';
+import {
+	sub_query,
+	validator,
+} from './getMod.ts';
 
-type return_type = AsyncGenerator<result['id']>;
+import {
+	cached as ids_in_cache,
+} from './getMods--ids-only.ts';
 
-export async function* live(): return_type {
-	const {
-		properties: {
-			data: {
-				properties: {
-					getMods: {
-						properties: {
-							mods: {
-								items: _,
-								...remaining
-							},
-							...remaining_properties_2
-						},
-						...remaining_getMods_0
-					},
-					...remaining_properties_1
-				},
-				...remaining_data_0
-			},
-			...remaining_properties_0
-		},
-		...fudged_schema
-	} = schema;
+import {
+	cached as single_record,
+} from './getMod.ts';
 
-	const id = schema.$defs.Mod.properties.id;
+import bulk_record, {
+	is_non_empty,
+} from './helper/bulk-record.ts';
 
-	const shrunk = {
-		...fudged_schema,
-		properties: {
-			...remaining_properties_0,
-			data: {
-				...remaining_data_0,
-				properties: {
-					...remaining_properties_1,
-					getMods: {
-						...remaining_getMods_0,
-						properties: {
-							...remaining_properties_2,
-							mods: {
-								...remaining,
-								items: {
-									type: 'object',
-									required: ['id'],
-									additionalProperties: false,
-									properties: {
-										id,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	};
+import {
+	stringify,
+} from '../helper/json.ts';
 
-	for await (const mod of paginated<{
-		id: result['id'],
-	}>(
+export async function* live<
+	Id extends result['id'],
+>(
+	ids: Iterable<Id>|AsyncIterable<Id>,
+): AsyncGenerator<result> {
+	yield* bulk_record<result>(
 		'getMods',
 		'mods',
-		'id',
-		shrunk,
-	)) {
-		if (!/^[A-Za-z0-9]+$/.test(mod.id)) {
+		sub_query,
+		ids,
+		validator,
+	);
+}
+
+export async function* cached<
+	Id extends result['id'],
+>(
+	ids: Iterable<Id>|AsyncIterable<Id>,
+) {
+	const current_state = new Set(await Array.fromAsync(ids_in_cache()));
+
+	let current_defer_page: Id[] = [];
+
+	async function* maybe_yield_and_cache() {
+		if (is_non_empty(current_defer_page)) {
+			for await (const result of live(current_defer_page)) {
+				const cache_file = `${
+					import.meta.dirname
+				}/../../.cache/api/getMods/${result.id}.json`;
+
+				await writeFile(cache_file, stringify(result));
+
+				yield result;
+			}
+
+			current_defer_page = [];
+		}
+	}
+
+	for await (const id of ids) {
+		if (!/^[A-Za-z0-9]+$/.test(id)) {
 			throw new Error(`Id for mod does not match expected pattern: ${
-				mod.id
+				id
 			}`);
 		}
 
-		yield mod.id;
-	}
-}
+		if (current_state.has(id)) {
+			yield* maybe_yield_and_cache();
 
-export async function* cached(): return_type {
-	for await (const path of glob(`${
-		import.meta.dirname
-	}/../../.cache/api/getMods/*.json`)) {
-		yield basename(path, '.json');
+			yield single_record(id);
+		} else {
+			current_defer_page.push(id);
+		}
 	}
+
+	yield* maybe_yield_and_cache();
 }
