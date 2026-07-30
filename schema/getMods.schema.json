@@ -1,13 +1,5 @@
 {
 	"$defs": {
-		"id": {
-			"type": "string",
-			"pattern": "^[A-Za-z0-9]+$"
-		},
-		"datetime": {
-			"type": "string",
-			"pattern": "^\\d{4,}-(0[1-9]|1[012])-(0[1-9]|[1-2][0-9]|3[0-1])T([0-5][0-9]|60):([0-5][0-9]|60):([0-5][0-9]|60)Z$"
-		},
 		"AiUseDisclosureInfo": {
 			"type": "object",
 			"required": ["message", "disclosure_type"],
@@ -80,7 +72,7 @@
 					"additionalProperties": false,
 					"properties": {
 						"id": {
-							"$ref": "#/$defs/id"
+							"$ref": "defs#/$defs/id"
 						}
 					}
 				}
@@ -91,7 +83,7 @@
 			"required": ["id"],
 			"properties": {
 				"id": {
-					"$ref": "#/$defs/id"
+					"$ref": "defs#/$defs/id"
 				},
 				"name": {
 					"type": "string",
@@ -116,7 +108,7 @@
 					]
 				},
 				"creator_id": {
-					"$ref": "#/$defs/id"
+					"$ref": "defs#/$defs/id"
 				},
 				"approved": {
 					"type": "boolean"
@@ -138,13 +130,13 @@
 					"minimum": 0
 				},
 				"updated_at": {
-					"$ref": "#/$defs/datetime"
+					"$ref": "defs#/$defs/datetime"
 				},
 				"created_at": {
-					"$ref": "#/$defs/datetime"
+					"$ref": "defs#/$defs/datetime"
 				},
 				"last_version_date": {
-					"$ref": "#/$defs/datetime"
+					"$ref": "defs#/$defs/datetime"
 				},
 				"mod_reference": {
 					"type": "string",
@@ -161,7 +153,7 @@
 						"additionalProperties": false,
 						"properties": {
 							"id": {
-								"$ref": "#/$defs/id"
+								"$ref": "defs#/$defs/id"
 							}
 						}
 					}
@@ -204,11 +196,14 @@
 					"minItems": 1,
 					"items": {
 						"type": "object",
-						"required": ["user_id"],
+						"required": ["user_id", "role"],
 						"additionalProperties": false,
 						"properties": {
 							"user_id": {
-								"$ref": "#/$defs/id"
+								"$ref": "defs#/$defs/id"
+							},
+							"role": {
+								"type": "string"
 							}
 						}
 					}
@@ -221,7 +216,7 @@
 						"required": ["id"],
 						"properties": {
 							"id": {
-								"$ref": "#/$defs/id"
+								"$ref": "defs#/$defs/id"
 							}
 						}
 					}

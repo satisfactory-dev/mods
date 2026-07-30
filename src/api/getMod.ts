@@ -15,6 +15,8 @@ import schema from '../../schema/getMods.schema.json' with {
 	type: 'json',
 };
 
+import type image_url from './helper/image-url.ts';
+
 type Compatibility = {
 	state: (
 		| 'Works'
@@ -37,6 +39,7 @@ type ControllerCompatibility = {
 
 type Author = {
 	user_id: Exclude<string, ''>,
+	role: string,
 };
 
 type IdObject = {
@@ -46,18 +49,14 @@ type IdObject = {
 type HasLogo<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = {
-	logo: `https://storage.ficsit.app/file/smr-prod${'-s3'|''}/images/mods/${
-		Id
-	}/logo.webp`,
+	logo: image_url<'mods', 'logo', Id>,
 	logo_thumbhash: Exclude<string, ''>,
 };
 
 type HasLogoBorked<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = {
-	logo: `https://storage.ficsit.app/file/smr-prod${'-s3'|''}/images/mods/${
-		Id
-	}/logo.webp`,
+	logo: HasLogo<Id>['logo'],
 	logo_thumbhash: '',
 };
 
@@ -203,7 +202,7 @@ export async function live<
 			Controller{
 				state
 				note
-		}
+			}
 		}
 		network_use_disclosure
 		ai_use_disclosure{
@@ -213,6 +212,7 @@ export async function live<
 		toggle_explicit_content
 		authors{
 			user_id
+			role
 		}
 		versions{
 			id
@@ -263,7 +263,6 @@ export async function cached<
 	const shim = {data: {
 		getMods: {
 			mods: [result],
-			count: 1,
 		},
 	}};
 

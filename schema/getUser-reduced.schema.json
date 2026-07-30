@@ -1,0 +1,46 @@
+{
+	"type": "object",
+	"required": ["data"],
+	"additionalProperties": false,
+	"properties": {
+		"data": {
+			"type": "object",
+			"required": ["getUser"],
+			"additionalProperties": false,
+			"properties": {
+				"getUser": {
+					"type": "object",
+					"required": ["id", "username", "avatar", "mods"],
+					"additionalProperties": false,
+					"properties": {
+						"id": {
+							"$ref": "defs#/$defs/id"
+						},
+						"username": {
+							"type": "string",
+							"minLength": 1
+						},
+						"avatar": {
+							"type": "string",
+							"pattern": "^https:\\/\\/storage\\.ficsit\\.app\\/file\\/smr-prod(-s3)?\\/images\\/users\\/[A-Za-z0-9]+\\/avatar\\.webp$"
+						},
+						"mods": {
+							"type": "array",
+							"minItems": 0,
+							"items": {
+								"type": "object",
+								"required": ["mod_id"],
+								"additionalProperties": false,
+								"properties": {
+									"mod_id": {
+										"$ref": "defs#/$defs/id"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
