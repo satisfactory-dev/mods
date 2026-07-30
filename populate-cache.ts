@@ -1,5 +1,6 @@
 import {
 	cached as getMods,
+	live,
 } from './src/api/getMods.ts';
 
 import {
@@ -14,7 +15,11 @@ import {
 	async_generator_to_set,
 } from './src/helper/async_generator_to_set.ts';
 
-let pass = await async_generator_to_set(getMods());
+let pass = (
+	await async_generator_to_set(live())
+).union(
+	await async_generator_to_set(getMods()),
+);
 
 let passes = 0;
 
