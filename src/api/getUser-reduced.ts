@@ -62,6 +62,13 @@ function verify_id<
 	}
 }
 
+export const sub_query = `id
+	username
+	avatar
+	mods {
+		mod_id
+	}`;
+
 export async function live<
 	Id extends result['id'],
 >(id: Id): Promise<result<Id>> {
@@ -69,12 +76,7 @@ export async function live<
 		`getUser(userId: ${
 			JSON.stringify(id)
 		})`,
-		`id
-		username
-		avatar
-		mods {
-			mod_id
-		}`,
+		sub_query,
 	)).data.getUser;
 
 	verify_id(id, result);

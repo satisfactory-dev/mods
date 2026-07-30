@@ -1,3 +1,11 @@
+import {
+	writeFile,
+} from 'node:fs/promises';
+
+import {
+	async_generator_to_set,
+} from '../../helper/async_generator_to_set.ts';
+
 import type {
 	ValidateFunction,
 } from './ajv.ts';
@@ -5,6 +13,10 @@ import type {
 import upstream from './run.ts';
 
 import validated from './validated.ts';
+
+import {
+	stringify,
+} from '../../helper/json.ts';
 
 function run(
 	operation: string,
@@ -17,7 +29,7 @@ function run(
 	})`, `${iterate_on} {${sub_query}}`);
 }
 
-export function is_non_empty<T>(list: T[]): list is [T, ...T[]] {
+function is_non_empty<T>(list: T[]): list is [T, ...T[]] {
 	return list.length > 0;
 }
 
@@ -43,7 +55,7 @@ async function* chunk_ids<
 	}
 }
 
-export default async function* records<
+export async function* live<
 	ResultType extends {id: Exclude<string, ''>},
 	Operation extends string = string,
 	IterateOn extends string = string,
@@ -84,4 +96,72 @@ export default async function* records<
 			yield result_in_request_order;
 		}
 	}
+}
+
+export async function* cached<
+	ResultType extends {id: Exclude<string, ''>},
+	Id extends ResultType['id'] = ResultType['id'],
+	Operation extends string = string,
+	IterateOn extends string = string,
+>(
+	operation: Operation,
+	iterate_on: IterateOn,
+	sub_query: string,
+	ids: Iterable<Id>|AsyncIterable<Id>,
+	get_current_state: AsyncGenerator<Id>,
+	single_record: (id: Id) => Promise<ResultType>,
+	validator: ValidateFunction<{
+		data: {
+			[k1 in Operation]: {
+				[k2 in IterateOn]: ResultType[];
+			}
+		},
+	}>,
+	cache_dir = operation,
+) {
+	const current_state = await async_generator_to_set(get_current_state);
+
+	let current_defer_page: Id[] = [];
+
+	async function* maybe_yield_and_cache() {
+		if (is_non_empty(current_defer_page)) {
+			for await (const result of live<ResultType>(
+				operation,
+				iterate_on,
+				sub_query,
+				current_defer_page,
+				validator,
+			)) {
+				if (!/^[A-Za-z0-9]+$/.test(result.id)) {
+					throw new Error(
+						`Id for record does not match expected pattern: ${
+							result.id
+						}`,
+					);
+				}
+
+				const cache_file = `${
+					import.meta.dirname
+				}/../../.cache/api/${cache_dir}/${result.id}.json`;
+
+				await writeFile(cache_file, stringify(result));
+
+				yield result;
+			}
+
+			current_defer_page = [];
+		}
+	}
+
+	for await (const id of ids) {
+		if (current_state.has(id)) {
+			yield* maybe_yield_and_cache();
+
+			yield single_record(id);
+		} else {
+			current_defer_page.push(id);
+		}
+	}
+
+	yield* maybe_yield_and_cache();
 }
