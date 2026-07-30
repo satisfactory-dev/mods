@@ -20,13 +20,17 @@ import {
 
 function run(
 	operation: string,
-	iterate_on: string,
+	iterate_on: string|undefined,
 	sub_query: string,
 	ids: [string, ...string[]],
 ): Promise<unknown> {
 	return upstream(`${operation}(filter: {
 		ids: ${JSON.stringify(ids)},
-	})`, `${iterate_on} {${sub_query}}`);
+	})`, (
+		iterate_on
+			? `${iterate_on} {${sub_query}}`
+			: sub_query
+	));
 }
 
 function is_non_empty<T>(list: T[]): list is [T, ...T[]] {
@@ -55,22 +59,44 @@ async function* chunk_ids<
 	}
 }
 
+type Response<
+	ResultType extends {id: Exclude<string, ''>},
+	Operation extends string = string,
+	IterateOn extends string|undefined = string,
+> = IterateOn extends string
+	? {
+		data: {
+			[k1 in Operation]: {
+				[k2 in IterateOn]: ResultType[]
+			}
+		},
+	}
+	: {
+		data: {
+			[k1 in Operation]: ResultType[]
+		},
+	};
+
+type Validator<
+	ResultType extends {id: Exclude<string, ''>},
+	Operation extends string = string,
+	IterateOn extends string|undefined = string,
+> = ValidateFunction<Response<
+	ResultType,
+	Operation,
+	IterateOn
+>>;
+
 export async function* live<
 	ResultType extends {id: Exclude<string, ''>},
 	Operation extends string = string,
-	IterateOn extends string = string,
+	IterateOn extends string|undefined = string|undefined,
 >(
 	operation: Operation,
 	iterate_on: IterateOn,
 	sub_query: string,
 	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
-	validator: ValidateFunction<{
-		data: {
-			[k1 in Operation]: {
-				[k2 in IterateOn]: ResultType[];
-			}
-		},
-	}>,
+	validator: Validator<ResultType, Operation, IterateOn>,
 ) {
 	for await (const chunk of chunk_ids(ids)) {
 		const result = validated(validator, await run(
@@ -80,12 +106,22 @@ export async function* live<
 			chunk,
 		));
 
+		const data: ResultType[] = iterate_on
+			? (result as Response<
+				ResultType,
+				Operation,
+				Exclude<IterateOn, undefined>
+			>).data[operation][iterate_on]
+			: (result as Response<
+				ResultType,
+				Operation,
+				undefined
+			>).data[operation];
+
 		for (const id_in_request_order of chunk) {
-			const result_in_request_order = result.data[
-				operation
-			][
-				iterate_on
-			].find(({id: maybe}) => maybe === id_in_request_order);
+			const result_in_request_order = data.find((
+				{id: maybe},
+			) => maybe === id_in_request_order);
 
 			if (!result_in_request_order) {
 				throw new Error(`${
@@ -102,7 +138,7 @@ export async function* cached<
 	ResultType extends {id: Exclude<string, ''>},
 	Id extends ResultType['id'] = ResultType['id'],
 	Operation extends string = string,
-	IterateOn extends string = string,
+	IterateOn extends string|undefined = string|undefined,
 >(
 	operation: Operation,
 	iterate_on: IterateOn,
@@ -110,13 +146,7 @@ export async function* cached<
 	ids: Iterable<Id>|AsyncIterable<Id>,
 	get_current_state: AsyncGenerator<Id>,
 	single_record: (id: Id) => Promise<ResultType>,
-	validator: ValidateFunction<{
-		data: {
-			[k1 in Operation]: {
-				[k2 in IterateOn]: ResultType[];
-			}
-		},
-	}>,
+	validator: Validator<ResultType, Operation, IterateOn>,
 	cache_dir = operation,
 ) {
 	const current_state = await async_generator_to_set(get_current_state);
@@ -125,7 +155,11 @@ export async function* cached<
 
 	async function* maybe_yield_and_cache() {
 		if (is_non_empty(current_defer_page)) {
-			for await (const result of live<ResultType>(
+			for await (const result of live<
+				ResultType,
+				Operation,
+				IterateOn
+			>(
 				operation,
 				iterate_on,
 				sub_query,

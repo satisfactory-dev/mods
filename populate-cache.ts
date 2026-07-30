@@ -11,6 +11,13 @@ import {
 	cached as getUser,
 } from './src/api/getUser-reduced.ts';
 
+import type {
+	result as Tag,
+} from './src/api/getTags.ts';
+import {
+	cached as getTags,
+} from './src/api/getTags.ts';
+
 import {
 	async_generator_to_set,
 } from './src/helper/async_generator_to_set.ts';
@@ -22,6 +29,8 @@ let pass = (
 );
 
 let passes = 0;
+
+const tag_ids_to_check = new Set<Tag['id']>();
 
 export const known_missing_users = new Proxy(
 	new Set<Exclude<string, ''>>([
@@ -73,6 +82,10 @@ while (pass.size > 0) {
 		for (const {user_id} of mod.authors) {
 			user_ids.add(user_id);
 		}
+
+		for (const {id: tag_id} of mod.tags) {
+			tag_ids_to_check.add(tag_id);
+		}
 	}
 
 	let user_check = 0;
@@ -103,3 +116,5 @@ while (pass.size > 0) {
 
 	pass = user_mod_ids.difference(current_state);
 }
+
+await Array.fromAsync(getTags(tag_ids_to_check));
