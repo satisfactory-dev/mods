@@ -89,6 +89,12 @@ export async function* live(): return_type {
 		'id',
 		shrunk,
 	)) {
+		if (!/^[A-Za-z0-9]+$/.test(mod.id)) {
+			throw new Error(`Id for mod does not match expected pattern: ${
+				mod.id
+			}`);
+		}
+
 		yield mod.id;
 	}
 }
