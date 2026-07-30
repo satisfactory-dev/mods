@@ -42,6 +42,8 @@ export async function* live(): return_type {
 		...fudged_schema
 	} = schema;
 
+	const id = schema.$defs.Mod.properties.id;
+
 	const shrunk = {
 		...fudged_schema,
 		properties: {
@@ -61,9 +63,7 @@ export async function* live(): return_type {
 									required: ['id'],
 									additionalProperties: false,
 									properties: {
-										id: {
-											$ref: '#/$defs/id',
-										},
+										id,
 									},
 								},
 							},
