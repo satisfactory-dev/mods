@@ -82,7 +82,9 @@ while (pass.size > 0) {
 			mods
 		} of ${
 			pass.size
-		} in current pass ${
+		} in pass ${
+			passes
+		} ${
 			mod.id
 		}`);
 
@@ -114,7 +116,9 @@ while (pass.size > 0) {
 			user_check
 		} of ${
 			user_ids.size
-		} users found in current pass: ${
+		} users found in pass ${
+			passes
+		}: ${
 			id
 		}`);
 
