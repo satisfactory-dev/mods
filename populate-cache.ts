@@ -113,6 +113,16 @@ while (pass.size > 0) {
 		for (const {id: version_id} of mod.versions) {
 			version_ids_to_check.add(version_id);
 		}
+
+		for (const version_id of [
+			mod.latestVersions.alpha,
+			mod.latestVersions.beta,
+			mod.latestVersions.release,
+		]) {
+			if (version_id) {
+				version_ids_to_check.add(version_id.id);
+			}
+		}
 	}
 
 	let user_check = 0;
