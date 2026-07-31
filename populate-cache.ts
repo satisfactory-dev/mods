@@ -1,4 +1,8 @@
 import {
+	writeFile,
+} from 'node:fs/promises';
+
+import {
 	cached as getMod_ids,
 	live,
 } from './src/api/getMods--ids-only.ts';
@@ -26,8 +30,16 @@ import {
 } from './src/api/getVersions.ts';
 
 import {
+	live as getSatisfactoryVersions,
+} from './src/api/getSatisfactoryVersions.ts';
+
+import {
 	async_generator_to_set,
 } from './src/helper/async_generator_to_set.ts';
+
+import {
+	stringify,
+} from './src/helper/json.ts';
 
 let pass = (
 	await async_generator_to_set(live())
@@ -159,3 +171,18 @@ while (pass.size > 0) {
 }
 
 await Array.fromAsync(getTags(tag_ids_to_check));
+
+for await (const version of getSatisfactoryVersions()) {
+	if (!/^[A-Za-z0-9]+$/.test(version.id)) {
+		throw new Error(`Invalid id on satisfactory version record ${
+			version.id
+		}`);
+	}
+
+	await writeFile(
+		`${import.meta.dirname}/.cache/api/getSatisfactoryVersions/${
+			version.id
+		}`,
+		stringify(version),
+	);
+}

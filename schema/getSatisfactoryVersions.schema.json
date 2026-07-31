@@ -1,0 +1,35 @@
+{
+	"type": "object",
+	"required": ["data"],
+	"additionalProperties": false,
+	"properties": {
+		"data": {
+			"type": "object",
+			"required": ["getSatisfactoryVersions"],
+			"additionalProperties": false,
+			"properties": {
+				"getSatisfactoryVersions": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"required": ["id", "version", "engine_version"],
+						"additionalProperties": false,
+						"properties": {
+							"id": {
+								"$ref": "defs#/$defs/id"
+							},
+							"version": {
+								"type": "integer",
+								"minimum": 0
+							},
+							"engine_version": {
+								"type": "string",
+								"minLength": 1
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
