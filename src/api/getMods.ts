@@ -26,7 +26,7 @@ export async function* live<
 ): AsyncGenerator<result> {
 	yield* bulk_record_live<result>(
 		'getMods',
-		'users',
+		'mods',
 		sub_query,
 		ids,
 		validator,
@@ -40,7 +40,7 @@ export async function* cached<
 ) {
 	yield* bulk_record_cached<result>(
 		'getMods',
-		'users',
+		'mods',
 		sub_query,
 		ids,
 		ids_in_cache(),
