@@ -39,7 +39,7 @@ export const validator = Ajv.compile<{
 export async function* ids_in_cache(): AsyncGenerator<result['id']> {
 	for await (const path of glob(`${
 		import.meta.dirname
-	}/../../.cache/api/getMods/*.json`)) {
+	}/../../.cache/api/getTags/*.json`)) {
 		yield basename(path, '.json');
 	}
 }
