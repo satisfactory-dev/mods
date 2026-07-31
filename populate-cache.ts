@@ -136,7 +136,7 @@ while (pass.size > 0) {
 	for await (const version of getVersions(version_ids_to_check)) {
 		++version_check;
 
-		console.log(`checking dependnecies for version ${
+		console.log(`checking dependencies for version ${
 			version_check
 		} of ${
 			version_ids_to_check.size
