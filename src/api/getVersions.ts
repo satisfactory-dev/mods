@@ -82,7 +82,22 @@ export type result<
 			}
 			| null
 		),
-		condition: string,
+		condition: (
+			| ''
+			| '*'
+			| 'N/A'
+			| `${number}.${number}` // yes this technically resolves to a.b.c.d
+			| `${number}.${number}.${number}`
+			| `${number}.${number}.${number}-pr${number}`
+			| `v${number}.${number}.${number}`
+			| `^${number}`
+			| `^${number}.${number}.${number}`
+			| `^${number}.${number}.${number} <${number}.${number}.${number}`
+			| `^${number}.${number}.${number}-pre.${number}`
+			| `^${number}.${number}.${number}-dev`
+			| `>${number}.${number}.${number}`
+			| `>=${number}.${number}.${number}`
+		),
 		optional: boolean,
 	}[],
 	virustotal_results: {

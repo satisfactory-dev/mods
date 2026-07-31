@@ -96,8 +96,16 @@
 										"minLength": 1
 									},
 									"game_version": {
-										"type": "string",
-										"minLength": 1
+										"oneOf": [
+											{
+												"type": "string",
+												"pattern": "^>=\\d+$"
+											},
+											{
+												"type": "string",
+												"pattern": "^\\d+$"
+											}
+										]
 									},
 									"required_on_remote": {
 										"type": "boolean"
@@ -250,8 +258,60 @@
 													]
 												},
 												"condition": {
-													"type": "string",
-													"minLength": 0
+													"oneOf": [
+														{
+															"type": "string",
+															"enum": [
+																"",
+																"*",
+																"N/A"
+															]
+														},
+														{
+															"type": "string",
+															"pattern": "^\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\d+\\.\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\d+\\.\\d+\\.\\d+-pr\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^v\\d+\\.\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\^\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\^\\d+\\.\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\^\\d+\\.\\d+\\.\\d+ <\\d+\\.\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\^\\d+\\.\\d+\\.\\d+-pre\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^\\^\\d+\\.\\d+\\.\\d+-dev$"
+														},
+														{
+															"type": "string",
+															"pattern": "^>\\d+\\.\\d+\\.\\d+$"
+														},
+														{
+															"type": "string",
+															"pattern": "^>=\\d+\\.\\d+\\.\\d+$"
+														}
+													]
 												},
 												"optional": {
 													"type": "boolean"
