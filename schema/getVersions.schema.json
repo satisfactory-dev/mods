@@ -1,0 +1,307 @@
+{
+	"type": "object",
+	"required": ["data"],
+	"additionalProperties": false,
+	"properties": {
+		"errors": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["message", "path"],
+				"additionalProperties": false,
+				"properties": {
+					"message": {
+						"type": "string",
+						"const": "ent: mod not found"
+					},
+					"path": {
+						"type": "array",
+						"items": false,
+						"minItems": 6,
+						"maxItems": 6,
+						"prefixItems": [
+							{
+								"type": "string",
+								"const": "getVersions"
+							},
+							{
+								"type": "string",
+								"const": "versions"
+							},
+							{
+								"type": "integer",
+								"minimum": 0
+							},
+							{
+								"type": "string",
+								"const": "dependencies"
+							},
+							{
+								"type": "integer",
+								"minimum": 0
+							},
+							{
+								"type": "string",
+								"const": "mod"
+							}
+						]
+					}
+				}
+			}
+		},
+		"data": {
+			"type": "object",
+			"required": ["getVersions"],
+			"additionalProperties": false,
+			"properties": {
+				"getVersions": {
+					"type": "object",
+					"required": ["versions"],
+					"additionalProperties": false,
+					"properties": {
+						"versions": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"additionalProperties": false,
+								"required": [
+									"id",
+									"mod_id",
+									"version",
+									"game_version",
+									"required_on_remote",
+									"changelog",
+									"downloads",
+									"stability",
+									"approved",
+									"updated_at",
+									"created_at",
+									"link",
+									"targets",
+									"metadata",
+									"size",
+									"hash",
+									"dependencies",
+									"virustotal_results"
+								],
+								"properties": {
+									"id": {
+										"$ref": "defs#/$defs/id"
+									},
+									"mod_id": {
+										"$ref": "defs#/$defs/id"
+									},
+									"version": {
+										"type": "string",
+										"minLength": 1
+									},
+									"game_version": {
+										"type": "string",
+										"minLength": 1
+									},
+									"required_on_remote": {
+										"type": "boolean"
+									},
+									"changelog": {
+										"type": "string",
+										"minLength": 0
+									},
+									"downloads": {
+										"type": "integer",
+										"minimum": 0
+									},
+									"stability": {
+										"type": "string",
+										"enum": [
+											"alpha",
+											"beta",
+											"release"
+										]
+									},
+									"approved": {
+										"type": "boolean"
+									},
+									"updated_at": {
+										"$ref": "defs#/$defs/datetime"
+									},
+									"created_at": {
+										"$ref": "defs#/$defs/datetime"
+									},
+									"link": {
+										"type": "string",
+										"minLength": 1
+									},
+									"targets": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"required": [
+												"targetName",
+												"link",
+												"size",
+												"hash"
+											],
+											"additionalProperties": false,
+											"properties": {
+												"targetName": {
+													"type": "string",
+													"enum": [
+														"Windows",
+														"WindowsServer",
+														"LinuxServer"
+													]
+												},
+												"link": {
+													"type": "string",
+													"minLength": 1
+												},
+												"size": {
+													"oneOf": [
+														{
+															"type": "integer",
+															"minimum": 0
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
+												"hash": {
+													"oneOf": [
+														{
+															"type": "string",
+															"pattern": "^[a-f0-9]{64}$"
+														},
+														{
+															"type": "string",
+															"const": ""
+														},
+														{
+															"type": "null"
+														}
+													]
+												}
+											}
+										}
+									},
+									"metadata": {
+										"oneOf": [
+											{
+												"type": "string",
+												"minLength": 0
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"size": {
+										"oneOf": [
+											{
+												"type": "integer",
+												"minimum": 0
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"hash": {
+										"oneOf": [
+											{
+												"type": "string",
+												"minLength": 1
+											},
+											{
+												"type": "string",
+												"const": ""
+											},
+											{
+												"type": "null"
+											}
+										]
+									},
+									"dependencies": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"required": [
+												"mod",
+												"condition",
+												"optional"
+											],
+											"additionalProperties": false,
+											"properties": {
+												"mod": {
+													"oneOf": [
+														{
+															"type": "object",
+															"required": ["id"],
+															"additionalProperties": false,
+															"properties": {
+																"id": {
+																	"$ref": "defs#/$defs/id"
+																}
+															}
+														},
+														{
+															"type": "null"
+														}
+													]
+												},
+												"condition": {
+													"type": "string",
+													"minLength": 0
+												},
+												"optional": {
+													"type": "boolean"
+												}
+											}
+										}
+									},
+									"virustotal_results": {
+										"type": "array",
+										"items": {
+											"type": "object",
+											"required": [
+												"id",
+												"hash",
+												"safe",
+												"file_name",
+												"created_at",
+												"updated_at"
+											],
+											"additionalProperties": false,
+											"properties": {
+												"id": {
+													"$ref": "defs#/$defs/id"
+												},
+												"hash": {
+													"type": "string",
+													"pattern": "^[a-f0-9]{64}$"
+												},
+												"safe": {
+													"type": "boolean"
+												},
+												"file_name": {
+													"type": "string",
+													"minLength": 1
+												},
+												"created_at": {
+													"$ref": "defs#/$defs/datetime"
+												},
+												"updated_at": {
+													"$ref": "defs#/$defs/datetime"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

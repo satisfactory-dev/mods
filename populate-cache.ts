@@ -18,6 +18,13 @@ import {
 	cached as getTags,
 } from './src/api/getTags.ts';
 
+import type {
+	result as Version,
+} from './src/api/getVersions.ts';
+import {
+	cached as getVersions,
+} from './src/api/getVersions.ts';
+
 import {
 	async_generator_to_set,
 } from './src/helper/async_generator_to_set.ts';
@@ -62,7 +69,9 @@ while (pass.size > 0) {
 
 	const user_ids = new Set<Exclude<string, ''>>();
 
-	const user_mod_ids = new Set<Exclude<string, ''>>();
+	const discovered_mod_ids = new Set<Exclude<string, ''>>();
+
+	const version_ids_to_check = new Set<Version['id']>();
 
 	let mods = 0;
 
@@ -86,6 +95,10 @@ while (pass.size > 0) {
 		for (const {id: tag_id} of mod.tags) {
 			tag_ids_to_check.add(tag_id);
 		}
+
+		for (const {id: version_id} of mod.versions) {
+			version_ids_to_check.add(version_id);
+		}
 	}
 
 	let user_check = 0;
@@ -108,13 +121,37 @@ while (pass.size > 0) {
 		const user = await getUser(id);
 
 		for (const {mod_id} of user.mods) {
-			user_mod_ids.add(mod_id);
+			discovered_mod_ids.add(mod_id);
 		}
 	}
 
 	const current_state = await async_generator_to_set(getMod_ids());
 
-	pass = user_mod_ids.difference(current_state);
+	let version_check = 0;
+
+	for await (const version of getVersions(version_ids_to_check)) {
+		++version_check;
+
+		console.log(`checking dependnecies for version ${
+			version_check
+		} of ${
+			version_ids_to_check.size
+		} versions found in pass ${
+			passes
+		}`);
+
+		for (const {mod} of version.dependencies) {
+			if (!mod) {
+				continue;
+			}
+
+			const {id: mod_id} = mod;
+
+			discovered_mod_ids.add(mod_id);
+		}
+	}
+
+	pass = discovered_mod_ids.difference(current_state);
 }
 
 await Array.fromAsync(getTags(tag_ids_to_check));
