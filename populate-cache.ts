@@ -144,7 +144,7 @@ while (pass.size > 0) {
 			id
 		}`);
 
-		const user = await getUser(id);
+		const user = await getUser(id, true);
 
 		for (const {mod_id} of user.mods) {
 			discovered_mod_ids.add(mod_id);

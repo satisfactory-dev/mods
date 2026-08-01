@@ -86,7 +86,7 @@ export async function live<
 
 export async function cached<
 	Id extends result['id'],
->(id: Id): Promise<result<Id>> {
+>(id: Id, force_update_cache = false): Promise<result<Id>> {
 	if (!/^[A-Za-z0-9]+$/.test(id)) {
 		throw new Error(`Id for mod does not match expected pattern: ${id}`);
 	}
@@ -95,7 +95,7 @@ export async function cached<
 		import.meta.dirname
 	}/../../.cache/api/getUser-reduced/${id}.json`;
 
-	if (!existsSync(cache_file)) {
+	if (!existsSync(cache_file) || force_update_cache) {
 		const result = await live(id);
 
 		await writeFile(cache_file, stringify(result));
