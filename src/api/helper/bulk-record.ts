@@ -172,11 +172,12 @@ export async function* cached<
 	cache_dir = operation,
 	filter_key = 'ids',
 ) {
+	const reusable = await Array.fromAsync(ids);
 	const current_state = await async_generator_to_set(get_current_state);
 
 	if (auto_refresh) {
 		const possibly_stale = (
-			new Set(await Array.fromAsync(ids))
+			new Set(reusable)
 		).intersection(current_state);
 
 		console.log(`checking ${possibly_stale.size} for possible staleness`);
@@ -280,7 +281,7 @@ export async function* cached<
 		}
 	}
 
-	for await (const id of ids) {
+	for (const id of reusable) {
 		if (current_state.has(id)) {
 			yield* maybe_yield_and_cache();
 
