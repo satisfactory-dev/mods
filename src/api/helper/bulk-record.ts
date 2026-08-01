@@ -25,15 +25,24 @@ function run(
 	iterate_on: string|undefined,
 	sub_query: string,
 	ids: [string, ...string[]],
+	filter_key = 'ids',
 ): Promise<unknown> {
 	if (ids.length > 100) {
 		throw new Error('Too many records requested!');
 	}
 
-	return upstream(`${operation}(filter: {
+	let query = `${operation}(filter: {
 		limit: 100,
-		ids: ${JSON.stringify(ids)},
-	})`, (
+		${filter_key}: ${JSON.stringify(ids)},
+	})`;
+
+	if ('userIds' === filter_key) {
+		query = `${operation}(
+			${filter_key}: ${JSON.stringify(ids)},
+		)`;
+	}
+
+	return upstream(query, (
 		iterate_on
 			? `${iterate_on} {${sub_query}}`
 			: sub_query
@@ -104,6 +113,7 @@ export async function* live<
 	sub_query: string,
 	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
 	validator: Validator<ResultType, Operation, IterateOn>,
+	filter_key = 'ids',
 ) {
 	for await (const chunk of chunk_ids(ids)) {
 		const result = validated(validator, await run(
@@ -111,6 +121,7 @@ export async function* live<
 			iterate_on,
 			sub_query,
 			chunk,
+			filter_key,
 		));
 
 		const data: ResultType[] = iterate_on
@@ -159,6 +170,7 @@ export async function* cached<
 		| Validator<{id: ResultType['id'], updated_at: string}>
 	) = undefined,
 	cache_dir = operation,
+	filter_key = 'ids',
 ) {
 	const current_state = await async_generator_to_set(get_current_state);
 
@@ -182,6 +194,7 @@ export async function* cached<
 			'id updated_at',
 			possibly_stale,
 			auto_refresh,
+			filter_key,
 		)) {
 			const cache_file = `${
 				import.meta.dirname
@@ -211,6 +224,7 @@ export async function* cached<
 			sub_query,
 			update_cache,
 			validator,
+			filter_key,
 		)) {
 			const cache_file = `${
 				import.meta.dirname
@@ -243,6 +257,7 @@ export async function* cached<
 				sub_query,
 				current_defer_page,
 				validator,
+				filter_key,
 			)) {
 				if (!/^[A-Za-z0-9]+$/.test(result.id)) {
 					throw new Error(

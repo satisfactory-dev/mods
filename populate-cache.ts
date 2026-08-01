@@ -12,8 +12,8 @@ import {
 } from './src/api/getMods.ts';
 
 import {
-	cached as getUser,
-} from './src/api/getUser-reduced.ts';
+	live as getUsers,
+} from './src/api/getUsers-reduced.ts';
 
 import type {
 	result as Tag,
@@ -74,6 +74,16 @@ export const known_missing_users = new Proxy(
 	},
 );
 
+function filtered_add<T>(
+	maybe: T,
+	to: Set<T>,
+	except: Set<T>,
+) {
+	if (!except.has(maybe)) {
+		to.add(maybe);
+	}
+}
+
 while (pass.size > 0) {
 	++passes;
 
@@ -100,10 +110,10 @@ while (pass.size > 0) {
 			mod.id
 		}`);
 
-		user_ids.add(mod.creator_id);
+		filtered_add(mod.creator_id, user_ids, known_missing_users);
 
 		for (const {user_id} of mod.authors) {
-			user_ids.add(user_id);
+			filtered_add(user_id, user_ids, known_missing_users);
 		}
 
 		for (const {id: tag_id} of mod.tags) {
@@ -127,12 +137,8 @@ while (pass.size > 0) {
 
 	let user_check = 0;
 
-	for (const id of user_ids) {
+	for await (const user of getUsers(user_ids)) {
 		++user_check;
-
-		if (known_missing_users.has(id)) {
-			continue;
-		}
 
 		console.log(`checking ${
 			user_check
@@ -141,10 +147,23 @@ while (pass.size > 0) {
 		} users found in pass ${
 			passes
 		}: ${
-			id
+			user.id
 		}`);
 
-		const user = await getUser(id, true);
+		if (!/^[A-Za-z0-9]+$/.test(user.id)) {
+			throw new Error(`Invalid id on user record ${
+				user.id
+			}`);
+		}
+
+		await writeFile(
+			`${
+				import.meta.dirname
+			}/.cache/api/getUser-reduced/${
+				user.id
+			}.json`,
+			stringify(user),
+		);
 
 		for (const {mod_id} of user.mods) {
 			discovered_mod_ids.add(mod_id);

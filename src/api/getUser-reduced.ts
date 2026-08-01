@@ -86,7 +86,7 @@ export async function live<
 
 export async function cached<
 	Id extends result['id'],
->(id: Id, force_update_cache = false): Promise<result<Id>> {
+>(id: Id): Promise<result<Id>> {
 	if (!/^[A-Za-z0-9]+$/.test(id)) {
 		throw new Error(`Id for mod does not match expected pattern: ${id}`);
 	}
@@ -95,7 +95,7 @@ export async function cached<
 		import.meta.dirname
 	}/../../.cache/api/getUser-reduced/${id}.json`;
 
-	if (!existsSync(cache_file) || force_update_cache) {
+	if (!existsSync(cache_file)) {
 		const result = await live(id);
 
 		await writeFile(cache_file, stringify(result));
@@ -120,14 +120,10 @@ export async function cached<
 	return shim.data.getUser;
 }
 
-export async function ids_in_cache(): Promise<Set<result['id']>> {
-	const result = new Set<result['id']>();
-
+export async function* ids_in_cache(): AsyncGenerator<result['id']> {
 	for await (const path of glob(`${
 		import.meta.dirname
 	}/../../.cache/api/getUser-reduced/*.json`)) {
-		result.add(basename(path, '.json'));
+		yield basename(path, '.json');
 	}
-
-	return result;
 }
