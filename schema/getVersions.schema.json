@@ -120,11 +120,7 @@
 									},
 									"stability": {
 										"type": "string",
-										"enum": [
-											"alpha",
-											"beta",
-											"release"
-										]
+										"enum": ["alpha", "beta", "release"]
 									},
 									"approved": {
 										"type": "boolean"
