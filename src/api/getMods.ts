@@ -2,6 +2,7 @@ import type {
 	result,
 } from './getMod.ts';
 import {
+	freshness_validator,
 	sub_query,
 	validator,
 } from './getMod.ts';
@@ -46,5 +47,6 @@ export async function* cached<
 		ids_in_cache(),
 		single_record,
 		validator,
+		freshness_validator,
 	);
 }

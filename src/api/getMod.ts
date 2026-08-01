@@ -156,6 +156,50 @@ export const validator = Ajv.compile<{
 	},
 }>(schema);
 
+const getMods = schema.properties.data.properties.getMods;
+
+const Mod = schema.$defs.Mod;
+
+export const freshness_validator = Ajv.compile<{
+	data: {
+		getMods: {
+			mods: {
+				id: result['id'],
+				updated_at: result['updated_at'],
+			}[],
+		},
+	},
+}>({
+	...schema,
+	properties: {
+		...schema.properties,
+		data: {
+			...schema.properties.data,
+			properties: {
+				...schema.properties.data.properties,
+				getMods: {
+					...getMods,
+					properties: {
+						...getMods.properties,
+						mods: {
+							...getMods.properties.mods,
+							items: {
+								type: 'object',
+								required: ['id', 'updated_at'],
+								additionalProperties: false,
+								properties: {
+									id: Mod.properties.id,
+									updated_at: Mod.properties.updated_at,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+});
+
 function verify_id<
 	Id extends result['id'],
 >(

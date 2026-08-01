@@ -1,4 +1,6 @@
 import {
+	stat,
+	utimes,
 	writeFile,
 } from 'node:fs/promises';
 
@@ -152,9 +154,80 @@ export async function* cached<
 	get_current_state: AsyncGenerator<Id>,
 	single_record: (id: Id) => Promise<ResultType>,
 	validator: Validator<ResultType, Operation, IterateOn>,
+	auto_refresh: (
+		| undefined
+		| Validator<{id: ResultType['id'], updated_at: string}>
+	) = undefined,
 	cache_dir = operation,
 ) {
 	const current_state = await async_generator_to_set(get_current_state);
+
+	if (auto_refresh) {
+		const possibly_stale = (
+			new Set(await Array.fromAsync(ids))
+		).intersection(current_state);
+
+		console.log(`checking ${possibly_stale.size} for possible staleness`);
+
+		const update_cache = new Set<ResultType['id']>();
+
+		const now = Date.now();
+
+		for await (const maybe of live<{
+			id: ResultType['id'],
+			updated_at: string,
+		}>(
+			operation,
+			iterate_on,
+			'id updated_at',
+			possibly_stale,
+			auto_refresh,
+		)) {
+			const cache_file = `${
+				import.meta.dirname
+			}/../../../.cache/api/${
+				cache_dir
+			}/${
+				maybe.id
+			}.json`;
+
+			if (
+				(
+					now - Math.max(
+						(await stat(cache_file)).mtimeMs,
+						(new Date(maybe.updated_at)).getTime(),
+					)
+				) > 86400_000
+			) {
+				update_cache.add(maybe.id);
+			} else {
+				await utimes(cache_file, now, now);
+			}
+		}
+
+		for await (const fresh of live<ResultType>(
+			operation,
+			iterate_on,
+			sub_query,
+			update_cache,
+			validator,
+		)) {
+			const cache_file = `${
+				import.meta.dirname
+			}/../../../.cache/api/${
+				cache_dir
+			}/${fresh.id}.json`;
+
+			await writeFile(
+				cache_file,
+				stringify(fresh),
+			);
+		}
+
+		console.log(`updated cache for ${
+			update_cache.size
+		} records`);
+	}
 
 	let current_defer_page: Id[] = [];
 

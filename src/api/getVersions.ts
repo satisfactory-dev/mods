@@ -118,6 +118,51 @@ export const validator = Ajv.compile<{
 	},
 }>(schema);
 
+const getVersions = schema.properties.data.properties.getVersions;
+
+const versions = schema
+	.properties.data.properties.getVersions.properties.versions.items;
+
+export const freshness_validator = Ajv.compile<{
+	data: {
+		getVersions: {
+			versions: {
+				id: result['id'],
+				updated_at: result['updated_at'],
+			}[],
+		},
+	},
+}>({
+	...schema,
+	properties: {
+		...schema.properties,
+		data: {
+			...schema.properties.data,
+			properties: {
+				...schema.properties.data.properties,
+				getVersions: {
+					...getVersions,
+					properties: {
+						...getVersions.properties,
+						versions: {
+							...getVersions.properties.versions,
+							items: {
+								type: 'object',
+								required: ['id', 'updated_at'],
+								additionalProperties: false,
+								properties: {
+									id: versions.properties.id,
+									updated_at: versions.properties.updated_at,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+});
+
 export async function* ids_in_cache(): AsyncGenerator<result['id']> {
 	for await (const path of glob(`${
 		import.meta.dirname
@@ -239,5 +284,6 @@ export async function* cached<
 		ids_in_cache(),
 		single_record,
 		validator,
+		freshness_validator,
 	);
 }
