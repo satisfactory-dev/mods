@@ -269,7 +269,7 @@ export const sub_query = `id
 			release {
 				id
 			}
-}`;
+		}`;
 
 export async function live<
 	Id extends result['id'],
