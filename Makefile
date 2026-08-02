@@ -36,7 +36,19 @@ coverage--skip-lint:
 coverage--lcov:
 	@node --experimental-test-coverage --test-coverage-include='${PWD}/src/**/*.ts' --test --test-reporter=lcov --test-reporter-destination=coverage/lcov.info
 
-npm-prep: tests
-	@echo 'building from ./tsconfig.app-npm.json'
-	@./node_modules/.bin/tsc --project ./tsconfig.app-npm.json
-	@npm publish --dry-run
+build: build--cache build--index build--web
+
+build--cache:
+	@node ./populate-cache.ts
+
+build--index:
+	@node ./populate-index.ts
+
+build--web:
+	@git clean -fxd ./dist/*.js ./dist/vendor/
+	@mkdir -p ./dist/api/
+	@rsync -avh --delete ./.cache/api/getMods/ ./dist/api/getMods/
+	@rsync -avh --delete ./.cache/api/getTags/ ./dist/api/getTags/
+	@rsync -avh --delete ./.cache/api/getUser-reduced/ ./dist/api/getUser-reduced/
+	@./node_modules/.bin/rolldown --config rolldown.config.ts
+	@node ./populate-html.ts

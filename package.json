@@ -11,6 +11,7 @@
   "exports": "./index.js",
   "types": "./index.d.ts",
   "devDependencies": {
+    "@lit-labs/ssr": "^4.1.0",
     "@satisfactory-dev/lunr": "^0.2.1",
     "@signpostmarv/js-types": "^0.4.1",
     "@signpostmarv/oxlint-config": "^0.4.0",
@@ -18,10 +19,12 @@
     "@types/node": "^26.1.2",
     "ajv": "^8.20.0",
     "html-to-text": "^10.0.0",
+    "lit": "^3.3.3",
     "markdown-it": "^15.0.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^7.0.2001",
     "prettier": "^3.9.6",
+    "rolldown": "^1.2.1",
     "typescript": "~7.0.2",
     "web-worker": "^1.5.0"
   }

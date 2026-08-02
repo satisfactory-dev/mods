@@ -177,11 +177,12 @@ class SearchWorker {
 
 	constructor(
 		init_with: string,
+		source = new URL('./search/thread.ts', import.meta.url),
 	) {
 		this.#init_with = init_with;
 
 		this.#worker = new Worker(
-			new URL('./search/thread.ts', import.meta.url),
+			source,
 			{
 				type: 'module',
 			},
@@ -442,10 +443,11 @@ export default class Search {
 	constructor(
 		index_provider: Promise<[string, ...string[]]>,
 		tags_provider: Promise<TagIndex[]>,
+		worker_source?: URL,
 	) {
 		this.#indices = index_provider.then((e) => {
 			return e.map((index) => {
-				return new SearchWorker(index);
+				return new SearchWorker(index, worker_source);
 			});
 		});
 		this.#tags = tags_provider;
