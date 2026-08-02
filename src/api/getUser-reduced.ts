@@ -12,7 +12,7 @@ import {
 	writeFile,
 } from 'node:fs/promises';
 
-import Ajv from './helper/ajv.ts';
+import Ajv from '../helper/ajv.ts';
 
 import type image_url from './helper/image-url.ts';
 

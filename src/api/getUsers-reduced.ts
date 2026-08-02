@@ -7,7 +7,7 @@ import {
 	sub_query,
 } from './getUser-reduced.ts';
 
-import Ajv from './helper/ajv.ts';
+import Ajv from '../helper/ajv.ts';
 
 import {
 	cached as bulk_record_cached,

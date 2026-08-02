@@ -1,7 +1,7 @@
 import type {
 	SchemaObject,
-} from './ajv.ts';
-import Ajv from './ajv.ts';
+} from '../../helper/ajv.ts';
+import Ajv from '../../helper/ajv.ts';
 
 import count from './count.ts';
 

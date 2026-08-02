@@ -7,7 +7,7 @@ import {
 	readFile,
 } from 'node:fs/promises';
 
-import Ajv from './helper/ajv.ts';
+import Ajv from '../helper/ajv.ts';
 
 import run from './helper/run.ts';
 

@@ -1,6 +1,6 @@
 import type {
 	ValidateFunction,
-} from './ajv.ts';
+} from '../../helper/ajv.ts';
 
 export default <T>(
 	validator: ValidateFunction<T>,

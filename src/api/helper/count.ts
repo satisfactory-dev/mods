@@ -1,4 +1,4 @@
-import Ajv from './ajv.ts';
+import Ajv from '../../helper/ajv.ts';
 
 import upstream from './run.ts';
 import validated from './validated.ts';

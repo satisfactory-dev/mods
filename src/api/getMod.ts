@@ -7,7 +7,7 @@ import {
 	writeFile,
 } from 'node:fs/promises';
 
-import Ajv from './helper/ajv.ts';
+import Ajv from '../helper/ajv.ts';
 
 import get from './helper/single-record.ts';
 

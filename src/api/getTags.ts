@@ -11,7 +11,7 @@ import {
 	readFile,
 } from 'node:fs/promises';
 
-import Ajv from './helper/ajv.ts';
+import Ajv from '../helper/ajv.ts';
 
 import {
 	cached as bulk_record_cached,

@@ -11,12 +11,18 @@
   "exports": "./index.js",
   "types": "./index.d.ts",
   "devDependencies": {
+    "@satisfactory-dev/lunr": "^0.2.0",
+    "@signpostmarv/js-types": "^0.4.1",
     "@signpostmarv/oxlint-config": "^0.4.0",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^26.1.2",
     "ajv": "^8.20.0",
+    "html-to-text": "^10.0.0",
+    "markdown-it": "^15.0.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^7.0.2001",
     "prettier": "^3.9.6",
-    "typescript": "~7.0.2"
+    "typescript": "~7.0.2",
+    "web-worker": "^1.5.0"
   }
 }

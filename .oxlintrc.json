@@ -4,6 +4,7 @@
 		"./node_modules/@signpostmarv/oxlint-config/.oxlintrc.typescript.json"
 	],
 	"env": {
+		"browser": true,
 		"node": true
 	},
 	"rules": {
