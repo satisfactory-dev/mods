@@ -3,7 +3,7 @@
 	"dockerComposeFile": "./docker-compose.yml",
 	"service": "devcontainer",
 	"workspaceFolder": "/app/",
-	"postCreateCommand": "npm config set git-tag-version=false && npm install",
+	"postCreateCommand": "npm config set git-tag-version=false && npm install --force --save-dev @lit-labs/ssr",
 	"remoteUser": "vscode",
 	"updateRemoteUserUID": true,
 	"customizations": {
