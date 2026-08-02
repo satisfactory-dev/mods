@@ -176,43 +176,43 @@ export default class Ui {
 
 		form.addEventListener('input', ({target}) => {
 			if (!Ui.#should_run_search(target, search)) {
-					return;
-				}
+				return;
+			}
 
-				this.#debounced = undefined;
+			this.#debounced = undefined;
 
-				clearTimeout(this.#debounce);
+			clearTimeout(this.#debounce);
 
-				this.#render();
+			this.#render();
 
-				this.#debounce = setTimeout(() => {
-					this.#debounced = true;
+			this.#debounce = setTimeout(() => {
+				this.#debounced = true;
 				void this.#search.search(
 					search.value.trim(),
 					[...form.querySelectorAll<HTMLInputElement>(
 						'input[name="tags[]"]:checked',
 					)].map((e) => e.value),
 				)
-						.then(
-							(results) => {
-								console.log(results);
+					.then(
+						(results) => {
+							console.log(results);
 
-								this.#debounced = results;
-
-								this.#render();
-							},
-						)
-						.catch((err) => {
-							console.error(err);
-
-							this.#debounced = new Error('An error occurred');
+							this.#debounced = results;
 
 							this.#render();
-						});
+						},
+					)
+					.catch((err) => {
+						console.error(err);
 
-					this.#render();
-				}, 100);
-			});
+						this.#debounced = new Error('An error occurred');
+
+						this.#render();
+					});
+
+				this.#render();
+			}, 100);
+		});
 
 		form.addEventListener('click', (e) => {
 			if (!Ui.#is_filter_button(e.target)) {
