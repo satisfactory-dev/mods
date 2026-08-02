@@ -199,7 +199,24 @@ while (pass.size > 0) {
 	pass = discovered_mod_ids.difference(current_state);
 }
 
-await Array.fromAsync(getTags(tag_ids_to_check));
+const tags: {
+	[key: string]: {
+		name: string,
+		description: string,
+	},
+} = {};
+
+for await (const {id, name, description} of getTags(tag_ids_to_check)) {
+	tags[id] = {
+		name,
+		description,
+	};
+}
+
+await writeFile(
+	`${import.meta.dirname}/.cache/api/tags.json`,
+	stringify(tags),
+);
 
 for await (const version of getSatisfactoryVersions()) {
 	if (!/^[A-Za-z0-9]+$/.test(version.id)) {

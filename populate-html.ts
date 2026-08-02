@@ -56,17 +56,118 @@ export async function htmldoc(
 
 const index = html`<html>
 <head>
-<link rel="preload" as="script" href="./thread.js">
-<link rel="preload" as="script" href="./web.js">
+<link rel="preload" as="script" href="./thread.js" crossorigin="anonymous">
+<link rel="preload" as="script" href="./web.js" crossorigin="anonymous">
 ${sources.map((source) => html`<link
 	rel="preload"
 	as="fetch"
 	href="${source}"
+	crossorigin="anonymous"
 >`)}
+<style>
+:root
+{
+	color-scheme: dark light ;
+	color: light-dark(#000, #fff) ;
+	font-family: system-ui ;
+}
+
+*,
+::before,
+::after
+{
+	font-size: inherit ;
+	font-family: inherit ;
+	box-sizing: border-box ;
+	margin: 0 ;
+	padding: 0 ;
+}
+
+ul,
+ol
+{
+	list-style: inside none ;
+}
+
+#search > fieldset > ul
+{
+	display: flex ;
+	flex-wrap: wrap ;
+
+	&,
+	> li
+	{
+		padding: .25em ;
+	}
+}
+
+#tags
+{
+	display: flex ;
+	flex-wrap: wrap ;
+
+	> li
+	{
+		position: relative ;
+		margin: .125em ;
+
+		&:focus-within > aside,
+		> label:hover ~ aside
+		{
+			display: block ;
+		}
+
+		> input
+		{
+			display: none ;
+
+			&:checked + label::before
+			{
+				background: light-dark(#000, #fff) ;
+				color: light-dark(#fff, #000) ;
+			}
+		}
+
+		> aside
+		{
+			position: absolute ;
+			top: 100% ;
+			left: 0 ;
+			display: none ;
+			background: light-dark(#fff, #000) ;
+			z-index: 2 ;
+			min-width: min(400px, 80vw) ;
+			padding: .25em ;
+		}
+
+		> label
+		{
+			border: 1px solid ;
+			padding: .25em ;
+			padding-left: calc(.25em + 1ch + .25em + 1px + .25em) ;
+			display: block ;
+			position: relative ;
+
+			&::before
+			{
+				content: '#' ;
+				border-right: 1px solid ;
+				padding: .25em ;
+				margin-right: .25em ;
+				position: absolute ;
+				top: 0 ;
+				left: 0 ;
+			}
+		}
+	}
+}
+</style>
 </head>
 <body>
 <script type="module">
 import Ui from './ui.js';
+
+const params = new URLSearchParams(location.search);
 
 document.addEventListener('DOMContentLoaded', () => {
 	import('./web.js').then(({default: Web}) => {
@@ -84,11 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		globalThis.mods = search;
 
-		(new Ui(
-			document.body,
+		(new Ui({
+			target: document.body,
 			search,
-			import.meta.url + '/api/',
-		)).init();
+			api_cache_root: import.meta.url + '/api/',
+			initial_query: params.get('q'),
+		})).init();
 	});
 });
 </script>

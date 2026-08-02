@@ -20,6 +20,8 @@ import type {
 	result as Mod,
 } from '../../api/getMod.ts';
 
+import tags from '../../../.cache/api/tags.json' with {type: 'json'};
+
 export default class Ui {
 	#api_cache_root: `${string}/api/`;
 
@@ -39,14 +41,25 @@ export default class Ui {
 
 	#target: HTMLElement;
 
-	constructor(
+	#initial_query: string;
+
+	#hide_filters = true;
+
+	constructor({
+		target,
+		search,
+		api_cache_root,
+		initial_query,
+	}: {
 		target: HTMLElement,
 		search: Search,
 		api_cache_root: `${string}/api/`,
-	) {
+		initial_query?: string,
+	}) {
 		this.#target = target;
 		this.#search = search;
 		this.#api_cache_root = api_cache_root;
+		this.#initial_query = initial_query || '';
 	}
 
 	get template() {
@@ -54,12 +67,52 @@ export default class Ui {
 			<fieldset>
 				<ul>
 					<li>
+						<button
+							type="button"
+							aria-expanded="false"
+							aria-controls="filters"
+						>Filter...</button>
+					</li>
+					<li>
 						<input
 							type="search"
 							aria-label="Search query for mods"
+							name="q"
+							value="${this.#initial_query}"
 						>
 					</li>
 				</ul>
+				<fieldset
+					id="filters"
+					?hidden="${this.#hide_filters}"
+					aria-label="Search Filters"
+				>
+					<ul
+						id="tags"
+						aria-label="Tags"
+					>${Object.entries(tags).map(([
+						id,
+						{
+							name,
+							description,
+						},
+					]) => html`<li>
+						<input
+							name="tags[]"
+							value="${id}"
+							id="tag-${id}"
+							type="checkbox"
+						>
+						<label
+							for="tag-${id}"
+							aria-describedby="tag-tooltip-${id}"
+						>${name}</label>
+						<aside
+							id="tag-tooltip-${id}"
+							role="tooltip"
+						>${description}</aside>
+					</li>`)}</ul>
+				</fieldset>
 			</fieldset>
 		</form><output form="search">${when(
 			this.#debounced,
@@ -100,9 +153,29 @@ export default class Ui {
 
 	init() {
 		this.#render();
-		this.#target.querySelector('form')
-			?.addEventListener('input', ({target}) => {
-				if (!Ui.#is_search(target)) {
+
+		const form = this.#target.querySelector('form');
+
+		if (!form) {
+			throw new Error('Could not find form!');
+		}
+
+		const filters = form.querySelector<HTMLFieldSetElement>('#filters');
+		const search = form.querySelector<(
+			& HTMLInputElement
+			& {type: 'search'}
+		)>('input[type="search"]');
+
+		if (!filters) {
+			throw new Error('Could not find filters!');
+		}
+
+		if (!search) {
+			throw new Error('Could not find search input!');
+		}
+
+		form.addEventListener('input', ({target}) => {
+			if (!Ui.#should_run_search(target, search)) {
 					return;
 				}
 
@@ -114,7 +187,12 @@ export default class Ui {
 
 				this.#debounce = setTimeout(() => {
 					this.#debounced = true;
-					void this.#search.search(target.value)
+				void this.#search.search(
+					search.value.trim(),
+					[...form.querySelectorAll<HTMLInputElement>(
+						'input[name="tags[]"]:checked',
+					)].map((e) => e.value),
+				)
 						.then(
 							(results) => {
 								console.log(results);
@@ -135,12 +213,38 @@ export default class Ui {
 					this.#render();
 				}, 100);
 			});
+
+		form.addEventListener('click', (e) => {
+			if (!Ui.#is_filter_button(e.target)) {
+				return;
+			}
+
+			const state = 'true' === e.target.getAttribute('aria-expanded');
+
+			this.#hide_filters = state;
+			e.target.setAttribute('aria-expanded', state ? 'false' : 'true');
+			this.#render();
+		});
 	}
 
-	static #is_search(maybe: unknown): maybe is HTMLInputElement {
+	static #is_filter_button(maybe: unknown): maybe is HTMLButtonElement {
 		return (
-			(maybe instanceof HTMLElement)
-			&& maybe.matches('input[type="search"]')
+			(maybe instanceof HTMLButtonElement)
+			&& maybe.matches('button[aria-controls="filters"')
+		);
+	}
+
+	static #should_run_search(
+		maybe: unknown,
+		search: HTMLInputElement & {type: 'search'},
+	): maybe is HTMLInputElement {
+		return (
+			'' !== search.value.trim()
+			&& (maybe instanceof HTMLElement)
+			&& (
+				maybe.matches('input[type="search"]')
+				|| maybe.matches('input[name="tags[]"]')
+			)
 		);
 	}
 }

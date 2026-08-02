@@ -48,7 +48,6 @@ build--web:
 	@git clean -fxd ./dist/*.js ./dist/vendor/
 	@mkdir -p ./dist/api/
 	@rsync -avh --delete ./.cache/api/getMods/ ./dist/api/getMods/
-	@rsync -avh --delete ./.cache/api/getTags/ ./dist/api/getTags/
 	@rsync -avh --delete ./.cache/api/getUser-reduced/ ./dist/api/getUser-reduced/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
 	@node ./populate-html.ts
