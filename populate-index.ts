@@ -49,6 +49,10 @@ const docs_by_index_key = new Map<string, Set<doc>>();
 const mods_by_tag = new Map<string, Set<result['id']>>();
 
 for await (const mod of getMods(ids_in_cache())) {
+	if (mod.hidden) {
+		continue;
+	}
+
 	const doc = {
 		id: mod.id,
 		mod_reference: mod.mod_reference,
