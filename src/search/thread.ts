@@ -88,7 +88,6 @@ self.addEventListener('message', (e) => {
 
 		postMessage(
 			{error: 'unsupported command'},
-			e.origin,
 		);
 
 		return;
@@ -100,23 +99,17 @@ self.addEventListener('message', (e) => {
 		index = Index.load(JSON.parse(args[0]) as SerializedIndex);
 		postMessage(
 			{success: 'init'},
-			e.origin,
 		);
 	} else if ('search' === cmd) {
 		if (undefined === index) {
 			postMessage(
 				{error: 'init', message: 'Index not initialised'},
-				e.origin,
 			);
 		} else {
 			const result = index.search(args[0]);
 
 			postMessage(
 				{success: 'search', result: [args[0], result]},
-				e.origin,
-				[
-					result,
-				],
 			);
 		}
 	}
