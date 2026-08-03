@@ -147,7 +147,7 @@ export default class Ui {
 								}.json`)
 									.then((e) => e.json())
 									.then((mod: Mod) => html`${mod.name}`),
-								() => '...loading',
+								'...loading',
 							)}</li>`)
 						}</ol>`,
 						() => html`<p>An error occurred!</p>`,
