@@ -8,6 +8,10 @@ import {
 } from 'lit';
 
 import {
+	repeat,
+} from 'lit/directives/repeat.js';
+
+import {
 	until,
 } from 'lit/directives/until.js';
 
@@ -101,7 +105,7 @@ export default class Ui {
 					<ul
 						id="tags"
 						aria-label="Tags"
-					>${Object.entries(tags).map(([
+					>${repeat(Object.entries(tags), ([id]) => id, ([
 						id,
 						{
 							name,
@@ -135,7 +139,10 @@ export default class Ui {
 					() => when(
 						!(this.#debounced instanceof Error),
 						() => html`<ol>${
-							(this.#debounced as IndexResult[]).map((
+							repeat(
+								this.#debounced as IndexResult[],
+								({ref}) => ref,
+								(
 								result,
 							) => html`<li
 								data-ref="${result.ref}"
