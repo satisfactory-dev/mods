@@ -165,32 +165,13 @@ ol
 </head>
 <body>
 <script type="module">
-import Ui from './ui.js';
+import init from './ui.js';
 
 const params = new URLSearchParams(location.search);
 
 document.addEventListener('DOMContentLoaded', () => {
 	import('./web.js').then(({default: Web}) => {
-		const search = (new Web(
-			[...document.querySelectorAll(
-				'head > link[rel="preload"][as="fetch"]',
-			)].map((e) => e.href),
-			new URL(
-				document.querySelector(
-					'head > link[rel="preload"][href$="/thread.js"]'
-				).href,
-				import.meta.url,
-			),
-		)).search;
-
-		globalThis.mods = search;
-
-		(new Ui({
-			target: document.body,
-			search,
-			api_cache_root: import.meta.url + '/api/',
-			initial_query: params.get('q'),
-		})).init();
+		init(Web, params);
 	});
 });
 </script>

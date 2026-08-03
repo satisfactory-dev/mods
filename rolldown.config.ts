@@ -7,7 +7,7 @@ export default defineConfig([
 		input: {
 			web: './src/search/web.ts',
 			thread: './src/search/thread.ts',
-			ui: './src/search/render/lit.ts',
+			ui: './src/search/render/lit--init.ts',
 		},
 		output: {
 			format: 'esm',
