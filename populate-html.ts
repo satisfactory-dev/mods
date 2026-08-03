@@ -176,18 +176,21 @@ ol
 <body>
 <script type="module">
 import init from './ui.js';
+import Provider from './provider.js';
 
 const params = new URLSearchParams(location.search);
 
 const url = new URL(import.meta.url);
 url.search = '';
 
+const provider = new Provider(url + '/api/');
+
 document.addEventListener('DOMContentLoaded', () => {
 	import('./web.js').then(({default: Web}) => {
 		init({
 			Web,
 			params,
-			api_cache_root: url + '/api/',
+			provider,
 		});
 	});
 });

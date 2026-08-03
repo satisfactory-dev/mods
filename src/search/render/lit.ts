@@ -23,11 +23,13 @@ import type Search from '../../search.ts';
 
 import type {
 	result as Mod,
-} from '../../api/getMod.ts';
+} from '../../api/getMod--reduced.ts';
 
 import {
 	assert_non_empty,
 } from '../../helper/array.ts';
+
+import type Provider from '../../provider/interface.ts';
 
 import tags from '../../../.cache/api/tags.json' with {type: 'json'};
 
@@ -40,8 +42,6 @@ assert_non_empty(_mod_ids);
 const mod_ids = _mod_ids;
 
 export default class Ui {
-	#api_cache_root: `${string}/api/`;
-
 	#debounce: (
 		| undefined
 		| ReturnType<typeof setTimeout>
@@ -62,20 +62,22 @@ export default class Ui {
 
 	#hide_filters = true;
 
+	#provider: Provider;
+
 	constructor({
 		target,
 		search,
-		api_cache_root,
 		initial_query,
+		provider,
 	}: {
 		target: HTMLElement,
 		search: Search,
-		api_cache_root: `${string}/api/`,
+		provider: Provider,
 		initial_query?: string,
 	}) {
 		this.#target = target;
 		this.#search = search;
-		this.#api_cache_root = api_cache_root;
+		this.#provider = provider;
 		this.#initial_query = initial_query || '';
 	}
 
@@ -150,12 +152,7 @@ export default class Ui {
 									data-ref="${result.ref}"
 									data-score="${result.score}"
 								>${until(
-									fetch(`${
-										this.#api_cache_root
-									}/getMod--reduced/${
-										result.ref
-									}.json`)
-										.then((e) => e.json())
+									this.#provider.getMod(result.ref)
 										.then((mod: Mod) => html`${mod.name}`),
 									'...loading',
 								)}</li>`)

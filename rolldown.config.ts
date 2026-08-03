@@ -8,6 +8,7 @@ export default defineConfig([
 			web: './src/search/web.ts',
 			thread: './src/search/thread.ts',
 			ui: './src/search/render/lit--init.ts',
+			provider: './src/provider/api-cache.ts',
 		},
 		output: {
 			format: 'esm',

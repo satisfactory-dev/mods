@@ -1,3 +1,5 @@
+import type Provider from '../../provider/interface.ts';
+
 import type Web from '../web.ts';
 
 import Ui from './lit.ts';
@@ -5,7 +7,7 @@ import Ui from './lit.ts';
 export default ({
 	Web,
 	params,
-	api_cache_root,
+	provider,
 }: {
 	Web: new (
 		...params: Parameters<
@@ -13,7 +15,7 @@ export default ({
 		>
 	) => Web,
 	params: URLSearchParams,
-	api_cache_root: `${string}/api/`,
+	provider: Provider,
 }) => {
 	const thread_source = document.querySelector<HTMLLinkElement>(
 		'head > link[rel="modulepreload"][href$="/thread.js"]',
@@ -45,7 +47,7 @@ export default ({
 	(new Ui({
 		target: document.body,
 		search,
-		api_cache_root,
+		provider,
 		initial_query: params.get('q') || '',
 	})).init();
 };
