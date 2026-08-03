@@ -31,7 +31,9 @@ import {
 
 import tags from '../../../.cache/api/tags.json' with {type: 'json'};
 
-import _mod_ids from '../../../.cache/indexed-mod-ids.json';
+import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
+	type: 'json',
+};
 
 assert_non_empty(_mod_ids);
 
