@@ -142,7 +142,7 @@ export default class Ui {
 							>${until(
 								fetch(`${
 									this.#api_cache_root
-								}/getMods/${
+								}/getMod--reduced/${
 									result.ref
 								}.json`)
 									.then((e) => e.json())
