@@ -8,11 +8,12 @@ import {
 } from 'lit';
 
 import {
-	when,
-} from 'lit/directives/when.js';
-import {
 	until,
 } from 'lit/directives/until.js';
+
+import {
+	when,
+} from 'lit/directives/when.js';
 
 import type Search from '../../search.ts';
 
