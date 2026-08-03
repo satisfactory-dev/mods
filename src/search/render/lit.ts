@@ -143,20 +143,20 @@ export default class Ui {
 								this.#debounced as IndexResult[],
 								({ref}) => ref,
 								(
-								result,
-							) => html`<li
-								data-ref="${result.ref}"
-								data-score="${result.score}"
-							>${until(
-								fetch(`${
-									this.#api_cache_root
-								}/getMod--reduced/${
-									result.ref
-								}.json`)
-									.then((e) => e.json())
-									.then((mod: Mod) => html`${mod.name}`),
-								'...loading',
-							)}</li>`)
+									result,
+								) => html`<li
+									data-ref="${result.ref}"
+									data-score="${result.score}"
+								>${until(
+									fetch(`${
+										this.#api_cache_root
+									}/getMod--reduced/${
+										result.ref
+									}.json`)
+										.then((e) => e.json())
+										.then((mod: Mod) => html`${mod.name}`),
+									'...loading',
+								)}</li>`)
 						}</ol>`,
 						() => html`<p>An error occurred!</p>`,
 					),
