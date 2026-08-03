@@ -11,7 +11,7 @@ export default (
 	params: URLSearchParams,
 ) => {
 	const thread_source = document.querySelector<HTMLLinkElement>(
-		'head > link[rel="preload"][href$="/thread.js"]',
+		'head > link[rel="modulepreload"][href$="/thread.js"]',
 	);
 
 	if (!thread_source) {

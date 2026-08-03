@@ -56,8 +56,18 @@ export async function htmldoc(
 
 const index = html`<html>
 <head>
-<link rel="preload" as="script" href="./thread.js" crossorigin="anonymous">
-<link rel="preload" as="script" href="./web.js" crossorigin="anonymous">
+<link
+	rel="modulepreload"
+	as="script"
+	href="./thread.js"
+	crossorigin="anonymous"
+>
+<link
+	rel="modulepreload"
+	as="script"
+	href="./web.js"
+	crossorigin="anonymous"
+>
 ${sources.map((source) => html`<link
 	rel="preload"
 	as="fetch"
