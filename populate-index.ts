@@ -27,13 +27,21 @@ import {
 	cached as ids_in_cache,
 } from './src/api/getMods--ids-only.ts';
 
-import {
-	cached as getMods,
-} from './src/api/getMods.ts';
-
 import type {
 	result,
+} from './src/api/getMod--reduced.ts';
+
+import {
+	cached as getMods,
+} from './src/api/getMods--reduced.ts';
+
+import {
+	cached as single_record,
 } from './src/api/getMod.ts';
+
+import {
+	stringify,
+} from './src/helper/json.ts';
 
 const md = new MarkdownIt();
 
@@ -48,23 +56,32 @@ const docs_by_index_key = new Map<string, Set<doc>>();
 
 const mods_by_tag = new Map<string, Set<result['id']>>();
 
+const mod_ids = new Set<doc['id']>();
+
 for await (const mod of getMods(ids_in_cache())) {
 	if (mod.hidden) {
 		continue;
 	}
 
+	const {
+		created_at,
+		full_description,
+	} = await single_record(mod.id);
+
 	const doc = {
 		id: mod.id,
 		mod_reference: mod.mod_reference,
 		short_description: mod.short_description,
-		full_description: convert(md.render(mod.full_description), {
+		full_description: convert(md.render(full_description), {
 			decodeEntities: true,
 		}),
 	};
 
+	mod_ids.add(doc.id);
+
 	const [
 		year,
-	] = mod.created_at.split('T')[0].split('-');
+	] = created_at.split('T')[0].split('-');
 
 	const index_key = year;
 
@@ -89,6 +106,11 @@ for await (const mod of getMods(ids_in_cache())) {
 		tags_set.add(mod.id);
 	}
 }
+
+await writeFile(
+	`${import.meta.dirname}/.cache/indexed-mod-ids.json`,
+	stringify([...mod_ids]),
+);
 
 const indices = new Map<string, Index>();
 

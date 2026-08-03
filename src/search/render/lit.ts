@@ -20,7 +20,17 @@ import type {
 	result as Mod,
 } from '../../api/getMod.ts';
 
+import {
+	assert_non_empty,
+} from '../../helper/array.ts';
+
 import tags from '../../../.cache/api/tags.json' with {type: 'json'};
+
+import _mod_ids from '../../../.cache/indexed-mod-ids.json';
+
+assert_non_empty(_mod_ids);
+
+const mod_ids = _mod_ids;
 
 export default class Ui {
 	#api_cache_root: `${string}/api/`;
@@ -187,11 +197,16 @@ export default class Ui {
 
 			this.#debounce = setTimeout(() => {
 				this.#debounced = true;
+
+				const search_value = search.value.trim();
+
 				void this.#search.search(
-					search.value.trim(),
+					search_value,
 					[...form.querySelectorAll<HTMLInputElement>(
 						'input[name="tags[]"]:checked',
 					)].map((e) => e.value),
+					[],
+					'' === search_value ? mod_ids : undefined,
 				)
 					.then(
 						(results) => {

@@ -47,7 +47,6 @@ build--index:
 build--web:
 	@git clean -fxd ./dist/*.js ./dist/vendor/
 	@mkdir -p ./dist/api/
-	@rsync -avh --delete ./.cache/api/getMods/ ./dist/api/getMods/
-	@rsync -avh --delete ./.cache/api/getUser-reduced/ ./dist/api/getUser-reduced/
+	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
 	@node ./populate-html.ts

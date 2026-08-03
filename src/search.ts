@@ -5,6 +5,9 @@ import Worker from 'web-worker';
 import type {
 	IndexResult,
 } from '@satisfactory-dev/lunr';
+import {
+	MatchData,
+} from '@satisfactory-dev/lunr';
 
 import type {
 	SchemaObject,
@@ -457,8 +460,17 @@ export default class Search {
 		query: string,
 		tags_query_include: string[] = [],
 		tags_query_exclude: string[] = [],
+		override_results?: [string, ...string[]],
 	) {
-		let results_promise = this.#search_query_only(query);
+		let results_promise = (
+			override_results
+				? Promise.resolve(override_results.map((ref): IndexResult => ({
+					ref,
+					score: 1,
+					matchData: new MatchData(),
+				})))
+				: this.#search_query_only(query)
+		);
 
 		if (tags_query_include.length) {
 			const [

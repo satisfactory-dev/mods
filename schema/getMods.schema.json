@@ -1,5 +1,18 @@
 {
 	"$defs": {
+		"possibly-has-logo": {
+			"oneOf": [
+				{
+					"$ref": "#/$defs/HasLogo"
+				},
+				{
+					"$ref": "#/$defs/HasLogoBorked"
+				},
+				{
+					"$ref": "#/$defs/NoHasLogo"
+				}
+			]
+		},
 		"AiUseDisclosureInfo": {
 			"type": "object",
 			"required": ["message", "disclosure_type"],
@@ -306,17 +319,7 @@
 										"$ref": "#/$defs/Mod"
 									},
 									{
-										"oneOf": [
-											{
-												"$ref": "#/$defs/HasLogo"
-											},
-											{
-												"$ref": "#/$defs/HasLogoBorked"
-											},
-											{
-												"$ref": "#/$defs/NoHasLogo"
-											}
-										]
+										"$ref": "#/$defs/possibly-has-logo"
 									}
 								]
 							}
