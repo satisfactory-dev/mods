@@ -15,9 +15,12 @@ import type {
 } from './getMod--reduced.ts';
 import {
 	schema as _schema,
-	cached as single_record,
 	sub_query,
 } from './getMod--reduced.ts';
+
+import {
+	cached as single_record,
+} from './getMod--reduced.cached.ts';
 
 import type {
 	SchemaObject,
