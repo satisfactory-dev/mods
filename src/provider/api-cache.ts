@@ -1,5 +1,10 @@
 import type {
+	ValidateFunction,
+} from 'ajv';
+
+import type {
 	result,
+	schema_type,
 } from '../api/getMod--reduced.ts';
 import {
 	get_validator,
@@ -23,7 +28,15 @@ export default class Fetch implements Provider {
 				`${this.#api_cache_root}/getMod--reduced/${id}.json`,
 			).then((e) => e.json()),
 		])
-			.then(([validator, maybe]) => {
+			.then(([
+				validator,
+				raw,
+			]: [
+				ValidateFunction<schema_type>,
+				unknown,
+			]) => {
+				const maybe = {data: {getMod: raw}};
+
 				if (!validator(maybe)) {
 					console.error(validator.errors);
 
