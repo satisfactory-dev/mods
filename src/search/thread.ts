@@ -8,11 +8,6 @@ import {
 	Index,
 } from '@satisfactory-dev/lunr';
 
-import type {
-	SchemaObject,
-} from '../helper/ajv.ts';
-import Ajv from '../helper/ajv.ts';
-
 export type Commands = {
 	init: {
 		cmd: 'init',
@@ -42,49 +37,39 @@ export type CommandError = {
 	message: string,
 };
 
-const args: [SchemaObject, ...SchemaObject[]] = [
-	[
-		'init',
-		[
-			{type: 'string', minLength: 1},
-		],
-	],
-	[
-		'search',
-		[
-			{type: 'string', minLength: 1},
-		],
-	],
-].map(([
-	cmd,
-	args,
-]): SchemaObject => ({
-	type: 'object',
-	required: ['cmd', 'args'],
-	additionalProperties: false,
-	properties: {
-		cmd: {
-			type: 'string',
-			const: cmd,
-		},
-		args: {
-			type: 'array',
-			minItems: args.length,
-			maxItems: args.length,
-			prefixItems: args,
-		},
-	},
-}));
-
-const validator = Ajv.compile<Commands[keyof Commands]>({
-	oneOf: args,
-});
-
 let index: Index|undefined = undefined;
+
+function validator(
+	maybe: unknown,
+): maybe is Commands[keyof Commands] {
+	if (!(
+		'object' === typeof maybe
+		&& null !== maybe
+	)) {
+		return false;
+	}
+
+	const keys = Object.keys(maybe);
+
+	return (
+		2 === keys.length
+		&& 'cmd' in maybe
+		&& 'args' in maybe
+		&& 'string' === typeof maybe.cmd
+		&& Array.isArray(maybe.args)
+		&& (
+			'init' === maybe.cmd
+			|| 'search' === maybe.cmd
+		)
+		&& 1 === maybe.args.length
+		&& 'string' === typeof maybe.args[0]
+		&& '' !== maybe.args[0]
+	);
+}
 
 self.addEventListener('message', (e) => {
 	if (!validator(e.data)) {
-		console.error('failure inside worker', validator.errors);
+		console.error('failure inside worker');
 
 		postMessage(
 			{error: 'unsupported command'},
