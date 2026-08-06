@@ -11,7 +11,7 @@ import type {
 	TagIndex,
 } from '../search.ts';
 import {
-	tags_index_validator,
+	get_tags_index_validator,
 } from '../search.ts';
 
 export async function lunr(): Promise<[string, ...string[]]> {
@@ -33,6 +33,8 @@ export async function lunr(): Promise<[string, ...string[]]> {
 
 export async function tags(): Promise<TagIndex[]> {
 	const indices: Promise<TagIndex>[] = [];
+
+	const tags_index_validator = await get_tags_index_validator();
 
 	for await (const path of glob(`${
 		import.meta.dirname
