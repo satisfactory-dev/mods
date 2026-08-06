@@ -47,43 +47,43 @@ export type CommandError = {
 };
 
 export function compile_cmd_schema() {
-const args: [SchemaObject, ...SchemaObject[]] = [
-	[
-		'init',
+	const args: [SchemaObject, ...SchemaObject[]] = [
 		[
-			{type: 'string', minLength: 1},
+			'init',
+			[
+				{type: 'string', minLength: 1},
+			],
 		],
-	],
-	[
-		'search',
 		[
-			{type: 'string', minLength: 1},
+			'search',
+			[
+				{type: 'string', minLength: 1},
+			],
 		],
-	],
-].map(([
-	cmd,
-	args,
-]): SchemaObject => ({
-	type: 'object',
-	required: ['cmd', 'args'],
-	additionalProperties: false,
-	properties: {
-		cmd: {
-			type: 'string',
-			const: cmd,
+	].map(([
+		cmd,
+		args,
+	]): SchemaObject => ({
+		type: 'object',
+		required: ['cmd', 'args'],
+		additionalProperties: false,
+		properties: {
+			cmd: {
+				type: 'string',
+				const: cmd,
+			},
+			args: {
+				type: 'array',
+				minItems: args.length,
+				maxItems: args.length,
+				prefixItems: args,
+			},
 		},
-		args: {
-			type: 'array',
-			minItems: args.length,
-			maxItems: args.length,
-			prefixItems: args,
-		},
-	},
-}));
+	}));
 
 	return {
 		$id: 'search-thread-cmd',
-	oneOf: args,
+		oneOf: args,
 	};
 }
 
@@ -101,38 +101,38 @@ let index: Index|undefined = undefined;
 
 if ('self' in globalThis) {
 	const self = globalThis.self;
-self.addEventListener('message', (e) => {
-	get_cmd_validator().then((validator) => {
-	if (!validator(e.data)) {
-		console.error('failure inside worker', validator.errors);
+	self.addEventListener('message', (e) => {
+		get_cmd_validator().then((validator) => {
+			if (!validator(e.data)) {
+				console.error('failure inside worker', validator.errors);
 
-		postMessage(
-			{error: 'unsupported command'},
-		);
+				postMessage(
+					{error: 'unsupported command'},
+				);
 
-		return;
-	}
+				return;
+			}
 
-	const {cmd, args} = e.data;
+			const {cmd, args} = e.data;
 
-	if ('init' === cmd) {
-		index = Index.load(JSON.parse(args[0]) as SerializedIndex);
-		postMessage(
-			{success: 'init'},
-		);
-	} else if ('search' === cmd) {
-		if (undefined === index) {
-			postMessage(
-				{error: 'init', message: 'Index not initialised'},
-			);
-		} else {
-			const result = index.search(args[0]);
+			if ('init' === cmd) {
+				index = Index.load(JSON.parse(args[0]) as SerializedIndex);
+				postMessage(
+					{success: 'init'},
+				);
+			} else if ('search' === cmd) {
+				if (undefined === index) {
+					postMessage(
+						{error: 'init', message: 'Index not initialised'},
+					);
+				} else {
+					const result = index.search(args[0]);
 
-			postMessage(
-				{success: 'search', result: [args[0], result]},
-			);
-		}
-	}
+					postMessage(
+						{success: 'search', result: [args[0], result]},
+					);
+				}
+			}
+		});
 	});
-});
 }
