@@ -19,12 +19,9 @@ export default class Fetch implements Provider {
 	async getMod(id: result['id']): Promise<result> {
 		return Promise.all([
 			get_validator(),
-			fetch(`${
-			this.#api_cache_root
-		}/getMod--reduced/${
-			id
-		}.json`)
-				.then((e) => e.json()),
+			fetch(
+				`${this.#api_cache_root}/getMod--reduced/${id}.json`,
+			).then((e) => e.json()),
 		])
 			.then(([validator, maybe]) => {
 				if (!validator(maybe)) {

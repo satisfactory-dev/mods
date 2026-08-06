@@ -66,57 +66,57 @@ const imported_Mod_props = Object.entries(_schema.$defs.Mod.properties)
 
 export function compile_schema() {
 	return {
-	..._schema,
+		..._schema,
 		$id: 'getMod--reduced',
-	$defs: {
-		..._schema.$defs,
-		'possibly-has-logo': {
-			oneOf: [
-				{
-					$ref: 'HasLogo--NoThumbHash',
-				},
-				{
-					$ref: 'NoHasLogo--NoThumbHash',
-				},
-			],
-		},
-		Mod: {
-			type: 'object',
-			required: [
-				...imported_Mod_props.map(([prop]) => prop),
-				'logo',
-			],
-			properties: {
-				...Object.fromEntries(
-					imported_Mod_props,
-				),
-				logo: {
-					oneOf: [
-						{
-							...LogoSchema.properties.logo,
-						},
-						{
-							type: 'string',
-							const: '',
-						},
-					],
+		$defs: {
+			..._schema.$defs,
+			'possibly-has-logo': {
+				oneOf: [
+					{
+						$ref: 'HasLogo--NoThumbHash',
+					},
+					{
+						$ref: 'NoHasLogo--NoThumbHash',
+					},
+				],
+			},
+			Mod: {
+				type: 'object',
+				required: [
+					...imported_Mod_props.map(([prop]) => prop),
+					'logo',
+				],
+				properties: {
+					...Object.fromEntries(
+						imported_Mod_props,
+					),
+					logo: {
+						oneOf: [
+							{
+								...LogoSchema.properties.logo,
+							},
+							{
+								type: 'string',
+								const: '',
+							},
+						],
+					},
 				},
 			},
 		},
-	},
-	properties: {
-		..._schema.properties,
-		data: {
-			..._schema.properties.data,
-			required: ['getMod'],
-			properties: {
-				getMod: {
-					$ref: '#/$defs/Mod',
+		properties: {
+			..._schema.properties,
+			data: {
+				..._schema.properties.data,
+				required: ['getMod'],
+				properties: {
+					getMod: {
+						$ref: '#/$defs/Mod',
+					},
 				},
 			},
 		},
-	},
-};
+	};
 }
 
 export type schema_type = {
