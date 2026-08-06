@@ -10,6 +10,11 @@
   "funding": "https://github.com/satisfactory-dev/mods?sponsor=1",
   "exports": "./index.js",
   "types": "./index.d.ts",
+  "overrides": {
+    "@lit-labs/ssr": {
+      "@types/node": "^26.1.2"
+    }
+  },
   "devDependencies": {
     "@lit-labs/ssr": "^4.1.0",
     "@satisfactory-dev/ajv-utilities": "^0.32.0",
