@@ -2,9 +2,16 @@ import {
 	writeFile,
 } from 'node:fs/promises';
 
+import type {
+	TypeScriptifyConfig,
+} from '@satisfactory-dev/ajv-utilities';
 import {
 	typescriptify,
 } from '@satisfactory-dev/ajv-utilities';
+
+import type {
+	AnyValidateFunction,
+} from 'ajv/dist/core.js';
 
 import standalone from 'ajv/dist/standalone/index.js';
 
@@ -23,17 +30,6 @@ import {
 	HasLogo__NoThumbHash,
 	NoHasLogo,
 } from './src/helper/ajv.ts';
-
-const ajv = fresh({
-	code: {
-		esm: true,
-		source: true,
-		optimize: 2,
-	},
-});
-
-ajv.addSchema(compile_Mods_schema());
-ajv.addSchema(compile_Mod_schema());
 
 function wrap_stylistic(code: string) {
 	return `${[
@@ -57,14 +53,22 @@ function wrap(code: string) {
 	return wrap_eslint(wrap_stylistic(code));
 }
 
-await writeFile(
-	`${import.meta.dirname}/.cache/json.validator.ts`,
-	wrap(typescriptify(
-		standalone(ajv, {
+const config: [
+	`${string}/.cache/${string}.validator.ts`,
+	(ajv: ReturnType<typeof fresh>) => void,
+	Exclude<Parameters<typeof standalone>[1], AnyValidateFunction>,
+	Partial<TypeScriptifyConfig>,
+][] = [
+	[
+		`${import.meta.dirname}/.cache/json.validator.ts`,
+		(ajv) => {
+			ajv.addSchema(compile_Mods_schema());
+			ajv.addSchema(compile_Mod_schema());
+		},
+		{
 			validator_getMods_reduced: 'getMods--reduced',
 			validator_getMod_reduced: 'getMod--reduced',
-		}),
-		ts,
+		},
 		{
 			remove_dataCtxKeys: [
 				'parentData',
@@ -144,5 +148,31 @@ await writeFile(
 				},
 			],
 		},
-	)),
-);
+	],
+];
+
+for (const [
+	file_path,
+	add_schema,
+	standalone_config,
+	typescriptify_config,
+] of config) {
+	const ajv = fresh({
+		code: {
+			esm: true,
+			source: true,
+			optimize: 2,
+		},
+	});
+
+	add_schema(ajv);
+
+	await writeFile(
+		file_path,
+		wrap(typescriptify(
+			standalone(ajv, standalone_config),
+			ts,
+			typescriptify_config,
+		)),
+	);
+}
