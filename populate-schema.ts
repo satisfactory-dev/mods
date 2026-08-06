@@ -196,6 +196,8 @@ for (const [
 		},
 	});
 
+	ajv.opts.verbose = false;
+
 	add_schema(ajv);
 
 	await writeFile(
