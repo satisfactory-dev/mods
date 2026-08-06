@@ -31,6 +31,10 @@ import {
 	NoHasLogo,
 } from './src/helper/ajv.ts';
 
+import {
+	compile_cmd_schema,
+} from './src/search/thread.ts';
+
 import tags_index_schema from './schema/tags-index.schema.json' with {
 	type: 'json',
 };
@@ -157,15 +161,21 @@ const config: [
 		`${import.meta.dirname}/.cache/search.validator.ts`,
 		(ajv) => {
 			ajv.addSchema(tags_index_schema);
+			ajv.addSchema(compile_cmd_schema());
 		},
 		{
 			validator_tag_index: 'tags-index',
+			validator_thread_cmd: 'search-thread-cmd',
 		},
 		{
 			specify_types: {
 				'tags-index': [
 					'TagIndex',
 					'../src/search.ts',
+				],
+				'search-thread-cmd': [
+					'CommandChoice',
+					'../src/search/thread.ts',
 				],
 			},
 		},

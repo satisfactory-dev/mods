@@ -8,6 +8,11 @@ import {
 	Index,
 } from '@satisfactory-dev/lunr';
 
+import type {
+	SchemaObject,
+	ValidateFunction,
+} from '../helper/ajv.ts';
+
 export type Commands = {
 	init: {
 		cmd: 'init',
@@ -18,6 +23,10 @@ export type Commands = {
 		args: [string],
 	},
 };
+
+export type CommandChoice<
+	K extends keyof Commands = keyof Commands,
+> = Commands[K];
 
 export type Results = {
 	init: {
@@ -37,39 +46,65 @@ export type CommandError = {
 	message: string,
 };
 
-let index: Index|undefined = undefined;
+export function compile_cmd_schema() {
+const args: [SchemaObject, ...SchemaObject[]] = [
+	[
+		'init',
+		[
+			{type: 'string', minLength: 1},
+		],
+	],
+	[
+		'search',
+		[
+			{type: 'string', minLength: 1},
+		],
+	],
+].map(([
+	cmd,
+	args,
+]): SchemaObject => ({
+	type: 'object',
+	required: ['cmd', 'args'],
+	additionalProperties: false,
+	properties: {
+		cmd: {
+			type: 'string',
+			const: cmd,
+		},
+		args: {
+			type: 'array',
+			minItems: args.length,
+			maxItems: args.length,
+			prefixItems: args,
+		},
+	},
+}));
 
-function validator(
-	maybe: unknown,
-): maybe is Commands[keyof Commands] {
-	if (!(
-		'object' === typeof maybe
-		&& null !== maybe
-	)) {
-		return false;
-	}
-
-	const keys = Object.keys(maybe);
-
-	return (
-		2 === keys.length
-		&& 'cmd' in maybe
-		&& 'args' in maybe
-		&& 'string' === typeof maybe.cmd
-		&& Array.isArray(maybe.args)
-		&& (
-			'init' === maybe.cmd
-			|| 'search' === maybe.cmd
-		)
-		&& 1 === maybe.args.length
-		&& 'string' === typeof maybe.args[0]
-		&& '' !== maybe.args[0]
-	);
+	return {
+		$id: 'search-thread-cmd',
+	oneOf: args,
+	};
 }
 
+function get_cmd_validator() {
+	return import(
+		'../../.cache/search.validator.ts',
+	).then(({
+		validator_thread_cmd,
+	}) => validator_thread_cmd as ValidateFunction<
+		CommandChoice
+	>);
+}
+
+let index: Index|undefined = undefined;
+
+if ('self' in globalThis) {
+	const self = globalThis.self;
 self.addEventListener('message', (e) => {
+	get_cmd_validator().then((validator) => {
 	if (!validator(e.data)) {
-		console.error('failure inside worker');
+		console.error('failure inside worker', validator.errors);
 
 		postMessage(
 			{error: 'unsupported command'},
@@ -98,4 +133,6 @@ self.addEventListener('message', (e) => {
 			);
 		}
 	}
+	});
 });
+}
