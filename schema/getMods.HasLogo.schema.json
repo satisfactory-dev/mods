@@ -1,0 +1,18 @@
+{
+	"$id": "HasLogo",
+	"allOf": [
+		{
+			"$ref": "HasLogo--NoThumbHash"
+		},
+		{
+			"type": "object",
+			"required": ["logo_thumbhash"],
+			"properties": {
+				"logo_thumbhash": {
+					"type": "string",
+					"pattern": "^[A-Za-z0-9+/=]+$"
+				}
+			}
+		}
+	]
+}

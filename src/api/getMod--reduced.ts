@@ -17,8 +17,15 @@ import _schema from '../../schema/getMods.schema.json' with {
 	type: 'json',
 };
 
+// oxlint-disable-next-line @stylistic/max-len
+import LogoSchema from '../../schema/getMods.HasLogo.NoThumbHash.schema.json' with {
+	type: 'json',
+};
+
 import type {
 	result as _result,
+	HasLogo,
+	NoHasLogo,
 } from './getMod.ts';
 
 import {
@@ -29,7 +36,6 @@ const import_fields = [
 	'id',
 	'name',
 	'short_description',
-	'logo',
 	'views',
 	'downloads',
 	'mod_reference',
@@ -40,10 +46,24 @@ const import_fields = [
 	'network_use_disclosure',
 ] as const;
 
-export type result<
+export type Logo<
 	Id extends _result['id'] = _result['id'],
 > = (
-	& Pick<_result<Id>, (typeof import_fields)[number]>
+	| HasLogo<Id>
+	| NoHasLogo
+);
+
+export type Logoless<
+	Id extends _result['id'] = _result['id'],
+	DateTimeType extends string | Date = string,
+> = Pick<_result<Id, DateTimeType>, (typeof import_fields)[number]>;
+
+export type result<
+	Id extends _result['id'] = _result['id'],
+	DateTimeType extends string | Date = string,
+> = (
+	& Logo<Id>
+	& Pick<_result<Id, DateTimeType>, (typeof import_fields)[number]>
 );
 
 const imported_Mod_props = Object.entries(_schema.$defs.Mod.properties)
@@ -62,27 +82,34 @@ export const schema = {
 		'possibly-has-logo': {
 			oneOf: [
 				{
-					$ref: '#/$defs/HasLogo',
+					$ref: 'HasLogo--NoThumbHash',
 				},
 				{
-					$ref: '#/$defs/NoHasLogo',
+					$ref: 'NoHasLogo--NoThumbHash',
 				},
 			],
 		},
-		HasLogo: {
-			..._schema.$defs.HasLogo,
-			required: ['logo'],
-		},
-		NoHasLogo: {
-			..._schema.$defs.NoHasLogo,
-			required: ['logo'],
-		},
 		Mod: {
 			type: 'object',
-			required: imported_Mod_props.map(([prop]) => prop),
-			properties: Object.fromEntries(
+			required: [
+				...imported_Mod_props.map(([prop]) => prop),
+				'logo',
+			],
+			properties: {
+				...Object.fromEntries(
 				imported_Mod_props,
-			),
+				),
+				logo: {
+					oneOf: [
+						{
+							...LogoSchema.properties.logo,
+						},
+						{
+							$ref: 'NoHasLogo',
+						},
+					],
+				},
+			},
 		},
 	},
 	properties: {
@@ -92,14 +119,7 @@ export const schema = {
 			required: ['getMod'],
 			properties: {
 				getMod: {
-					allOf: [
-						{
 							$ref: '#/$defs/Mod',
-						},
-						{
-							$ref: '#/$defs/possibly-has-logo',
-						},
-					],
 				},
 			},
 		},

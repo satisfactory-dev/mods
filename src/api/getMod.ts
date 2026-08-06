@@ -50,26 +50,26 @@ type IdObject = {
 	id: Exclude<string, ''>,
 };
 
-type HasLogo<
+export type HasLogo<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = {
 	logo: image_url<'mods', 'logo', Id>,
 	logo_thumbhash: Exclude<string, ''>,
 };
 
-type HasLogoBorked<
+export type HasLogoBorked<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = {
 	logo: HasLogo<Id>['logo'],
 	logo_thumbhash: '',
 };
 
-type NoHasLogo = {
+export type NoHasLogo = {
 	logo: '',
 	logo_thumbhash: '',
 };
 
-type CompatibilityInfo = {
+export type CompatibilityInfo = {
 	EA: Compatibility,
 	EXP: Compatibility,
 	Controller: ControllerCompatibility,
@@ -84,16 +84,18 @@ type AiUseDisclosureInfo = {
 	),
 };
 
-export type result<
+export type Logo<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
-	DateTimeType extends string | Date = string,
 > = (
-	& (
 		| HasLogo<Id>
 		| HasLogoBorked<Id>
 		| NoHasLogo
-	)
-	& {
+);
+
+export type Logoless<
+	Id extends Exclude<string, ''> = Exclude<string, ''>,
+	DateTimeType extends string | Date = string,
+> = {
 		id: Id,
 		name: Exclude<string, ''>,
 		short_description: string,
@@ -145,7 +147,14 @@ export type result<
 				| IdObject
 			),
 		},
-	}
+};
+
+export type result<
+	Id extends Exclude<string, ''> = Exclude<string, ''>,
+	DateTimeType extends string | Date = string,
+> = (
+	& Logo<Id>
+	& Logoless<Id, DateTimeType>
 );
 
 export const validator = Ajv.compile<{

@@ -3,13 +3,13 @@
 		"possibly-has-logo": {
 			"oneOf": [
 				{
-					"$ref": "#/$defs/HasLogo"
+					"$ref": "HasLogo"
 				},
 				{
-					"$ref": "#/$defs/HasLogoBorked"
+					"$ref": "HasLogoBorked"
 				},
 				{
-					"$ref": "#/$defs/NoHasLogo"
+					"$ref": "NoHasLogo"
 				}
 			]
 		},
@@ -249,48 +249,6 @@
 							"$ref": "#/$defs/LatestVersion"
 						}
 					}
-				}
-			}
-		},
-		"HasLogo": {
-			"type": "object",
-			"required": ["logo", "logo_thumbhash"],
-			"properties": {
-				"logo": {
-					"type": "string",
-					"pattern": "^https:\\/\\/storage\\.ficsit\\.app\\/file\\/smr-prod(-s3)?\\/images\\/mods\\/[A-Za-z0-9]+\\/logo\\.webp$"
-				},
-				"logo_thumbhash": {
-					"type": "string",
-					"pattern": "^[A-Za-z0-9+/=]+$"
-				}
-			}
-		},
-		"HasLogoBorked": {
-			"type": "object",
-			"required": ["logo", "logo_thumbhash"],
-			"properties": {
-				"logo": {
-					"type": "string",
-					"pattern": "^https:\\/\\/storage\\.ficsit\\.app\\/file\\/smr-prod(-s3)?\\/images\\/mods\\/[A-Za-z0-9]+\\/logo\\.webp$"
-				},
-				"logo_thumbhash": {
-					"type": "string",
-					"const": ""
-				}
-			}
-		},
-		"NoHasLogo": {
-			"type": "object",
-			"required": ["logo", "logo_thumbhash"],
-			"properties": {
-				"logo": {
-					"type": "string",
-					"const": ""
-				},
-				"logo_thumbhash": {
-					"type": "string",
-					"const": ""
 				}
 			}
 		}

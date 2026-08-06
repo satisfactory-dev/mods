@@ -44,6 +44,13 @@ build--cache:
 build--index:
 	@node ./populate-index.ts
 
+build--schema:
+	@git clean -fxd ./.cache/*.validator.ts
+	@node ./populate-schema.ts
+	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
+	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
+	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
+
 build--web:
 	@git clean -fxd ./dist/*.js ./dist/vendor/
 	@mkdir -p ./dist/api/

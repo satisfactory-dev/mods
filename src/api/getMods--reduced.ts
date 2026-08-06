@@ -19,15 +19,20 @@ import {
 	sub_query,
 } from './getMod--reduced.ts';
 
-import Ajv from '../helper/ajv.ts';
+import type {
+	SchemaObject,
+	ValidateFunction,
+} from '../helper/ajv.ts';
 
 import {
 	cached as bulk_record_cached,
 	live as bulk_record_live,
 } from './helper/bulk-record.ts';
 
-const schema = {
+export function compile_schema(): SchemaObject {
+	return {
 	..._schema,
+		$id: 'getMods--reduced',
 	properties: {
 		..._schema.properties,
 		data: {
@@ -49,20 +54,29 @@ const schema = {
 		},
 	},
 };
+}
 
-export const validator = Ajv.compile<{
+export type schema_type = {
 	data: {
 		getMods: {
 			mods: result[],
 		},
 	},
-}>(schema);
+};
+
+export function get_validator(): Promise<ValidateFunction<schema_type>> {
+	return import(
+		'../../.cache/getMods--reduced.validator.ts',
+	).then((e) => e.default as ValidateFunction<schema_type>);
+}
 
 export async function* live<
 	Id extends result['id'],
 >(
 	ids: Iterable<Id>|AsyncIterable<Id>,
 ): AsyncGenerator<result> {
+	const validator = await get_validator();
+
 	yield* bulk_record_live<result>(
 		'getMods',
 		'mods',
@@ -77,6 +91,8 @@ export async function* cached<
 >(
 	ids: Iterable<Id>|AsyncIterable<Id>,
 ) {
+	const validator = await get_validator();
+
 	yield* bulk_record_cached<result>(
 		'getMods',
 		'mods',

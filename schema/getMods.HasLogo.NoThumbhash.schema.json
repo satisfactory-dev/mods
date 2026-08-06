@@ -1,0 +1,11 @@
+{
+	"$id": "HasLogo--NoThumbHash",
+	"type": "object",
+	"required": ["logo"],
+	"properties": {
+		"logo": {
+			"type": "string",
+			"pattern": "^https:\\/\\/storage\\.ficsit\\.app\\/file\\/smr-prod(-s3)?\\/images\\/mods\\/[A-Za-z0-9]+\\/logo\\.webp$"
+		}
+	}
+}

@@ -1,0 +1,18 @@
+{
+	"$id": "HasLogoBorked",
+	"allOf": [
+		{
+			"$ref": "HasLogo--NoThumbHash"
+		},
+		{
+			"type": "object",
+			"required": ["logo_thumbhash"],
+			"properties": {
+				"logo_thumbhash": {
+					"type": "string",
+					"const": ""
+				}
+			}
+		}
+	]
+}
