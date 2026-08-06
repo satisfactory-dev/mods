@@ -11,15 +11,49 @@ import {
 
 import type {
 	SchemaObject,
+	ValidateFunction,
 } from './helper/ajv.ts';
-import Ajv from './helper/ajv.ts';
 
 import type {
 	CommandError,
 	Commands,
 	Results,
+	ResultsChoice,
 } from './search/thread.ts';
 
+type Success<
+	Required extends [string, ...string[]],
+	Properties extends {
+		[k in Required[number]]: SchemaObject;
+	},
+> = {
+	type: 'object',
+	required: Required,
+	additionalProperties: false,
+	properties: Properties,
+};
+
+type SuccessBasic<
+	Cmd extends keyof Commands,
+> = Success<['success'], {
+	success: {
+		type: 'string',
+		const: Cmd,
+	},
+}>;
+
+type SuccessWithResult<
+	Cmd extends keyof Commands,
+	Result extends SchemaObject,
+> = Success<['success', 'result'], {
+	success: {
+		type: 'string',
+		const: Cmd,
+	},
+	result: Result,
+}>;
+
+export function compile_results_schema() {
 const arg_config: [
 	(
 		| [keyof Commands]
@@ -69,38 +103,6 @@ const arg_config: [
 	],
 ];
 
-type Success<
-	Required extends [string, ...string[]],
-	Properties extends {
-		[k in Required[number]]: SchemaObject;
-	},
-> = {
-	type: 'object',
-	required: Required,
-	additionalProperties: false,
-	properties: Properties,
-};
-
-type SuccessBasic<
-	Cmd extends keyof Commands,
-> = Success<['success'], {
-	success: {
-		type: 'string',
-		const: Cmd,
-	},
-}>;
-
-type SuccessWithResult<
-	Cmd extends keyof Commands,
-	Result extends SchemaObject,
-> = Success<['success', 'result'], {
-	success: {
-		type: 'string',
-		const: Cmd,
-	},
-	result: Result,
-}>;
-
 const args = arg_config.map(<
 	Cmd extends keyof Commands,
 	Result extends SchemaObject,
@@ -145,10 +147,8 @@ const args = arg_config.map(<
 	return schema;
 });
 
-const validator = Ajv.compile<(
-	| Results[keyof Results]
-	| CommandError
-)>({
+	return {
+		$id: 'search-results',
 	oneOf: [
 		...args,
 		{
@@ -167,7 +167,16 @@ const validator = Ajv.compile<(
 			},
 		},
 	],
-});
+	};
+}
+
+async function get_results_validator() {
+	return import(
+		'../.cache/search.validator.ts',
+	).then(({
+		validator_search_results,
+	}) => validator_search_results as ValidateFunction<ResultsChoice>);
+}
 
 class SearchWorker {
 	#init_with: string;
@@ -193,11 +202,17 @@ class SearchWorker {
 	}
 
 	get ready() {
+		return this.#get_ready();
+	}
+
+	async #get_ready() {
 		if (this.#ready) {
 			return Promise.resolve();
 		} else if (!this.#ready_promise) {
 			let init: (((e: MessageEvent) => void) | undefined);
 			let init_err: (((e: ErrorEvent) => void) | undefined);
+
+			const validator = await get_results_validator();
 
 			const init_err_generator = (
 				nope: (e: Error) => void,
@@ -237,7 +252,7 @@ class SearchWorker {
 
 					const data: unknown = e.data;
 
-					if (!SearchWorker.is_expected(data)) {
+					if (!SearchWorker.is_expected(data, validator)) {
 						console.error(validator.errors);
 						error = Error('Unsupported message!');
 
@@ -311,7 +326,9 @@ class SearchWorker {
 		return this.#ready_promise;
 	}
 
-	search(query: string): Promise<IndexResult[]> {
+	async search(query: string): Promise<IndexResult[]> {
+		const validator = await get_results_validator();
+
 		return this.ready.then(() => new Promise((yup, nope) => {
 			let handle: ((e: MessageEvent) => void) | undefined = undefined;
 			let fail: ((e: ErrorEvent) => void) | undefined = undefined;
@@ -333,10 +350,8 @@ class SearchWorker {
 			};
 
 			handle = ({data}: MessageEvent) => {
-				if (!SearchWorker.is_expected(data)) {
+				if (!SearchWorker.is_expected(data, validator)) {
 					cleanup();
-
-					console.error(validator.errors);
 
 					nope(new Error('Unsupported message'));
 
@@ -407,9 +422,7 @@ class SearchWorker {
 
 	static is_expected(
 		value: unknown,
-	): value is (
-		| Results[keyof Results]
-		| CommandError
+		validator: ValidateFunction<ResultsChoice>,
 	) {
 		return validator(value);
 	}

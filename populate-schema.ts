@@ -35,6 +35,10 @@ import {
 	compile_cmd_schema,
 } from './src/search/thread.ts';
 
+import {
+	compile_results_schema,
+} from './src/search.ts';
+
 import tags_index_schema from './schema/tags-index.schema.json' with {
 	type: 'json',
 };
@@ -162,10 +166,12 @@ const config: [
 		(ajv) => {
 			ajv.addSchema(tags_index_schema);
 			ajv.addSchema(compile_cmd_schema());
+			ajv.addSchema(compile_results_schema());
 		},
 		{
 			validator_tag_index: 'tags-index',
 			validator_thread_cmd: 'search-thread-cmd',
+			validator_search_results: 'search-results',
 		},
 		{
 			specify_types: {
@@ -176,6 +182,10 @@ const config: [
 				'search-thread-cmd': [
 					'CommandChoice',
 					'../src/search/thread.ts',
+				],
+				'search-results': [
+					'ResultsChoice',
+					'../src/search.ts',
 				],
 			},
 		},

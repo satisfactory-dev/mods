@@ -41,6 +41,10 @@ export type Results = {
 	},
 };
 
+export type ResultsChoice<
+	K extends keyof Results = keyof Results,
+> = Results[K];
+
 export type CommandError = {
 	error: keyof Commands,
 	message: string,
