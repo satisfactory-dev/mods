@@ -36,13 +36,13 @@ import NoHasLogo from '../../schema/getMods.NoHasLogo.schema.json' with {
 };
 
 export function fresh(options?: Partial<Options>) {
-const instance = new Ajv({
+	const instance = new Ajv({
 		...options,
-	strict: true,
-	verbose: true,
-});
+		strict: true,
+		verbose: true,
+	});
 
-instance.addSchema($defs);
+	instance.addSchema($defs);
 	instance.addSchema(HasLogo__NoThumbHash);
 	instance.addSchema(NoHasLogo__NoThumbHash);
 	instance.addSchema(HasLogo);

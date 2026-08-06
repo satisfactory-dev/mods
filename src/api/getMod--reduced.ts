@@ -97,7 +97,7 @@ export const schema = {
 			],
 			properties: {
 				...Object.fromEntries(
-				imported_Mod_props,
+					imported_Mod_props,
 				),
 				logo: {
 					oneOf: [
@@ -119,7 +119,7 @@ export const schema = {
 			required: ['getMod'],
 			properties: {
 				getMod: {
-							$ref: '#/$defs/Mod',
+					$ref: '#/$defs/Mod',
 				},
 			},
 		},

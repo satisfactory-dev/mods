@@ -87,66 +87,66 @@ type AiUseDisclosureInfo = {
 export type Logo<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 > = (
-		| HasLogo<Id>
-		| HasLogoBorked<Id>
-		| NoHasLogo
+	| HasLogo<Id>
+	| HasLogoBorked<Id>
+	| NoHasLogo
 );
 
 export type Logoless<
 	Id extends Exclude<string, ''> = Exclude<string, ''>,
 	DateTimeType extends string | Date = string,
 > = {
-		id: Id,
-		name: Exclude<string, ''>,
-		short_description: string,
-		full_description: string,
-		source_url: (
-			| ''
-			| `https://${string}`
-		),
-		creator_id: Exclude<string, ''>,
-		approved: boolean,
-		views: number,
-		downloads: number,
-		hotness: number,
-		popularity: number,
-		updated_at: DateTimeType,
-		created_at: DateTimeType,
-		last_version_date: DateTimeType,
-		mod_reference: Exclude<string, ''>,
-		hidden: boolean,
-		tags: {
-			id: Exclude<string, ''>,
-		}[],
-		compatibility: (
-			| CompatibilityInfo
+	id: Id,
+	name: Exclude<string, ''>,
+	short_description: string,
+	full_description: string,
+	source_url: (
+		| ''
+		| `https://${string}`
+	),
+	creator_id: Exclude<string, ''>,
+	approved: boolean,
+	views: number,
+	downloads: number,
+	hotness: number,
+	popularity: number,
+	updated_at: DateTimeType,
+	created_at: DateTimeType,
+	last_version_date: DateTimeType,
+	mod_reference: Exclude<string, ''>,
+	hidden: boolean,
+	tags: {
+		id: Exclude<string, ''>,
+	}[],
+	compatibility: (
+		| CompatibilityInfo
+		| null
+	),
+	network_use_disclosure: (
+		| string
+		| null
+	),
+	ai_use_disclosure: (
+		| AiUseDisclosureInfo
+		| null
+	),
+	toggle_explicit_content: boolean,
+	authors: [Author, ...Author[]],
+	versions: IdObject[],
+	latestVersions: {
+		alpha: (
 			| null
+			| IdObject
 		),
-		network_use_disclosure: (
-			| string
+		beta: (
 			| null
+			| IdObject
 		),
-		ai_use_disclosure: (
-			| AiUseDisclosureInfo
+		release: (
 			| null
+			| IdObject
 		),
-		toggle_explicit_content: boolean,
-		authors: [Author, ...Author[]],
-		versions: IdObject[],
-		latestVersions: {
-			alpha: (
-				| null
-				| IdObject
-			),
-			beta: (
-				| null
-				| IdObject
-			),
-			release: (
-				| null
-				| IdObject
-			),
-		},
+	},
 };
 
 export type result<

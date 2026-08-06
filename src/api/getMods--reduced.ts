@@ -31,29 +31,31 @@ import {
 
 export function compile_schema(): SchemaObject {
 	return {
-	..._schema,
+		..._schema,
 		$id: 'getMods--reduced',
-	properties: {
-		..._schema.properties,
-		data: {
-			..._schema.properties.data,
-			required: ['getMods'],
-			properties: {
-				getMods: {
-					type: 'object',
-					required: ['mods'],
-					unevaluatedProperties: false,
-					properties: {
-						mods: {
-							type: 'array',
-							items: _schema.properties.data.properties.getMod,
+		properties: {
+			..._schema.properties,
+			data: {
+				..._schema.properties.data,
+				required: ['getMods'],
+				properties: {
+					getMods: {
+						type: 'object',
+						required: ['mods'],
+						unevaluatedProperties: false,
+						properties: {
+							mods: {
+								type: 'array',
+								items: (
+									_schema.properties.data.properties.getMod
+								),
+							},
 						},
 					},
 				},
 			},
 		},
-	},
-};
+	};
 }
 
 export type schema_type = {
