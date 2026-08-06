@@ -105,7 +105,8 @@ export const schema = {
 							...LogoSchema.properties.logo,
 						},
 						{
-							$ref: 'NoHasLogo',
+							type: 'string',
+							const: '',
 						},
 					],
 				},
