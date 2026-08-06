@@ -19,8 +19,8 @@ import type {
 	result,
 } from './getMod--reduced.ts';
 import {
+	get_validator,
 	live,
-	validator,
 	verify_id,
 } from './getMod--reduced.ts';
 
@@ -52,6 +52,8 @@ export async function cached<
 	);
 
 	const shim = {data: {getMod}};
+
+	const validator = await get_validator();
 
 	if (!validator(shim)) {
 		console.error(validator.errors);

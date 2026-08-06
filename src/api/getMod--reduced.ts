@@ -1,5 +1,3 @@
-import Ajv from '../helper/ajv.ts';
-
 import run from './helper/run.ts';
 
 import validated from './helper/validated.ts';
@@ -18,6 +16,10 @@ import type {
 	HasLogo,
 	NoHasLogo,
 } from './getMod.ts';
+
+import type {
+	ValidateFunction,
+} from '../helper/ajv.ts';
 
 const import_fields = [
 	'id',
@@ -62,8 +64,10 @@ const imported_Mod_props = Object.entries(_schema.$defs.Mod.properties)
 		maybe,
 	));
 
-export const schema = {
+export function compile_schema() {
+	return {
 	..._schema,
+		$id: 'getMod--reduced',
 	$defs: {
 		..._schema.$defs,
 		'possibly-has-logo': {
@@ -113,12 +117,13 @@ export const schema = {
 		},
 	},
 };
+}
 
-export const validator = Ajv.compile<{
+export type schema_type = {
 	data: {
 		getMod: result,
 	},
-}>(schema);
+};
 
 export function verify_id<
 	Id extends result['id'],
@@ -163,9 +168,19 @@ export const sub_query = `
 		disclosure_type
 	}`;
 
+export function get_validator(): Promise<ValidateFunction<schema_type>> {
+	return import(
+		'../../.cache/json.validator.ts',
+	).then((
+		e,
+	) => e.validator_getMod_reduced as ValidateFunction<schema_type>);
+}
+
 export async function live<
 	Id extends result['id'],
 >(id: Id): Promise<result<Id>> {
+	const validator = await get_validator();
+
 	const result = validated(validator, await run(
 		`getMod(modId: ${
 			JSON.stringify(id)

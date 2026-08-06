@@ -2,7 +2,7 @@ import type {
 	result,
 } from '../api/getMod--reduced.ts';
 import {
-	validator,
+	get_validator,
 } from '../api/getMod--reduced.ts';
 
 import type Provider from './interface.ts';
@@ -17,13 +17,16 @@ export default class Fetch implements Provider {
 	}
 
 	async getMod(id: result['id']): Promise<result> {
-		return fetch(`${
+		return Promise.all([
+			get_validator(),
+			fetch(`${
 			this.#api_cache_root
 		}/getMod--reduced/${
 			id
 		}.json`)
-			.then((e) => e.json())
-			.then((maybe) => {
+				.then((e) => e.json()),
+		])
+			.then(([validator, maybe]) => {
 				if (!validator(maybe)) {
 					console.error(validator.errors);
 

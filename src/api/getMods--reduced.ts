@@ -14,7 +14,7 @@ import type {
 	result,
 } from './getMod--reduced.ts';
 import {
-	schema as _schema,
+	compile_schema as single_compile_schema,
 	sub_query,
 } from './getMod--reduced.ts';
 
@@ -33,6 +33,8 @@ import {
 } from './helper/bulk-record.ts';
 
 export function compile_schema(): SchemaObject {
+	const _schema = single_compile_schema();
+
 	return {
 		..._schema,
 		$id: 'getMods--reduced',
@@ -71,8 +73,10 @@ export type schema_type = {
 
 export function get_validator(): Promise<ValidateFunction<schema_type>> {
 	return import(
-		'../../.cache/getMods--reduced.validator.ts',
-	).then((e) => e.default as ValidateFunction<schema_type>);
+		'../../.cache/json.validator.ts',
+	).then((
+		e,
+	) => e.validator_getMods_reduced as ValidateFunction<schema_type>);
 }
 
 export async function* live<

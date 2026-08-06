@@ -3,7 +3,6 @@ import {
 } from 'node:fs/promises';
 
 import {
-	compile,
 	typescriptify,
 } from '@satisfactory-dev/ajv-utilities';
 
@@ -12,8 +11,12 @@ import standalone from 'ajv/dist/standalone/index.js';
 import ts from '@typescript/typescript6';
 
 import {
-	compile_schema as Mod_schema,
+	compile_schema as compile_Mods_schema,
 } from './src/api/getMods--reduced.ts';
+
+import {
+	compile_schema as compile_Mod_schema,
+} from './src/api/getMod--reduced.ts';
 
 import {
 	fresh,
@@ -28,6 +31,9 @@ const ajv = fresh({
 		optimize: 2,
 	},
 });
+
+ajv.addSchema(compile_Mods_schema());
+ajv.addSchema(compile_Mod_schema());
 
 function wrap_stylistic(code: string) {
 	return `${[
@@ -52,9 +58,12 @@ function wrap(code: string) {
 }
 
 await writeFile(
-	`${import.meta.dirname}/.cache/getMods--reduced.validator.ts`,
+	`${import.meta.dirname}/.cache/json.validator.ts`,
 	wrap(typescriptify(
-		standalone(ajv, compile(ajv, Mod_schema())),
+		standalone(ajv, {
+			validator_getMods_reduced: 'getMods--reduced',
+			validator_getMod_reduced: 'getMod--reduced',
+		}),
 		ts,
 		{
 			remove_dataCtxKeys: [
@@ -68,6 +77,13 @@ await writeFile(
 						as: 'getMods_reduced_schema_type',
 					},
 					'../src/api/getMods--reduced.ts',
+				],
+				'getMod--reduced': [
+					{
+						name: 'schema_type',
+						as: 'getMod_reduced_schema_type',
+					},
+					'../src/api/getMod--reduced.ts',
 				],
 				[HasLogo__NoThumbHash.$id]: [
 					'HasLogoNoThumbHash',
