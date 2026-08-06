@@ -133,6 +133,12 @@ if ('self' in globalThis) {
 					);
 				}
 			}
+		}).catch((err) => {
+			console.error('Failed to get cmd validator!', err);
+
+			postMessage(
+				{error: 'error getting validator'},
+			);
 		});
 	});
 }
