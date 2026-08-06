@@ -200,7 +200,7 @@ export async function cached<
 
 	const cache_file = `${
 		import.meta.dirname
-	}/../.cache/api/getMod--reduced/${id}.json`;
+	}/../../.cache/api/getMod--reduced/${id}.json`;
 
 	if (!existsSync(cache_file)) {
 		const result = await live(id);
