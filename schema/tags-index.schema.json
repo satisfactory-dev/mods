@@ -1,0 +1,18 @@
+{
+	"$id": "tags-index",
+	"type": "object",
+	"required": ["tag_id", "mods"],
+	"additionalProperties": false,
+	"properties": {
+		"tag_id": {
+			"$ref": "defs#/$defs/id"
+		},
+		"mods": {
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"$ref": "defs#/$defs/id"
+			}
+		}
+	}
+}

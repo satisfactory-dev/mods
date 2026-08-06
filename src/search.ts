@@ -420,23 +420,11 @@ export type TagIndex = {
 	mods: [string, ...string[]],
 };
 
-export const tags_index_validator = Ajv.compile<TagIndex>({
-	type: 'object',
-	required: ['tag_id', 'mods'],
-	additionalProperties: false,
-	properties: {
-		tag_id: {
-			$ref: 'defs#/$defs/id',
-		},
-		mods: {
-			type: 'array',
-			minItems: 1,
-			items: {
-				$ref: 'defs#/$defs/id',
-			},
-		},
-	},
-});
+export function get_tags_index_validator() {
+	return import(
+		'../.cache/search.validator.ts',
+	).then(({validator_tag_index}) => validator_tag_index);
+}
 
 export default class Search {
 	#indices: Promise<[SearchWorker, ...SearchWorker[]]>;

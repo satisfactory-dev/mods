@@ -31,6 +31,10 @@ import {
 	NoHasLogo,
 } from './src/helper/ajv.ts';
 
+import tags_index_schema from './schema/tags-index.schema.json' with {
+	type: 'json',
+};
+
 function wrap_stylistic(code: string) {
 	return `${[
 		'max-len',
@@ -147,6 +151,23 @@ const config: [
 					properties: ['EA', 'EXP', 'Controller'],
 				},
 			],
+		},
+	],
+	[
+		`${import.meta.dirname}/.cache/search.validator.ts`,
+		(ajv) => {
+			ajv.addSchema(tags_index_schema);
+		},
+		{
+			validator_tag_index: 'tags-index',
+		},
+		{
+			specify_types: {
+				'tags-index': [
+					'TagIndex',
+					'../src/search.ts',
+				],
+			},
 		},
 	],
 ];

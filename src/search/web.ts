@@ -6,7 +6,7 @@ import type {
 	TagIndex,
 } from '../search.ts';
 import Search, {
-	tags_index_validator,
+	get_tags_index_validator,
 } from '../search.ts';
 
 export type source = `${string}/${(
@@ -55,8 +55,10 @@ export default class Web {
 		return Promise.all(indices);
 	}
 
-	#tags(): Promise<TagIndex[]> {
+	async #tags(): Promise<TagIndex[]> {
 		const indices: Promise<TagIndex>[] = [];
+
+		const tags_index_validator = await get_tags_index_validator();
 
 		for (const source of this.#sources.filter((
 			maybe,
