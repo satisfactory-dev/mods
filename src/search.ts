@@ -444,6 +444,8 @@ export default class Search {
 
 	#tags: Promise<TagIndex[]>;
 
+	#results = new Map<string, Promise<IndexResult[]>>();
+
 	constructor(
 		index_provider: Promise<[string, ...string[]]>,
 		tags_provider: Promise<TagIndex[]>,
@@ -470,7 +472,7 @@ export default class Search {
 					score: 1,
 					matchData: new MatchData(),
 				})))
-				: this.#search_query_only(query)
+				: this.#search_query_cached(query)
 		);
 
 		if (tags_query_include.length) {
@@ -514,6 +516,22 @@ export default class Search {
 		}
 
 		return results_promise;
+	}
+
+	#search_query_cached(query: string) {
+		let existing = this.#results.get(query);
+
+		if (!existing) {
+			if (this.#results.size >= 10) {
+				this.#results.delete([...this.#results.keys()][0]);
+			}
+
+			existing = this.#search_query_only(query);
+
+			this.#results.set(query, existing);
+		}
+
+		return existing;
 	}
 
 	async #search_query_only(query: string) {
