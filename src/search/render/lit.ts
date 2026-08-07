@@ -342,6 +342,7 @@ export class DeferredModFetch extends LitElement {
 			${when(
 				data?.mod_reference,
 				(mod_reference) => html`<a
+					target="_blank"
 					href="https://ficsit.app/mod/${
 						encodeURIComponent(mod_reference)
 					}"
