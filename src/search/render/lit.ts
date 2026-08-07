@@ -6,7 +6,6 @@ import type {
 	TemplateResult,
 } from 'lit';
 import {
-	css,
 	html,
 	LitElement,
 	render,
@@ -23,6 +22,10 @@ import {
 import {
 	when,
 } from 'lit/directives/when.js';
+
+import {
+	classMap,
+} from 'lit/directives/class-map.js';
 
 import {
 	IntersectionController,
@@ -49,8 +52,6 @@ import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
 type DeferredModItem = (
 	& HTMLDivElement
 	& {
-		getAttribute(attr: 'part'): 'mod',
-		getAttribute(attr: string): string | undefined,
 		dataset: (
 			& DOMStringMap
 			& {
@@ -61,26 +62,12 @@ type DeferredModItem = (
 	}
 );
 
+type ModContent = {
+	name: string,
+	data: Mod,
+};
+
 export class DeferredModFetch extends LitElement {
-	static styles = css`
-		:host
-		{
-			display: block ;
-			min-height: 1ch ;
-
-			&:empty
-			{
-				min-height: 0 ;
-			}
-		}
-
-		[part="mod"]
-		{
-			display: block ;
-			min-height: 1ch ;
-		}
-	`;
-
 	static properties = {
 		results: {
 			type: Array,
@@ -112,7 +99,9 @@ export class DeferredModFetch extends LitElement {
 				);
 
 				for (const entry of entries) {
-					if ('mod' === entry.target.getAttribute('part')) {
+					if ('ref' in (
+						entry.target as HTMLElement
+					).dataset) {
 						const id = (
 							entry.target as DeferredModItem
 						).dataset.ref;
@@ -147,6 +136,221 @@ export class DeferredModFetch extends LitElement {
 		this.setAttribute('role', 'list');
 	}
 
+	protected createRenderRoot() {
+		return this;
+	}
+
+	#conditionally<
+		K extends keyof Exclude<ModContent['data'], undefined>,
+	>(
+		icon: string,
+		data: ModContent['data'] | undefined,
+		prop: K,
+		alt?: (value: Exclude<ModContent['data'][K], null>) => TemplateResult,
+	) {
+		return html`${when(
+			icon,
+			() => html`<span aria-hidden="true">${icon}</span>`,
+		)}${when(
+			data,
+			(value) => when(
+				alt && value[prop] ? alt : undefined,
+				(cb) => html`${cb(value[prop] as Exclude<
+					ModContent['data'][K],
+					null
+				>)}`,
+				() => html`${
+					'number' === typeof value[prop]
+						? Intl.NumberFormat().format(value[prop])
+						: value[prop]
+				}`,
+			),
+		)}`;
+	}
+
+	#compatibility_bool<
+		K extends keyof Exclude<ModContent['data']['compatibility'], null>,
+	>(
+		data: ModContent['data'] | undefined,
+		prop: K,
+		expect: Exclude<
+			ModContent['data']['compatibility'],
+			null
+		>[K]['state'],
+	) {
+		if (!data?.compatibility) {
+			return false;
+		}
+
+		return expect === data.compatibility[prop].state;
+	}
+
+	#content({
+		name,
+		data,
+	}: {
+		name: string,
+		data?: ModContent['data'],
+	}) {
+		return html`<header>
+			<h1>${name}</h1>
+			<ul>
+				<li aria-label="Views">${this.#conditionally(
+					'👁️',
+					data,
+					'views',
+				)}</li>
+				<li aria-label="Downloads">${this.#conditionally(
+					'⬇️',
+					data,
+					'downloads',
+				)}</li>
+				<li aria-label="Downloads">${this.#conditionally(
+					'⬇️',
+					data,
+					'downloads',
+				)}</li>
+				<li aria-label="Compatibility" class="compatibility">
+					<ul class=${classMap(
+						Object.fromEntries(
+							([
+								[
+									['EA', 'EXP'],
+									['Works', 'Broken', 'Damaged'],
+								],
+								[
+									['Controller'],
+									[
+										'Untested',
+										'Unsupported',
+										'Partial',
+										'Implicit',
+										'Supported',
+									],
+								],
+							] as const).flatMap(([
+								props,
+								expects,
+							]) => props.flatMap((prop) => expects.map((
+								expect,
+							) => [
+								`${
+									prop.toLowerCase()
+								}-${
+									expect.toLowerCase()
+								}`,
+								this.#compatibility_bool(
+									data,
+									prop,
+									expect,
+								),
+							]))),
+						),
+					)}>
+						<li aria-label="Stable">
+						${this.#conditionally(
+							'',
+							data,
+							'compatibility',
+							({
+								EA: {
+									state,
+								},
+							}) => html`<span
+								aria-label="${state}"
+								class="icon"
+							>${
+								'Works' === state
+									? '👍'
+									: '👎'
+							}</span>`,
+						)}
+						</li>
+						<li aria-label="Experimental">
+						${this.#conditionally(
+							'',
+							data,
+							'compatibility',
+							({
+								EXP: {
+									state,
+								},
+							}) => html`<span aria-label="${state}">${
+								'Works' === state
+									? '👍'
+									: '👎'
+							}</span>`,
+						)}
+						</li>
+						<li aria-label="Controller">
+						${this.#conditionally(
+							'',
+							data,
+							'compatibility',
+							({
+								Controller: {
+									state,
+								},
+							}) => html`<span aria-label="${state}">${
+								'Supported' === state
+									? '👍'
+									: (
+										'Untested' === state
+											? '❓'
+											: '👎'
+									)
+							}</span>`,
+						)}
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</header>
+		${when(
+			data,
+			(value) => html`${when(
+				value.logo,
+				(logo) => html`<img
+					src="${logo}"
+					width="1024"
+					height="1024"
+					loading="lazy"
+				>`,
+				() => html`<span
+					class="as-image"
+					title="No image available"
+				></span>`,
+			)}`,
+			() => html`<span class="as-image" inert></span>`,
+		)}
+		<section>
+		${when(
+			data?.tags,
+			(tag_ids) => html`<ul>${
+				tag_ids
+					.map(({id}) => id)
+					.filter((
+						maybe,
+					): maybe is keyof typeof tags => maybe in tags)
+					.map((id) => html`<li>${tags[id].name}</li>`)}</ul>`,
+		)}${when(
+			data?.short_description,
+			(description) => html`<p>${description}</p>`,
+		)}
+		</section>
+		<footer>
+			${when(
+				data?.mod_reference,
+				(mod_reference) => html`<a
+					href="https://ficsit.app/mod/${
+						encodeURIComponent(mod_reference)
+					}"
+					title="View ${name}"
+				><span aria-hidden="true">ℹ️</span></a>`,
+			)}
+		</footer>`;
+	}
+
 	render() {
 		return html`${
 			repeat(
@@ -158,14 +362,17 @@ export class DeferredModFetch extends LitElement {
 					data-ref="${result.ref}"
 					data-score="${result.score}"
 					role="listitem"
-					part="mod"
 				>${when(
 					this.#controller.value?.has(result.ref) ?? false,
 					() => until(
 						this.#fetch(result.ref),
-						'...loading',
+						this.#content({
+							name: '...loading',
+						}),
 					),
-					() => '👀',
+					() => this.#content({
+						name: '',
+					}),
 				)}</div>`,
 			)
 		}`;
@@ -174,14 +381,17 @@ export class DeferredModFetch extends LitElement {
 	async #fetch(id: Mod['id']): Promise<TemplateResult> {
 		const mod = await this.provider.getMod(id);
 
-		return html`${mod.name}`;
+		return this.#content({
+			name: mod.name,
+			data: mod,
+		});
 	}
 
 	updated(changed_properties: Map<string, unknown>) {
 		super.updated(changed_properties);
 
 		for (const item of (
-			this.shadowRoot?.querySelectorAll('[part="mod"]') || [])
+			this.querySelectorAll('[data-ref]') || [])
 		) {
 			this.#controller.observe(item);
 		}

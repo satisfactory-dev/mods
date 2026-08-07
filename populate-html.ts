@@ -54,8 +54,12 @@ export async function htmldoc(
 		.trim();
 }
 
-const index = html`<html>
+const index = html`<html
+	lang="en"
+>
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link
 	rel="modulepreload"
 	as="script"
@@ -171,6 +175,119 @@ ol
 		}
 	}
 }
+
+satisfactory-dev-mods-deferred
+{
+	display: flex ;
+	flex-wrap: wrap ;
+
+	padding: 1ch ;
+
+	a
+	{
+		text-decoration: none ;
+	}
+
+	> [role="listitem"]
+	{
+		display: grid ;
+		grid-template: 'logo header' 'logo section' 'logo footer' ;
+		width: max(calc(50% - 2ch), 550px) ;
+		margin: 1ch ;
+
+		> header,
+		> section,
+		> footer
+		{
+			padding: .5ch ;
+		}
+
+		> header
+		{
+			grid-area: header ;
+
+			> ul
+			{
+				display: flex ;
+				flex-wrap: wrap ;
+
+				li:not(:first-child)
+				{
+					margin-left: 1ch ;
+				}
+			}
+
+			.compatibility
+			{
+				> ul
+				{
+					display: flex ;
+					> [aria-label="Controller"]::before,
+					.icon
+					{
+						filter:
+							grayscale(1)
+							sepia(1)
+							contrast(.2)
+							saturate(1)
+						;
+					}
+
+					> ::before
+					{
+						display: inline-block ;
+						margin-right: .125em ;
+						padding: .125em ;
+						border: 1px solid ;
+					}
+
+					> [aria-label="Stable"]::before
+					{
+						content: 'EA' ;
+					}
+
+					> [aria-label="Experimental"]::before
+					{
+						content: 'EXP' ;
+					}
+					> [aria-label="Controller"]::before
+					{
+						content: '🎮' ;
+					}
+				}
+			}
+		}
+
+		> section
+		{
+			grid-area: section ;
+		}
+
+		> img,
+		> .as-image
+		{
+			display: block ;
+			width: min(200px, 100%) ;
+			height: auto ;
+			grid-area: logo ;
+			margin: auto .5ch auto 0 ;
+		}
+
+		> .as-image
+		{
+			height: 100% ;
+			aspect-ratio: 1 ;
+		}
+
+		> footer
+		{
+			grid-area: footer ;
+			display: flex ;
+			align-items: flex-end ;
+			justify-content: flex-end ;
+		}
+	}
+}
 </style>
 </head>
 <body>
@@ -201,4 +318,5 @@ document.addEventListener('DOMContentLoaded', () => {
 await writeFile(
 	`${import.meta.dirname}/dist/index.html`,
 	await htmldoc(index),
+	'utf8',
 );
