@@ -308,33 +308,19 @@ export default class Ui {
 		render(this.template, this.#target);
 	}
 
-	init() {
-		this.#render();
-
-		const form = this.#target.querySelector('form');
-
-		if (!form) {
-			throw new Error('Could not find form!');
-		}
-
-		const filters = form.querySelector<HTMLFieldSetElement>('#filters');
-		const search = form.querySelector<(
-			& HTMLInputElement
-			& {type: 'search'}
-		)>('input[type="search"]');
-
-		if (!filters) {
-			throw new Error('Could not find filters!');
-		}
-
-		if (!search) {
-			throw new Error('Could not find search input!');
-		}
-
-		form.addEventListener('input', ({target}) => {
-			if (!Ui.#should_run_search(target, search)) {
+	#debounced_search(
+		form: HTMLFormElement,
+		target: true | HTMLElement,
+		search: string,
+	) {
+		if (
+			true !== target
+			&& !Ui.#should_run_search(target, search)
+		) {
 				return;
 			}
+
+			const search_value = search.trim();
 
 			this.#debounced = undefined;
 
@@ -344,8 +330,6 @@ export default class Ui {
 
 			this.#debounce = setTimeout(() => {
 				this.#debounced = true;
-
-				const search_value = search.value.trim();
 
 				void this.#search.search(
 					search_value,
@@ -374,6 +358,37 @@ export default class Ui {
 
 				this.#render();
 			}, 100);
+	}
+
+	init() {
+		this.#render();
+
+		const form = this.#target.querySelector('form');
+
+		if (!form) {
+			throw new Error('Could not find form!');
+		}
+
+		const filters = form.querySelector<HTMLFieldSetElement>('#filters');
+		const search = form.querySelector<(
+			& HTMLInputElement
+			& {type: 'search'}
+		)>('input[type="search"]');
+
+		if (!filters) {
+			throw new Error('Could not find filters!');
+		}
+
+		if (!search) {
+			throw new Error('Could not find search input!');
+		}
+
+		form.addEventListener('input', ({target}) => {
+			this.#debounced_search(
+				form,
+				target as HTMLElement,
+				search.value,
+			);
 		});
 
 		form.addEventListener('click', (e) => {
@@ -387,6 +402,12 @@ export default class Ui {
 			e.target.setAttribute('aria-expanded', state ? 'false' : 'true');
 			this.#render();
 		});
+
+		this.#debounced_search(
+			form,
+			true,
+			this.#initial_query,
+		);
 	}
 
 	static #is_filter_button(maybe: unknown): maybe is HTMLButtonElement {
@@ -398,14 +419,19 @@ export default class Ui {
 
 	static #should_run_search(
 		maybe: unknown,
-		search: HTMLInputElement & {type: 'search'},
+		search_value: string,
 	): maybe is HTMLInputElement {
 		return (
-			'' !== search.value.trim()
-			&& (maybe instanceof HTMLElement)
+			'' !== search_value.trim()
+			&& (
+				true === maybe
+				|| (
+					(maybe instanceof HTMLElement)
 			&& (
 				maybe.matches('input[type="search"]')
 				|| maybe.matches('input[name="tags[]"]')
+			)
+				)
 			)
 		);
 	}
