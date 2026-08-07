@@ -61,8 +61,21 @@ function wrap_eslint(code: string) {
 	}${code}`;
 }
 
+function wrap_tsc(code: string) {
+	return code.replaceAll(
+		/(\s{22,})(if \(valid3\))/g,
+		`${
+			'\n'
+		}${
+			'$1'
+		}// @ts-expect-error ${
+			'AJV causes issues with how it builds the validator'
+		}$1$2`,
+	);
+}
+
 function wrap(code: string) {
-	return wrap_eslint(wrap_stylistic(code));
+	return wrap_tsc(wrap_eslint(wrap_stylistic(code)));
 }
 
 const config: [
