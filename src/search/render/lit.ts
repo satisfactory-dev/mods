@@ -521,7 +521,6 @@ export default class Ui {
 
 	#debounced_search(
 		form: HTMLFormElement,
-		target: true | HTMLElement,
 		search: string,
 	) {
 		const search_value = search.trim();
@@ -587,10 +586,9 @@ export default class Ui {
 			throw new Error('Could not find search input!');
 		}
 
-		form.addEventListener('input', ({target}) => {
+		form.addEventListener('input', () => {
 			this.#debounced_search(
 				form,
-				target as HTMLElement,
 				search.value,
 			);
 		});
@@ -609,7 +607,6 @@ export default class Ui {
 
 		this.#debounced_search(
 			form,
-			true,
 			this.#initial_query,
 		);
 	}
