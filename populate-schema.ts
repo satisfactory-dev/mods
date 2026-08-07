@@ -185,7 +185,7 @@ const config: [
 				],
 				'search-results': [
 					'ResultsChoice',
-					'../src/search.ts',
+					'../src/search/thread.ts',
 				],
 			},
 		},
