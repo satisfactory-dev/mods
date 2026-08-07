@@ -131,22 +131,22 @@ ol
 #tags > li > label,
 .tags > li
 {
-			border: 1px solid ;
-			padding: .25em ;
-			padding-left: calc(.25em + 1ch + .25em + 1px + .25em) ;
-			display: block ;
-			position: relative ;
+	border: 1px solid ;
+	padding: .25em ;
+	padding-left: calc(.25em + 1ch + .25em + 1px + .25em) ;
+	display: block ;
+	position: relative ;
 
-			&::before
-			{
-				content: '#' ;
-				border-right: 1px solid ;
-				padding: .25em ;
-				margin-right: .25em ;
-				position: absolute ;
-				top: 0 ;
-				left: 0 ;
-			}
+	&::before
+	{
+		content: '#' ;
+		border-right: 1px solid ;
+		padding: .25em ;
+		margin-right: .25em ;
+		position: absolute ;
+		top: 0 ;
+		left: 0 ;
+	}
 }
 
 #tags
