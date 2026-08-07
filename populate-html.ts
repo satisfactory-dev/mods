@@ -211,8 +211,12 @@ satisfactory-dev-mods-deferred
 	{
 		display: grid ;
 		grid-template: 'logo header' 'logo section' 'logo footer' ;
-		width: max(calc(50% - 2ch), 550px) ;
+		width: 100% ;
+		max-width: min(calc(50% - 2ch), 550px) ;
 		margin: 1ch ;
+		padding: 1ch ;
+		outline: 1px solid ;
+		border-radius: 0 1em 1em 1em ;
 
 		> header,
 		> section,
@@ -230,7 +234,7 @@ satisfactory-dev-mods-deferred
 				display: flex ;
 				flex-wrap: wrap ;
 
-				li:not(:first-child)
+				li:not(:first-child):not(.compatibility)
 				{
 					margin-left: 1ch ;
 				}
@@ -238,9 +242,21 @@ satisfactory-dev-mods-deferred
 
 			.compatibility
 			{
+				display: block ;
+				width: 100% ;
+				margin-top: 1ch ;
+
 				> ul
 				{
 					display: flex ;
+
+					> li
+					{
+						outline: 1px solid ;
+						display: flex ;
+						justify-content: center ;
+					}
+
 					> [aria-label="Controller"]::before,
 					.icon
 					{
@@ -252,12 +268,48 @@ satisfactory-dev-mods-deferred
 						;
 					}
 
+					.icon
+					{
+						&[aria-label="Works"]
+						{
+							filter:
+								grayscale(1)
+								sepia(1)
+								contrast(.2)
+								saturate(20)
+								hue-rotate(45deg)
+							;
+						}
+
+						&[aria-label="Unsupported"]
+						{
+							filter:
+								grayscale(1)
+								sepia(1)
+								contrast(.2)
+								saturate(20)
+								hue-rotate(-45deg)
+							;
+						}
+
+						&[aria-label="Untested"]
+						{
+							filter:
+								grayscale(1)
+								sepia(1)
+								contrast(.2)
+								saturate(20)
+								hue-rotate(-22.5deg)
+							;
+						}
+					}
+
+					.icon,
 					> ::before
 					{
 						display: inline-block ;
 						margin-right: .125em ;
 						padding: .125em ;
-						border: 1px solid ;
 					}
 
 					> [aria-label="Stable"]::before
@@ -287,22 +339,23 @@ satisfactory-dev-mods-deferred
 		{
 			display: block ;
 			grid-area: logo ;
-		}
-
-		> .has-image > img,
-		> .as-image
-		{
-			display: block ;
 			width: min(200px, 100%) ;
-			height: auto ;
 			margin: auto .5ch auto 0 ;
 		}
 
 		> .has-image > img,
 		> .as-image
 		{
-			height: 100% ;
-			aspect-ratio: 1 ;
+			display: block ;
+			width: 100% ;
+			height: auto ;
+		}
+
+		> .has-image > img,
+		> .as-image
+		{
+			height: auto ;
+			width: 100% ;
 		}
 
 		> footer
