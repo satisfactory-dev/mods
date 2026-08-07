@@ -279,7 +279,10 @@ export class DeferredModFetch extends LitElement {
 								EXP: {
 									state,
 								},
-							}) => html`<span aria-label="${state}">${
+							}) => html`<span
+								aria-label="${state}"
+								class="icon"
+							>${
 								'Works' === state
 									? '👍'
 									: '👎'
@@ -295,8 +298,14 @@ export class DeferredModFetch extends LitElement {
 								Controller: {
 									state,
 								},
-							}) => html`<span aria-label="${state}">${
-								'Supported' === state
+							}) => html`<span
+								aria-label="${state}"
+								class="icon"
+							>${
+								(
+									'Supported' === state
+									|| 'Implicit' === state
+								)
 									? '👍'
 									: (
 										'Untested' === state
