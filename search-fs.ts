@@ -6,6 +6,7 @@ import {
 
 let [,, ...query] = process.argv;
 
+// @todo implement the new providers
 const search = new Search(lunr(), tags());
 
 const tags_query_include = query
