@@ -58,6 +58,12 @@ const mods_by_tag = new Map<string, Set<result['id']>>();
 
 const mod_ids = new Set<doc['id']>();
 
+const has_ai = new Set<doc['id']>();
+
+const stable_mods = new Set<doc['id']>();
+
+const controller_supported_or_moot_mods = new Set<doc['id']>();
+
 for await (const mod of getMods(ids_in_cache())) {
 	if (mod.hidden) {
 		continue;
@@ -105,12 +111,63 @@ for await (const mod of getMods(ids_in_cache())) {
 
 		tags_set.add(mod.id);
 	}
+
+	if (
+		'ai_usage' === mod.ai_use_disclosure?.disclosure_type
+		|| 'runtime_ai_usage' === mod.ai_use_disclosure?.disclosure_type
+	) {
+		has_ai.add(mod.id);
+	}
+
+	if ('Works' === mod.compatibility?.EA.state) {
+		stable_mods.add(mod.id);
+	}
+
+	if (
+		'Implicit' === mod.compatibility?.Controller.state
+		|| 'Supported' === mod.compatibility?.Controller.state
+	) {
+		controller_supported_or_moot_mods.add(mod.id);
+	}
 }
 
 await writeFile(
 	`${import.meta.dirname}/.cache/indexed-mod-ids.json`,
 	stringify([...mod_ids]),
 );
+
+for (
+	const [
+		basename,
+		data,
+	] of [
+		[
+			'ai.mod-ids',
+			has_ai,
+		],
+		[
+			'stable.mod-ids',
+			stable_mods,
+		],
+		[
+			'controller-supported-or-moot.mod-ids',
+			controller_supported_or_moot_mods,
+		],
+	] as const
+) {
+	const index_string = stringify([...data]);
+	const sha512 = hash('sha-512', index_string, 'hex');
+
+	const cache_file = `${
+		import.meta.dirname
+	}/.cache/mod-ids/${basename}.${
+		sha512.substring(0, 8)
+	}.json`;
+
+	if(!existsSync(cache_file)) {
+		await writeFile(cache_file, index_string);
+	}
+}
 
 const indices = new Map<string, Index>();
 

@@ -22,17 +22,28 @@ import {
 	collectResult,
 } from '@lit-labs/ssr/lib/render-result.js';
 
-import type {
-	source,
-} from './src/search/web.ts';
 import Web from './src/search/web.ts';
 
-const sources: source[] = [];
+const sources: string[] = [];
 
 for await (const path of glob(`${import.meta.dirname}/dist/*.json`)) {
 	const file = `./${basename(path)}`;
 
-	if (Web.is_source(file)) {
+	if (
+		Web.is_source(file)
+		|| Web.is_mod_ids_list(file)
+	) {
+		sources.push(file);
+	}
+}
+
+for await (const path of glob(`${import.meta.dirname}/dist/mod-ids/*.json`)) {
+	const file = `./${basename(path)}`;
+
+	if (
+		Web.is_source(file)
+		|| Web.is_mod_ids_list(file)
+	) {
 		sources.push(file);
 	}
 }

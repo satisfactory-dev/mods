@@ -34,6 +34,11 @@ export default class Web {
 			this.#search = new Search(
 				this.#lunr(),
 				this.#tags(),
+				{
+					noai: this.#noai(),
+					woso: this.#woso(),
+					controller: this.#controller(),
+				},
 				this.#thread_source,
 			);
 		}
@@ -80,9 +85,106 @@ export default class Web {
 		return Promise.all(indices);
 	}
 
+	static #is_ids(maybe: unknown): maybe is string[] {
+		return (
+			Array.isArray(maybe)
+			&& maybe.every((possibly) => (
+				'string' === typeof possibly
+				&& /^[A-Za-z0-9]+$/.test(possibly)
+			))
+		);
+	}
+
+	async #noai(): Promise<Set<string>> {
+		let ids = new Set<string>();
+
+		for (const source of this.#sources.filter((
+			maybe,
+		) => /ai\.mod-ids\..+\.json$/.test(maybe))) {
+			ids = new Set([
+				...ids,
+				...(await fetch(source)
+					.then((e) => e.json())
+					.then((maybe): string[] => {
+						if (!Web.#is_ids(maybe)) {
+							throw new Error(
+
+								// oxlint-disable-next-line @stylistic/max-len
+								'No-ai json contained something other than a string array!',
+							);
+						}
+
+						return maybe;
+					})),
+			]);
+		}
+
+		return ids;
+	}
+
+	async #woso(): Promise<Set<string>> {
+		let ids = new Set<string>();
+
+		for (const source of this.#sources.filter((
+			maybe,
+		) => /stable\.mod-ids\..+\.json$/.test(maybe))) {
+			ids = new Set([
+				...ids,
+				...(await fetch(source)
+					.then((e) => e.json())
+					.then((maybe): string[] => {
+						if (!Web.#is_ids(maybe)) {
+							throw new Error(
+
+								// oxlint-disable-next-line @stylistic/max-len
+								'Stable mods json contained something other than a string array!',
+							);
+						}
+
+						return maybe;
+					})),
+			]);
+		}
+
+		return ids;
+	}
+
+	async #controller(): Promise<Set<string>> {
+		let ids = new Set<string>();
+
+		for (const source of this.#sources.filter((
+			maybe,
+		) => /controller-supported-or-moot\.mod-ids\..+\.json$/.test(maybe))) {
+			ids = new Set([
+				...ids,
+				...(await fetch(source)
+					.then((e) => e.json())
+					.then((maybe): string[] => {
+						if (!Web.#is_ids(maybe)) {
+							throw new Error(
+
+								// oxlint-disable-next-line @stylistic/max-len
+								'Supports controller json contained something other than a string array!',
+							);
+						}
+
+						return maybe;
+					})),
+			]);
+		}
+
+		return ids;
+	}
+
 	static is_source(
 		maybe: string,
 	): maybe is source {
 		return /\/(lunr|tags)\..+\.json$/.test(maybe);
+	}
+
+	static is_mod_ids_list(
+		maybe: string,
+	): maybe is `/${string}.mod-ids.${string}.json` {
+		return /\/.+\.mod-ids\.[a-f0-9]{8}\.json$/.test(maybe);
 	}
 }

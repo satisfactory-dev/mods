@@ -42,6 +42,8 @@ build--cache:
 	@node ./populate-cache.ts
 
 build--index:
+	@mkdir -p ./.cache/mod-ids/
+	@git clean -fxd ./.cache/mod-ids/*.json
 	@node ./populate-index.ts
 
 build--schema:
@@ -54,6 +56,8 @@ build--schema:
 build--web:
 	@git clean -fxd ./dist/*.js ./dist/vendor/
 	@mkdir -p ./dist/api/
+	@mkdir -p ./dist/mod-ids/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
+	@rsync -avh --delete ./.cache/mod-ids/ ./dist/mod-ids/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
 	@node ./populate-html.ts

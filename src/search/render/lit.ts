@@ -43,6 +43,10 @@ import {
 
 import type Provider from '../../provider/interface.ts';
 
+import type {
+	SupportedToggles,
+} from '../../search.ts';
+
 import tags from '../../../.cache/api/tags.json' with {type: 'json'};
 
 import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
@@ -403,6 +407,15 @@ assert_non_empty(_mod_ids);
 
 const mod_ids = _mod_ids;
 
+type Toggles = (
+	& {
+		[k in SupportedToggles]: () => void;
+	}
+	& {
+		it: () => void,
+	}
+);
+
 export default class Ui {
 	#debounce: (
 		| undefined
@@ -425,6 +438,31 @@ export default class Ui {
 	#hide_filters = true;
 
 	#provider: Provider;
+
+	#invert_tags = false;
+
+	#working_on_stable_only = true;
+
+	#controller_supported_or_moot = false;
+
+	#no_ai = true;
+
+	#toggles: Toggles = {
+		woso: () => {
+			this.#working_on_stable_only = !this.#working_on_stable_only;
+		},
+		controller: () => {
+			this.#controller_supported_or_moot = (
+				!this.#controller_supported_or_moot
+			);
+		},
+		noai: () => {
+			this.#no_ai = !this.#no_ai;
+		},
+		it: () => {
+			this.#invert_tags = !this.#invert_tags;
+		},
+	};
 
 	constructor({
 		target,
@@ -468,6 +506,64 @@ export default class Ui {
 					?hidden="${this.#hide_filters}"
 					aria-label="Search Filters"
 				>
+					<fieldset>
+						<ul>
+							<li>
+								<input
+									type="checkbox"
+									name="woso"
+									id="working-on-stable-only"
+									?checked=${this.#working_on_stable_only}
+								>
+								<label
+									for="working-on-stable-only"
+								>${
+									'Working on stable only'
+								}</label>
+							</li>
+							<li>
+								<input
+									type="checkbox"
+									name="controller"
+									id="controller-supported-or-moot"
+									?checked=${
+										this.#controller_supported_or_moot
+									}
+								>
+								<label
+									for="controller-supported-or-moot"
+								>${
+									'Works with Controller (or moot)'
+								}</label>
+							</li>
+							<li>
+								<input
+									type="checkbox"
+									name="noai"
+									id="no-ai"
+									?checked=${this.#no_ai}
+								>
+								<label
+									for="no-ai"
+								>${
+									'No AI'
+								}</label>
+							</li>
+							<li>
+								<input
+									type="checkbox"
+									name="it"
+									id="invert-tags"
+									?checked=${this.#invert_tags}
+								>
+								<label
+									for="invert-tags"
+								>${
+									'Tag Filter excludes instead of includes'
+								}</label>
+							</li>
+						</ul>
+					</fieldset>
 					<ul
 						id="tags"
 						aria-label="Tags"
@@ -534,12 +630,23 @@ export default class Ui {
 		this.#debounce = setTimeout(() => {
 			this.#debounced = true;
 
+			const tag_match = [...form.querySelectorAll<HTMLInputElement>(
+				'input[name="tags[]"]:checked',
+			)].map((e) => e.value);
+
 			void this.#search.search(
 				search_value,
-				[...form.querySelectorAll<HTMLInputElement>(
-					'input[name="tags[]"]:checked',
-				)].map((e) => e.value),
-				[],
+				{
+					tags_query_exclude: (
+						this.#invert_tags ? [] : tag_match
+					),
+					tags_query_include: (
+						this.#invert_tags ? tag_match : []
+					),
+					noai: this.#no_ai,
+					woso: this.#working_on_stable_only,
+					controller: this.#controller_supported_or_moot,
+				},
 				'' === search_value ? mod_ids : undefined,
 			)
 				.then(
@@ -561,6 +668,10 @@ export default class Ui {
 
 			this.#render();
 		}, 100);
+	}
+
+	#is_toggle(maybe: string): maybe is keyof Toggles {
+		return maybe in this.#toggles;
 	}
 
 	init() {
@@ -586,7 +697,21 @@ export default class Ui {
 			throw new Error('Could not find search input!');
 		}
 
-		form.addEventListener('input', () => {
+		form.addEventListener('input', ({target}) => {
+			const coerced = target as HTMLElement;
+
+			if (
+				coerced.matches(
+					'input[name][type="checkbox"]:not([name="tags[]"])',
+				)
+			) {
+				const name = (coerced as HTMLInputElement).name;
+
+				if (this.#is_toggle(name)) {
+					this.#toggles[name]();
+				}
+			}
+
 			this.#debounced_search(
 				form,
 				search.value,

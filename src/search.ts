@@ -439,16 +439,29 @@ export function get_tags_index_validator() {
 	).then(({validator_tag_index}) => validator_tag_index);
 }
 
+export type SupportedToggles = (
+	| 'woso' // working on stable only
+	| 'controller' // controller supported or moot
+	| 'noai' // because reasons
+);
+
+type TogglesProviders = {
+	[key in SupportedToggles]: Promise<Set<string>>;
+};
+
 export default class Search {
 	#indices: Promise<[SearchWorker, ...SearchWorker[]]>;
 
 	#tags: Promise<TagIndex[]>;
+
+	#toggles_providers: TogglesProviders;
 
 	#results = new Map<string, Promise<IndexResult[]>>();
 
 	constructor(
 		index_provider: Promise<[string, ...string[]]>,
 		tags_provider: Promise<TagIndex[]>,
+		toggles_providers: TogglesProviders,
 		worker_source?: URL,
 	) {
 		this.#indices = index_provider.then((e) => {
@@ -457,12 +470,26 @@ export default class Search {
 			});
 		});
 		this.#tags = tags_provider;
+		this.#toggles_providers = toggles_providers;
 	}
 
 	async search(
 		query: string,
-		tags_query_include: string[] = [],
-		tags_query_exclude: string[] = [],
+		{
+			tags_query_include = [],
+			tags_query_exclude = [],
+			noai = false,
+			woso = false,
+			controller = false,
+		}: (
+			& {
+				tags_query_include: string[],
+				tags_query_exclude: string[],
+			}
+			& {
+				[k in SupportedToggles]: boolean;
+			}
+		),
 		override_results?: [string, ...string[]],
 	) {
 		let results_promise = (
@@ -513,6 +540,33 @@ export default class Search {
 			results_promise = Promise.resolve(results.filter(({
 				ref: id,
 			}) => mods_matching_tags.has(id)));
+		}
+
+		if (noai) {
+			results_promise = Promise.all([
+				results_promise,
+				this.#toggles_providers.noai,
+			]).then(([results, has_ai]) => results.filter((
+				{ref: maybe},
+			) => !has_ai.has(maybe)));
+		}
+
+		if (woso) {
+			results_promise = Promise.all([
+				results_promise,
+				this.#toggles_providers.woso,
+			]).then(([results, works_on_stable]) => results.filter((
+				{ref: maybe},
+			) => works_on_stable.has(maybe)));
+		}
+
+		if (controller) {
+			results_promise = Promise.all([
+				results_promise,
+				this.#toggles_providers.controller,
+			]).then(([results, works_on_controller]) => results.filter((
+				{ref: maybe},
+			) => works_on_controller.has(maybe)));
 		}
 
 		return results_promise;
