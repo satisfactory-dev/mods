@@ -282,16 +282,23 @@ satisfactory-dev-mods-deferred
 			grid-area: section ;
 		}
 
-		> img,
+		> .has-image,
+		> .as-image
+		{
+			display: block ;
+			grid-area: logo ;
+		}
+
+		> .has-image > img,
 		> .as-image
 		{
 			display: block ;
 			width: min(200px, 100%) ;
 			height: auto ;
-			grid-area: logo ;
 			margin: auto .5ch auto 0 ;
 		}
 
+		> .has-image > img,
 		> .as-image
 		{
 			height: 100% ;

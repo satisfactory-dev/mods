@@ -323,12 +323,19 @@ export class DeferredModFetch extends LitElement {
 			data,
 			(value) => html`${when(
 				value.logo,
-				(logo) => html`<img
+				(logo) => html`<a
+					class="has-image"
+					target="_blank"
+					href="https://ficsit.app/mod/${
+						encodeURIComponent(value.mod_reference)
+					}"
+					title="View ${name}"
+				><img
 					src="${logo}"
 					width="1024"
 					height="1024"
 					loading="lazy"
-				>`,
+				></a>`,
 				() => html`<span
 					class="as-image"
 					title="No image available"
