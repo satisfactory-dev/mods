@@ -16,6 +16,7 @@
     }
   },
   "devDependencies": {
+    "@lit-labs/observers": "^2.1.0",
     "@lit-labs/ssr": "^4.1.0",
     "@satisfactory-dev/ajv-utilities": "^0.32.0",
     "@satisfactory-dev/lunr": "^0.2.1",

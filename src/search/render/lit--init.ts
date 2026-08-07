@@ -2,7 +2,9 @@ import type Provider from '../../provider/interface.ts';
 
 import type Web from '../web.ts';
 
-import Ui from './lit.ts';
+import Ui, {
+	DeferredModFetch,
+} from './lit.ts';
 
 export default ({
 	Web,
@@ -24,6 +26,8 @@ export default ({
 	if (!thread_source) {
 		throw new Error(`Could not find thread source!`);
 	}
+
+	customElements.define('satisfactory-dev-mods-deferred', DeferredModFetch);
 
 	const search = (new Web(
 		[...document.querySelectorAll<HTMLLinkElement>(

@@ -2,8 +2,13 @@ import type {
 	IndexResult,
 } from '@satisfactory-dev/lunr';
 
+import type {
+	TemplateResult,
+} from 'lit';
 import {
+	css,
 	html,
+	LitElement,
 	render,
 } from 'lit';
 
@@ -18,6 +23,10 @@ import {
 import {
 	when,
 } from 'lit/directives/when.js';
+
+import {
+	IntersectionController,
+} from '@lit-labs/observers/intersection-controller.js';
 
 import type Search from '../../search.ts';
 
@@ -36,6 +45,148 @@ import tags from '../../../.cache/api/tags.json' with {type: 'json'};
 import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
 	type: 'json',
 };
+
+type DeferredModItem = (
+	& HTMLDivElement
+	& {
+		getAttribute(attr: 'part'): 'mod',
+		getAttribute(attr: string): string | undefined,
+		dataset: (
+			& DOMStringMap
+			& {
+				ref: Mod['id'],
+				score: IndexResult['score'],
+			}
+		),
+	}
+);
+
+export class DeferredModFetch extends LitElement {
+	static styles = css`
+		:host
+		{
+			display: block ;
+			min-height: 1ch ;
+
+			&:empty
+			{
+				min-height: 0 ;
+			}
+		}
+
+		[part="mod"]
+		{
+			display: block ;
+			min-height: 1ch ;
+		}
+	`;
+
+	static properties = {
+		results: {
+			type: Array,
+		},
+		provider: {
+			type: Object,
+		},
+	};
+
+	results!: IndexResult[];
+
+	provider!: Provider;
+
+	#controller!: IntersectionController<Set<Mod['id']>>;
+
+	constructor() {
+		super();
+
+		let controller: IntersectionController<
+			Set<Mod['id']>
+		>;
+
+		controller = new IntersectionController<
+			Set<Mod['id']>
+		>(this, {
+			callback: (entries) => {
+				const fresh = new Set<Mod['id']>(
+					controller.value || [],
+				);
+
+				for (const entry of entries) {
+					if ('mod' === entry.target.getAttribute('part')) {
+						const id = (
+							entry.target as DeferredModItem
+						).dataset.ref;
+
+						if (entry.isIntersecting) {
+							fresh.add(id);
+						} else {
+							fresh.delete(id);
+						}
+					}
+				}
+
+				return fresh;
+			},
+			skipInitial: false,
+		});
+
+		this.#controller = controller;
+	}
+
+	connectedCallback(): void {
+		super.connectedCallback();
+
+		if (!this.provider) {
+			throw new Error('API provider not set!');
+		}
+
+		if (!this.results) {
+			throw new Error(`IndexResult instances not set!`);
+		}
+
+		this.setAttribute('role', 'list');
+	}
+
+	render() {
+		return html`${
+			repeat(
+				this.results,
+				({ref}) => ref,
+				(
+					result,
+				) => html`<div
+					data-ref="${result.ref}"
+					data-score="${result.score}"
+					role="listitem"
+					part="mod"
+				>${when(
+					this.#controller.value?.has(result.ref) ?? false,
+					() => until(
+						this.#fetch(result.ref),
+						'...loading',
+					),
+					() => '👀',
+				)}</div>`,
+			)
+		}`;
+	}
+
+	async #fetch(id: Mod['id']): Promise<TemplateResult> {
+		const mod = await this.provider.getMod(id);
+
+		return html`${mod.name}`;
+	}
+
+	updated(changed_properties: Map<string, unknown>) {
+		super.updated(changed_properties);
+
+		for (const item of (
+			this.shadowRoot?.querySelectorAll('[part="mod"]') || [])
+		) {
+			this.#controller.observe(item);
+		}
+	}
+}
 
 assert_non_empty(_mod_ids);
 
@@ -142,21 +293,10 @@ export default class Ui {
 					() => html`<p>...searching</p>`,
 					() => when(
 						!(this.#debounced instanceof Error),
-						() => html`<ol>${
-							repeat(
-								this.#debounced as IndexResult[],
-								({ref}) => ref,
-								(
-									result,
-								) => html`<li
-									data-ref="${result.ref}"
-									data-score="${result.score}"
-								>${until(
-									this.#provider.getMod(result.ref)
-										.then((mod: Mod) => html`${mod.name}`),
-									'...loading',
-								)}</li>`)
-						}</ol>`,
+						() => html`<satisfactory-dev-mods-deferred
+							.provider=${this.#provider}
+							.results=${this.#debounced}
+						></satisfactory-dev-mods-deferred>`,
 						() => html`<p>An error occurred!</p>`,
 					),
 				),
