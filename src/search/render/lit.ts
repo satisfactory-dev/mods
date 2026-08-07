@@ -317,47 +317,47 @@ export default class Ui {
 			true !== target
 			&& !Ui.#should_run_search(target, search)
 		) {
-				return;
-			}
+			return;
+		}
 
-			const search_value = search.trim();
+		const search_value = search.trim();
 
-			this.#debounced = undefined;
+		this.#debounced = undefined;
 
-			clearTimeout(this.#debounce);
+		clearTimeout(this.#debounce);
 
-			this.#render();
+		this.#render();
 
-			this.#debounce = setTimeout(() => {
-				this.#debounced = true;
+		this.#debounce = setTimeout(() => {
+			this.#debounced = true;
 
-				void this.#search.search(
-					search_value,
-					[...form.querySelectorAll<HTMLInputElement>(
-						'input[name="tags[]"]:checked',
-					)].map((e) => e.value),
-					[],
-					'' === search_value ? mod_ids : undefined,
-				)
-					.then(
-						(results) => {
-							console.log(results);
+			void this.#search.search(
+				search_value,
+				[...form.querySelectorAll<HTMLInputElement>(
+					'input[name="tags[]"]:checked',
+				)].map((e) => e.value),
+				[],
+				'' === search_value ? mod_ids : undefined,
+			)
+				.then(
+					(results) => {
+						console.log(results);
 
-							this.#debounced = results;
-
-							this.#render();
-						},
-					)
-					.catch((err) => {
-						console.error(err);
-
-						this.#debounced = new Error('An error occurred');
+						this.#debounced = results;
 
 						this.#render();
-					});
+					},
+				)
+				.catch((err) => {
+					console.error(err);
 
-				this.#render();
-			}, 100);
+					this.#debounced = new Error('An error occurred');
+
+					this.#render();
+				});
+
+			this.#render();
+		}, 100);
 	}
 
 	init() {
@@ -427,10 +427,10 @@ export default class Ui {
 				true === maybe
 				|| (
 					(maybe instanceof HTMLElement)
-			&& (
-				maybe.matches('input[type="search"]')
-				|| maybe.matches('input[name="tags[]"]')
-			)
+					&& (
+						maybe.matches('input[type="search"]')
+						|| maybe.matches('input[name="tags[]"]')
+					)
 				)
 			)
 		);
