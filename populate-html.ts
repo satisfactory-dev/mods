@@ -211,6 +211,8 @@ satisfactory-dev-mods-deferred
 	{
 		display: grid ;
 		grid-template: 'logo header' 'logo section' 'logo footer' ;
+		grid-template-columns: min(calc(100% * (200 / 550)), 200px) ;
+		grid-column-gap: 1ch ;
 		width: 100% ;
 		max-width: min(calc(50% - 2ch), 550px) ;
 		margin: 1ch ;
@@ -339,23 +341,15 @@ satisfactory-dev-mods-deferred
 		{
 			display: block ;
 			grid-area: logo ;
-			width: min(200px, 100%) ;
+			width: 100% ;
 			margin: auto .5ch auto 0 ;
 		}
 
-		> .has-image > img,
-		> .as-image
+		> .has-image > img
 		{
 			display: block ;
 			width: 100% ;
 			height: auto ;
-		}
-
-		> .has-image > img,
-		> .as-image
-		{
-			height: auto ;
-			width: 100% ;
 		}
 
 		> footer
