@@ -54,119 +54,119 @@ type SuccessWithResult<
 }>;
 
 export function compile_results_schema() {
-const arg_config: [
-	(
-		| [keyof Commands]
-		| [keyof Commands, SchemaObject]
-	),
-	...(
-		| [keyof Commands]
-		| [keyof Commands, SchemaObject]
-	)[],
-] = [
-	[
-		'init',
-	],
-	[
-		'search',
-		{
-			type: 'array',
-			minItems: 2,
-			maxItems: 2,
-			prefixItems: [
-				{
-					type: 'string',
-					minLength: 1,
-				},
-				{
-					type: 'array',
-					items: {
-						type: 'object',
-						required: ['ref', 'score', 'matchData'],
-						additionalProperties: false,
-						properties: {
-							ref: {
-								$ref: 'defs#/$defs/id',
-							},
-							score: {
-								type: 'number',
-								minimum: 0,
-							},
-							matchData: {
-								type: 'object',
+	const arg_config: [
+		(
+			| [keyof Commands]
+			| [keyof Commands, SchemaObject]
+		),
+		...(
+			| [keyof Commands]
+			| [keyof Commands, SchemaObject]
+		)[],
+	] = [
+		[
+			'init',
+		],
+		[
+			'search',
+			{
+				type: 'array',
+				minItems: 2,
+				maxItems: 2,
+				prefixItems: [
+					{
+						type: 'string',
+						minLength: 1,
+					},
+					{
+						type: 'array',
+						items: {
+							type: 'object',
+							required: ['ref', 'score', 'matchData'],
+							additionalProperties: false,
+							properties: {
+								ref: {
+									$ref: 'defs#/$defs/id',
+								},
+								score: {
+									type: 'number',
+									minimum: 0,
+								},
+								matchData: {
+									type: 'object',
+								},
 							},
 						},
 					},
-				},
-			],
-		},
-	],
-];
-
-const args = arg_config.map(<
-	Cmd extends keyof Commands,
-	Result extends SchemaObject,
-	Item extends (
-		| [Cmd]
-		| [Cmd, Result]
-	),
->(
-	[
-		cmd,
-		result,
-	]: (
-		Item
-	),
-) => {
-	const schema: (
-		| SuccessBasic<Cmd>
-		| SuccessWithResult<Cmd, Result>
-	) = {
-		type: 'object',
-		required: ['success'],
-		additionalProperties: false,
-		properties: {
-			success: {
-				type: 'string',
-				const: cmd,
+				],
 			},
-		},
-	};
+		],
+	];
 
-	if (undefined !== result) {
-		return {
-			...schema,
-			required: ['success', 'result'] as const,
+	const args = arg_config.map(<
+		Cmd extends keyof Commands,
+		Result extends SchemaObject,
+		Item extends (
+			| [Cmd]
+			| [Cmd, Result]
+		),
+	>(
+		[
+			cmd,
+			result,
+		]: (
+			Item
+		),
+	) => {
+		const schema: (
+			| SuccessBasic<Cmd>
+			| SuccessWithResult<Cmd, Result>
+		) = {
+			type: 'object',
+			required: ['success'],
+			additionalProperties: false,
 			properties: {
-				...schema.properties,
-				result,
+				success: {
+					type: 'string',
+					const: cmd,
+				},
 			},
 		};
-	}
 
-	return schema;
-});
+		if (undefined !== result) {
+			return {
+				...schema,
+				required: ['success', 'result'] as const,
+				properties: {
+					...schema.properties,
+					result,
+				},
+			};
+		}
+
+		return schema;
+	});
 
 	return {
 		$id: 'search-results',
-	oneOf: [
-		...args,
-		{
-			type: 'object',
-			required: ['error', 'message'],
-			additionalProperties: false,
-			properties: {
-				error: {
-					type: 'string',
-					enum: args.map((e) => e.properties.success),
-				},
-				message: {
-					type: 'string',
-					minLength: 1,
+		oneOf: [
+			...args,
+			{
+				type: 'object',
+				required: ['error', 'message'],
+				additionalProperties: false,
+				properties: {
+					error: {
+						type: 'string',
+						enum: args.map((e) => e.properties.success),
+					},
+					message: {
+						type: 'string',
+						minLength: 1,
+					},
 				},
 			},
-		},
-	],
+		],
 	};
 }
 
