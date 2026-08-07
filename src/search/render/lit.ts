@@ -524,13 +524,6 @@ export default class Ui {
 		target: true | HTMLElement,
 		search: string,
 	) {
-		if (
-			true !== target
-			&& !Ui.#should_run_search(target, search)
-		) {
-			return;
-		}
-
 		const search_value = search.trim();
 
 		this.#debounced = undefined;
@@ -625,25 +618,6 @@ export default class Ui {
 		return (
 			(maybe instanceof HTMLButtonElement)
 			&& maybe.matches('button[aria-controls="filters"')
-		);
-	}
-
-	static #should_run_search(
-		maybe: unknown,
-		search_value: string,
-	): maybe is HTMLInputElement {
-		return (
-			'' !== search_value.trim()
-			&& (
-				true === maybe
-				|| (
-					(maybe instanceof HTMLElement)
-					&& (
-						maybe.matches('input[type="search"]')
-						|| maybe.matches('input[name="tags[]"]')
-					)
-				)
-			)
 		);
 	}
 }
