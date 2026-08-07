@@ -654,10 +654,10 @@ export default class Ui {
 				search_value,
 				{
 					tags_query_exclude: (
-						this.#invert_tags ? [] : tag_match
+						this.#invert_tags ? tag_match : []
 					),
 					tags_query_include: (
-						this.#invert_tags ? tag_match : []
+						this.#invert_tags ? [] : tag_match
 					),
 					noai: this.#no_ai,
 					woso: this.#working_on_stable_only,
