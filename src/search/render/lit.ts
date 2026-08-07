@@ -326,7 +326,7 @@ export class DeferredModFetch extends LitElement {
 		<section>
 		${when(
 			data?.tags,
-			(tag_ids) => html`<ul>${
+			(tag_ids) => html`<ul class="tags">${
 				tag_ids
 					.map(({id}) => id)
 					.filter((

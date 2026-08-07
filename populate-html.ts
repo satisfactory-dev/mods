@@ -115,7 +115,8 @@ ol
 	}
 }
 
-#tags
+#tags,
+.tags
 {
 	display: flex ;
 	flex-wrap: wrap ;
@@ -124,7 +125,34 @@ ol
 	{
 		position: relative ;
 		margin: .125em ;
+	}
+}
 
+#tags > li > label,
+.tags > li
+{
+			border: 1px solid ;
+			padding: .25em ;
+			padding-left: calc(.25em + 1ch + .25em + 1px + .25em) ;
+			display: block ;
+			position: relative ;
+
+			&::before
+			{
+				content: '#' ;
+				border-right: 1px solid ;
+				padding: .25em ;
+				margin-right: .25em ;
+				position: absolute ;
+				top: 0 ;
+				left: 0 ;
+			}
+}
+
+#tags
+{
+	> li
+	{
 		&:focus-within > aside,
 		> label:hover ~ aside
 		{
@@ -152,26 +180,6 @@ ol
 			z-index: 2 ;
 			min-width: min(400px, 80vw) ;
 			padding: .25em ;
-		}
-
-		> label
-		{
-			border: 1px solid ;
-			padding: .25em ;
-			padding-left: calc(.25em + 1ch + .25em + 1px + .25em) ;
-			display: block ;
-			position: relative ;
-
-			&::before
-			{
-				content: '#' ;
-				border-right: 1px solid ;
-				padding: .25em ;
-				margin-right: .25em ;
-				position: absolute ;
-				top: 0 ;
-				left: 0 ;
-			}
 		}
 	}
 }
