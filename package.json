@@ -35,6 +35,7 @@
     "postcss": "^8.5.26",
     "prettier": "^3.9.6",
     "rolldown": "^1.2.1",
+    "sharp": "^0.35.3",
     "typescript": "~7.0.2",
     "web-worker": "^1.5.0"
   }

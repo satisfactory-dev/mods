@@ -1,6 +1,19 @@
 import {
+	hash,
+} from 'node:crypto';
+
+import {
+	glob,
+	readFile,
+	unlink,
 	writeFile,
 } from 'node:fs/promises';
+
+import {
+	existsSync,
+} from 'node:fs';
+
+import sharp from 'sharp';
 
 import {
 	cached as getMod_ids,
@@ -41,6 +54,75 @@ import {
 	stringify,
 } from './src/helper/json.ts';
 
+import type {
+	HasLogo,
+	HasLogoBorked,
+	result,
+} from './src/api/getMod.ts';
+
+const start = performance.now();
+
+const logo_sizes_cache_file = `${
+	import.meta.dirname
+}/.cache/logo-sizes.json`;
+const full_mod_api_hash_cache_file = `${
+	import.meta.dirname
+}/.cache/mod-api-hashes.json`;
+
+const tag_ids_to_check = new Set<Tag['id']>();
+
+type logo_size = [
+	number, // scale
+	number, // width
+	number, // height
+];
+
+let logo_sizes: Map<
+	result['id'],
+	[
+		logo_size,
+		logo_size,
+		logo_size,
+	]
+>;
+
+if (existsSync(logo_sizes_cache_file)) {
+	logo_sizes = new Map(await import(logo_sizes_cache_file, {
+		with: {
+			type: 'json',
+		},
+	}).then(({
+		default: cache,
+	}) => Object.entries(cache as {
+		[k in result['id']]: [
+			logo_size,
+			logo_size,
+			logo_size,
+		];
+	})));
+} else {
+	logo_sizes = new Map();
+}
+
+let full_mod_api_hash_cache: Map<result['id'], string>;
+
+if (existsSync(full_mod_api_hash_cache_file)) {
+	full_mod_api_hash_cache = new Map(await import(
+		full_mod_api_hash_cache_file,
+		{
+			with: {
+				type: 'json',
+			},
+		},
+	).then(({
+		default: cache,
+	}) => Object.entries(cache as {
+		[k in result['id']]: string;
+	})));
+} else {
+	full_mod_api_hash_cache = new Map();
+}
+
 let pass = (
 	await async_generator_to_set(live())
 ).union(
@@ -48,8 +130,6 @@ let pass = (
 );
 
 let passes = 0;
-
-const tag_ids_to_check = new Set<Tag['id']>();
 
 export const known_missing_users = new Proxy(
 	new Set<Exclude<string, ''>>([
@@ -81,6 +161,146 @@ function filtered_add<T>(
 ) {
 	if (!except.has(maybe)) {
 		to.add(maybe);
+	}
+}
+
+function has_logo(
+	maybe: result,
+): maybe is (result & (HasLogo | HasLogoBorked)) {
+	return '' !== maybe.logo;
+}
+
+function has_expected_sizes(maybe: logo_size[]): maybe is [
+	logo_size,
+	logo_size,
+	logo_size,
+] {
+	return 3 === maybe.length;
+}
+
+async function logo(mod: result) {
+	if (!has_logo(mod)) {
+		return;
+	}
+
+	const mod_cache_file = `${
+		import.meta.dirname
+	}/.cache/api/getMods/${mod.id}.json`;
+
+	if (!existsSync(mod_cache_file)) {
+		throw new Error(`Cache file for mod ${mod.id} does not exist!`);
+	}
+
+	const current_mod_hash = hash(
+		'sha512',
+		await readFile(mod_cache_file),
+		'hex',
+	);
+
+	const existing_logo_caches = new Set<string>();
+	const keep = new Set<string>();
+
+	let retain_keeps = false;
+
+	for await (const path of glob(
+		`${
+			import.meta.dirname
+		}/.cache/{logo,thumbnail}/${
+			mod.id
+		}{.,-*.}{webp,avif}`,
+	)) {
+		existing_logo_caches.add(path);
+	}
+
+	try {
+		const logo_cache_file = `${
+			import.meta.dirname
+		}/.cache/logo/${mod.id}.webp`;
+
+		existing_logo_caches.add(logo_cache_file);
+
+		if (
+			existsSync(logo_cache_file)
+			&& full_mod_api_hash_cache.get(mod.id) === current_mod_hash
+		) {
+			return;
+		}
+
+		full_mod_api_hash_cache.set(mod.id, current_mod_hash);
+
+		await writeFile(
+			logo_cache_file,
+			Buffer.from(
+				await (
+					await fetch(mod.logo)
+				).arrayBuffer(),
+			),
+		);
+
+		const image = sharp(logo_cache_file, {
+			autoOrient: true,
+			animated: true,
+		});
+
+		const sizes: logo_size[] = [];
+
+		for (const size of [
+			120,
+			160,
+			200,
+		]) {
+			const thumb = image.resize({
+				width: size,
+				height: size,
+				fit: 'inside',
+				withoutEnlargement: true,
+			});
+
+			const {data, info} = await thumb.webp({
+				quality: 60,
+				smartSubsample: true,
+				smartDeblock: true,
+				effort: 6,
+			}).toBuffer({
+				resolveWithObject: true,
+			});
+
+			sizes.push([size, info.width, info.height]);
+
+			const sha512 = hash('sha512', data, 'hex');
+
+			const output_file = `${
+				import.meta.dirname
+			}/.cache/thumbnail/${mod.id}-${
+				size
+			}-${
+				sha512.substring(0, 8)
+			}.webp`;
+
+			await writeFile(output_file, data);
+
+			keep.add(output_file);
+			keep.add(logo_cache_file);
+		}
+
+
+		if (!has_expected_sizes(sizes)) {
+			throw new Error(`Sizes missing for ${mod.id}`);
+		}
+
+		logo_sizes.set(mod.id, sizes);
+
+		retain_keeps = true;
+	} finally {
+		for (const path of existing_logo_caches) {
+			if (!retain_keeps || !keep.has(path)) {
+				await unlink(path);
+			}
+		}
+
+		if (!retain_keeps) {
+			logo_sizes.delete(mod.id);
+		}
 	}
 }
 
@@ -133,6 +353,8 @@ while (pass.size > 0) {
 				version_ids_to_check.add(version_id.id);
 			}
 		}
+
+		await logo(mod);
 	}
 
 	let user_check = 0;
@@ -232,3 +454,15 @@ for await (const version of getSatisfactoryVersions()) {
 		stringify(version),
 	);
 }
+
+await writeFile(
+	logo_sizes_cache_file,
+	stringify(Object.fromEntries(logo_sizes)),
+);
+
+await writeFile(
+	full_mod_api_hash_cache_file,
+	stringify(Object.fromEntries(full_mod_api_hash_cache)),
+);
+
+console.log(`finished after ${performance.now() - start}ms`);
