@@ -763,17 +763,23 @@ export default class Ui {
 	}
 
 	static #copyright_notice() {
+		const now = new Date();
+
 		return html`
 			<p>An experimental forked search alternative of <a
 				target="_blank"
 				href="https://ficsit.app/mods"
 			>https://ficsit.app/mods</a>.</p>
 			<p>Fork &copy; ${
-				(new Date()).getFullYear()
+				now.getFullYear()
 			} <a
 				target="_blank"
 				href="https://github.com/satisfactory-dev/mods/"
-			>SignpostMarv</a>.</p>
+			>SignpostMarv</a>, last build at ${
+				now.toTimeString()
+			} on ${
+				now.toDateString()
+			}.</p>
 			<p>Original data / content managed by <a
 				target="_blank"
 				href="https://ficsit.app/tos"
