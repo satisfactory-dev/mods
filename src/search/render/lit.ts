@@ -53,6 +53,22 @@ import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
 	type: 'json',
 };
 
+import type {
+	logo_size,
+} from '../../../populate-cache.ts';
+
+import logo_sizes_raw from '../../../.cache/logo-sizes.json' with {
+	type: 'json',
+};
+
+const logo_sizes = new Map(Object.entries(logo_sizes_raw as unknown as {
+	[k in string]: [
+		logo_size,
+		logo_size,
+		logo_size,
+	];
+}));
+
 type DeferredModItem = (
 	& HTMLDivElement
 	& {
@@ -142,6 +158,16 @@ export class DeferredModFetch extends LitElement {
 
 	protected createRenderRoot() {
 		return this;
+	}
+
+	#logo_size_url(mod: Mod, size: logo_size) {
+		return `./thumbnail/mod/${
+			encodeURIComponent(mod.id)
+		}-${
+			encodeURIComponent(size[0])
+		}-${
+			encodeURIComponent(size[3])
+		}.webp`;
 	}
 
 	#conditionally<
@@ -344,12 +370,39 @@ export class DeferredModFetch extends LitElement {
 				value.logo,
 				(logo) => this.#mod_link(
 					value,
+					() => html`${when(
+						logo_sizes.get(value.id),
+						(sizes) => {
+							sizes = sizes.sort(([a], [b]) => {
+								return a - b;
+							});
+
+							const size = sizes[sizes.length - 1];
+
+							// using aria-hidden due to lack of alt data in api
+							return html`<img
+								aria-hidden="true"
+								loading="lazy"
+								width="${size[1]}"
+								height="${size[2]}"
+								src="${this.#logo_size_url(
+									value,
+									size,
+								)}"
+								srcset="${sizes.map((size) => `${
+									this.#logo_size_url(value, size)
+								} ${
+									size[1]
+								}w`).join(', ')}"
+							>`;
+						},
 					() => html`<img
 					src="${logo}"
 					width="1024"
 					height="1024"
 					loading="lazy"
-					>`,
+						>`,
+					)}`,
 					{
 						'has-image': true,
 					},

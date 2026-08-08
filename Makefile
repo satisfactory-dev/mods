@@ -62,7 +62,9 @@ build--web: build--css
 	@mkdir -p ./dist/api/
 	@mkdir -p ./dist/data/
 	@mkdir -p ./dist/css/
+	@mkdir -p ./dist/thumbnail/mod/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
 	@rsync -avh --delete ./.cache/data/ ./dist/data/
+	@rsync -avh --delete ./.cache/thumbnail/ ./dist/thumbnail/mod/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
 	@node ./populate-html.ts
