@@ -140,10 +140,11 @@ satisfactory-dev-mods-deferred
 	{
 		display: grid ;
 		grid-template: 'logo header' 'logo section' 'logo footer' ;
-		grid-template-columns: min(calc(100% * (200 / 550)), 200px) ;
+		grid-template-columns: max(min(200px, calc(100% * (200 / 550))), 100px) 1fr ;
+		grid-template-rows: min-content min-content 1fr ;
 		grid-column-gap: 1ch ;
 		width: 100% ;
-		max-width: min(calc(50% - 2ch), 550px) ;
+		max-width: 550px ;
 		margin: 1ch ;
 		padding: 1ch ;
 		outline: 1px solid ;
