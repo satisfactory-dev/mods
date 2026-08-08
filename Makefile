@@ -32,7 +32,7 @@ coverage--skip-lint:
 coverage--lcov:
 	@node --experimental-test-coverage --test-coverage-include='${PWD}/src/**/*.ts' --test --test-reporter=lcov --test-reporter-destination=coverage/lcov.info
 
-build: build--cache build--index build--web
+build: build--schema build--cache build--index build--web
 
 build--cache:
 	@node ./populate-cache.ts
