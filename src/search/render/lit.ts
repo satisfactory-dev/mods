@@ -189,6 +189,21 @@ export class DeferredModFetch extends LitElement {
 		return expect === data.compatibility[prop].state;
 	}
 
+	#mod_link(
+		mod: ModContent['data'],
+		content: (mod: ModContent['data']) => TemplateResult | string,
+		class_map: Parameters<typeof classMap>[0] = {},
+	) {
+		return html`<a
+			class=${classMap(class_map)},
+			target="_blank"
+			href="https://ficsit.app/mod/${
+				encodeURIComponent(mod.mod_reference)
+			}"
+			title="View ${mod.name}"
+		>${content(mod)}</a>`;
+	}
+
 	#content({
 		name,
 		data,
@@ -197,7 +212,11 @@ export class DeferredModFetch extends LitElement {
 		data?: ModContent['data'],
 	}) {
 		return html`<header>
-			<h1>${name}</h1>
+			<h1>${when(
+				data,
+				(value) => this.#mod_link(value, (mod) => mod.name),
+				() => name,
+			)}</h1>
 			<ul>
 				<li aria-label="Views">${this.#conditionally(
 					'👁️',
@@ -323,19 +342,18 @@ export class DeferredModFetch extends LitElement {
 			data,
 			(value) => html`${when(
 				value.logo,
-				(logo) => html`<a
-					class="has-image"
-					target="_blank"
-					href="https://ficsit.app/mod/${
-						encodeURIComponent(value.mod_reference)
-					}"
-					title="View ${name}"
-				><img
+				(logo) => this.#mod_link(
+					value,
+					() => html`<img
 					src="${logo}"
 					width="1024"
 					height="1024"
 					loading="lazy"
-				></a>`,
+					>`,
+					{
+						'has-image': true,
+					},
+				),
 				() => html`<span
 					class="as-image"
 					title="No image available"
@@ -360,14 +378,11 @@ export class DeferredModFetch extends LitElement {
 		</section>
 		<footer>
 			${when(
-				data?.mod_reference,
-				(mod_reference) => html`<a
-					target="_blank"
-					href="https://ficsit.app/mod/${
-						encodeURIComponent(mod_reference)
-					}"
-					title="View ${name}"
-				><span aria-hidden="true">ℹ️</span></a>`,
+				data,
+				(data) => this.#mod_link(
+					data,
+					() => html`<span aria-hidden="true">ℹ️</span>`,
+				),
 			)}
 		</footer>`;
 	}
