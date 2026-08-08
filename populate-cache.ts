@@ -220,7 +220,8 @@ async function logo(mod: result) {
 		existing_logo_caches.add(logo_cache_file);
 
 		if (
-			existsSync(logo_cache_file)
+			logo_sizes.has(mod.id)
+			&& existsSync(logo_cache_file)
 			&& full_mod_api_hash_cache.get(mod.id) === current_mod_hash
 		) {
 			return;
