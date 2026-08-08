@@ -445,7 +445,7 @@ export type SupportedToggles = (
 	| 'noai' // because reasons
 );
 
-type TogglesProviders = {
+export type TogglesProviders = {
 	[key in SupportedToggles]: Promise<Set<string>>;
 };
 
@@ -487,7 +487,7 @@ export default class Search {
 				tags_query_exclude: string[],
 			}
 			& {
-				[k in SupportedToggles]: boolean;
+				[k in SupportedToggles]?: boolean;
 			}
 		),
 		override_results?: [string, ...string[]],

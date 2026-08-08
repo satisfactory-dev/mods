@@ -2,12 +2,16 @@ import Search from './src/search.ts';
 import {
 	lunr,
 	tags,
+	toggles_providers,
 } from './src/search/fs.ts';
 
 let [,, ...query] = process.argv;
 
-// @todo implement the new providers
-const search = new Search(lunr(), tags());
+const search = new Search(
+	lunr(),
+	tags(),
+	toggles_providers,
+);
 
 const tags_query_include = query
 	.filter((e) => e.startsWith('tag:'))
@@ -23,8 +27,10 @@ query = query
 
 void search.search(
 	query.join(' '),
+	{
 	tags_query_include,
 	tags_query_exclude,
+	},
 )
 	.then((yup) => {
 		console.log(yup);

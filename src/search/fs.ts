@@ -9,6 +9,7 @@ import {
 
 import type {
 	TagIndex,
+	TogglesProviders,
 } from '../search.ts';
 import {
 	get_tags_index_validator,
@@ -57,3 +58,45 @@ export async function tags(): Promise<TagIndex[]> {
 
 	return Promise.all(indices);
 }
+
+export const toggles_providers: TogglesProviders = {
+	woso: (async () => {
+		for await (const path of glob(`${
+			import.meta.dirname
+		}/../../dist/mod-ids/stable.mod-ids.*.json`)) {
+			return import(path, {
+				with: {
+					type: 'json',
+				},
+			}).then(({default: ids}) => new Set(ids as string[]));
+		}
+
+		throw new Error('Could not find file!');
+	})(),
+	controller: (async () => {
+		for await (const path of glob(`${
+			import.meta.dirname
+		}/../../dist/mod-ids/controller-supported-or-moot.mod-ids.*.json`)) {
+			return import(path, {
+				with: {
+					type: 'json',
+				},
+			}).then(({default: ids}) => new Set(ids as string[]));
+		}
+
+		throw new Error('Could not find file!');
+	})(),
+	noai: (async () => {
+		for await (const path of glob(`${
+			import.meta.dirname
+		}/../../dist/mod-ids/ai.mod-ids.*.json`)) {
+			return import(path, {
+				with: {
+					type: 'json',
+				},
+			}).then(({default: ids}) => new Set(ids as string[]));
+		}
+
+		throw new Error('Could not find file!');
+	})(),
+};
