@@ -28,8 +28,8 @@ query = query
 void search.search(
 	query.join(' '),
 	{
-	tags_query_include,
-	tags_query_exclude,
+		tags_query_include,
+		tags_query_exclude,
 	},
 )
 	.then((yup) => {
