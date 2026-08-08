@@ -396,11 +396,11 @@ export class DeferredModFetch extends LitElement {
 								}w`).join(', ')}"
 							>`;
 						},
-					() => html`<img
-					src="${logo}"
-					width="1024"
-					height="1024"
-					loading="lazy"
+						() => html`<img
+							src="${logo}"
+							width="1024"
+							height="1024"
+							loading="lazy"
 						>`,
 					)}`,
 					{
