@@ -306,6 +306,11 @@ async function logo(mod: result) {
 
 		if (!retain_keeps) {
 			logo_sizes.delete(mod.id);
+		} else {
+			await writeFile(
+				logo_sizes_cache_file,
+				stringify(Object.fromEntries(logo_sizes)),
+			);
 		}
 	}
 }
