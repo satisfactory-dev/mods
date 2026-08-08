@@ -71,10 +71,11 @@ const full_mod_api_hash_cache_file = `${
 
 const tag_ids_to_check = new Set<Tag['id']>();
 
-type logo_size = [
+export type logo_size = [
 	number, // scale
 	number, // width
 	number, // height
+	string, // hash substring
 ];
 
 let logo_sizes: Map<
@@ -227,6 +228,8 @@ async function logo(mod: result) {
 			return;
 		}
 
+		console.log(`regenerating thumbnails for ${mod.id}`);
+
 		full_mod_api_hash_cache.set(mod.id, current_mod_hash);
 
 		await writeFile(
@@ -266,22 +269,23 @@ async function logo(mod: result) {
 				resolveWithObject: true,
 			});
 
-			sizes.push([size, info.width, info.height]);
-
 			const sha512 = hash('sha512', data, 'hex');
+
+			const hash_substring = sha512.substring(0, 8);
+
+			sizes.push([size, info.width, info.height, hash_substring]);
 
 			const output_file = `${
 				import.meta.dirname
 			}/.cache/thumbnail/${mod.id}-${
 				size
 			}-${
-				sha512.substring(0, 8)
+				hash_substring
 			}.webp`;
 
 			await writeFile(output_file, data);
 
 			keep.add(output_file);
-			keep.add(logo_cache_file);
 		}
 
 
@@ -290,6 +294,7 @@ async function logo(mod: result) {
 		}
 
 		logo_sizes.set(mod.id, sizes);
+		keep.add(logo_cache_file);
 
 		retain_keeps = true;
 	} finally {
