@@ -392,7 +392,6 @@ satisfactory-dev-mods-deferred
 			display: block ;
 			grid-area: logo ;
 			width: 100% ;
-			margin: auto .5ch auto 0 ;
 		}
 
 		> .has-image > img
