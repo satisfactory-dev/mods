@@ -3,5 +3,11 @@
 	"compilerOptions": {
 		"noEmit": true
 	},
-	"include": ["./src/**/*.ts", "./tests/src/*.ts", "./.cache/*.ts", "./*.ts"]
+	"include": [
+		"./src/**/*.ts",
+		"./tests/src/*.ts",
+		"./.cache/*.ts",
+		"./*.ts",
+		"cache-json.d.ts"
+	]
 }
