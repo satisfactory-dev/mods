@@ -38,7 +38,7 @@ for await (const path of glob(`${import.meta.dirname}/dist/*.json`)) {
 }
 
 for await (const path of glob(`${import.meta.dirname}/dist/mod-ids/*.json`)) {
-	const file = `./${basename(path)}`;
+	const file = `./mod-ids/${basename(path)}`;
 
 	if (
 		Web.is_source(file)
