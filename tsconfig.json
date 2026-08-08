@@ -1,6 +1,9 @@
 {
 	"compilerOptions": {
 		"types": ["node"],
+		"paths": {
+			"cssnano": ["./cssnano-is-weird.d.ts"]
+		},
 		"allowImportingTsExtensions": true,
 		"erasableSyntaxOnly": true,
 		"noEmit": true,
