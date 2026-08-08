@@ -71,6 +71,13 @@ const index = html`<html
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mods</title>
+<meta
+	name="description"
+	content="${
+		'An experimental forked search alternative of https://ficsit.app/mods.'
+	}"
+>
 <link
 	rel="modulepreload"
 	as="script"
