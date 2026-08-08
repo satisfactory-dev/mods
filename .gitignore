@@ -7,3 +7,4 @@
 /.cache/
 /dist/
 /.devcontainer/.env
+/css/*.css

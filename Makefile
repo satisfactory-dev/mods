@@ -54,10 +54,14 @@ build--schema:
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 
-build--web:
+build--css:
+	@node ./build-css.ts
+
+build--web: build--css
 	@rm -f ./dist/js/*.js ./dist/*.json
 	@mkdir -p ./dist/api/
 	@mkdir -p ./dist/data/
+	@mkdir -p ./dist/css/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
 	@rsync -avh --delete ./.cache/data/ ./dist/data/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
