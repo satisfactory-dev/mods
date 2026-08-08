@@ -39,18 +39,18 @@ build--cache:
 
 build--index:
 	@mkdir -p ./.cache/mod-ids/
-	@git clean -fxd ./.cache/mod-ids/*.json
+	@rm -f ./.cache/mod-ids/*.json
 	@node ./populate-index.ts
 
 build--schema:
-	@git clean -fxd ./.cache/*.validator.ts
+	@rm -f ./.cache/*.validator.ts
 	@node ./populate-schema.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 
 build--web:
-	@git clean -fxd ./dist/*.js ./dist/vendor/
+	@rm -f ./dist/*.js ./dist/vendor/
 	@mkdir -p ./dist/api/
 	@mkdir -p ./dist/mod-ids/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
