@@ -50,7 +50,7 @@ build--schema:
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 
 build--web:
-	@rm -f ./dist/*.js ./dist/vendor/
+	@rm -f ./dist/js/*.js
 	@mkdir -p ./dist/api/
 	@mkdir -p ./dist/mod-ids/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/

@@ -20,7 +20,7 @@ export default ({
 	provider: Provider,
 }) => {
 	const thread_source = document.querySelector<HTMLLinkElement>(
-		'head > link[rel="modulepreload"][href$="/thread.js"]',
+		'head > link[rel="modulepreload"][href*="/thread-"]',
 	);
 
 	if (!thread_source) {

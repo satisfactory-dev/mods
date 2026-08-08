@@ -12,9 +12,10 @@ export default defineConfig([
 		},
 		output: {
 			format: 'esm',
-			dir: 'dist',
+			dir: 'dist/js/',
 			minify: false,
 			sourcemap: false,
+			entryFileNames: '[name]-[hash].js',
 			codeSplitting: {
 				groups: [
 					{

@@ -10,9 +10,11 @@ import {
 import type {
 	TemplateResult,
 } from 'lit';
+
 import {
 	html,
-} from 'lit';
+	unsafeStatic,
+} from 'lit/static-html.js';
 
 import {
 	render,
@@ -23,6 +25,10 @@ import {
 } from '@lit-labs/ssr/lib/render-result.js';
 
 import Web from './src/search/web.ts';
+
+import {
+	stringify,
+} from './src/helper/json.ts';
 
 const sources: string[] = [];
 
@@ -65,6 +71,36 @@ export async function htmldoc(
 		.trim();
 }
 
+const modulepreloads = new Set<string>();
+
+for await (const path of glob('./dist/js/{thread, web}-*.js')) {
+	modulepreloads.add(basename(path));
+}
+
+const files: {
+	ui: string | undefined,
+	provider: string | undefined,
+	web: string | undefined,
+	thread: string | undefined,
+} = {
+	ui: undefined,
+	provider: undefined,
+	web: undefined,
+	thread: undefined,
+};
+
+for (const key of Object.keys(files)) {
+	for await (const path of glob(
+		`./dist/js/${key}-*.js`,
+	)) {
+		files[key] = basename(path);
+	}
+
+	if (!files[key]) {
+		throw new Error(`Could not find ${key}`);
+	}
+}
+
 const index = html`<html
 	lang="en"
 >
@@ -78,18 +114,14 @@ const index = html`<html
 		'An experimental forked search alternative of https://ficsit.app/mods.'
 	}"
 >
+${[...modulepreloads].map((filename) => html`
 <link
 	rel="modulepreload"
 	as="script"
-	href="./thread.js"
+	href="./js/${filename}"
 	crossorigin="anonymous"
 >
-<link
-	rel="modulepreload"
-	as="script"
-	href="./web.js"
-	crossorigin="anonymous"
->
+`)}
 ${sources.map((source) => html`<link
 	rel="preload"
 	as="fetch"
@@ -392,9 +424,17 @@ satisfactory-dev-mods-deferred
 </style>
 </head>
 <body>
+<script type="importmap">${unsafeStatic(stringify({
+	imports: {
+		'./js/ui.js': `./js/${files.ui}`,
+		'./js/provider.js': `./js/${files.provider}`,
+		'./js/web.js': `./js/${files.web}`,
+		'./js/thread.js': `./js/${files.thread}`,
+	},
+}))}</script>
 <script type="module">
-import init from './ui.js';
-import Provider from './provider.js';
+import init from './js/ui.js';
+import Provider from './js/provider.js';
 
 const params = new URLSearchParams(location.search);
 
@@ -404,7 +444,7 @@ url.search = '';
 const provider = new Provider(url + '/api/');
 
 document.addEventListener('DOMContentLoaded', () => {
-	import('./web.js').then(({default: Web}) => {
+	import('./js/web.js').then(({default: Web}) => {
 		init({
 			Web,
 			params,
