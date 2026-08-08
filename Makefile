@@ -38,22 +38,27 @@ build--cache:
 	@node ./populate-cache.ts
 
 build--index:
-	@mkdir -p ./.cache/mod-ids/
+	@mkdir -p ./.cache/data/mod-ids/
+	@mkdir -p ./.cache/data/lunr/
 	@rm -f ./.cache/mod-ids/*.json
+	@rm -f ./.cache/data/mod-ids/*.json
+	@rm -f ./.cache/data/lunr/*.js
+	@rm -f ./.cache/lunr/*.js
 	@node ./populate-index.ts
 
 build--schema:
 	@rm -f ./.cache/*.validator.ts
+	@rm -f ./.cache/data/*/*.json
 	@node ./populate-schema.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 	@-./node_modules/.bin/oxlint --fix ./.cache/*.validator.ts
 
 build--web:
-	@rm -f ./dist/js/*.js
+	@rm -f ./dist/js/*.js ./dist/*.json
 	@mkdir -p ./dist/api/
-	@mkdir -p ./dist/mod-ids/
+	@mkdir -p ./dist/data/
 	@rsync -avh --delete ./.cache/api/getMod--reduced/ ./dist/api/getMod--reduced/
-	@rsync -avh --delete ./.cache/mod-ids/ ./dist/mod-ids/
+	@rsync -avh --delete ./.cache/data/ ./dist/data/
 	@./node_modules/.bin/rolldown --config rolldown.config.ts
 	@node ./populate-html.ts

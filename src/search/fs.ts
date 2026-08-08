@@ -20,7 +20,7 @@ export async function lunr(): Promise<[string, ...string[]]> {
 
 	for await (const path of glob(`${
 		import.meta.dirname
-	}/../../dist/lunr.*.json`)) {
+	}/../../dist/data/lunr/lunr.*.json`)) {
 		indices.push(
 			readFile(path)
 				.then((e) => e.toString()),
@@ -39,7 +39,7 @@ export async function tags(): Promise<TagIndex[]> {
 
 	for await (const path of glob(`${
 		import.meta.dirname
-	}/../../dist/tags.*.json`)) {
+	}/../../dist/data/tags/tags.*.json`)) {
 		indices.push(import(
 			path,
 			{

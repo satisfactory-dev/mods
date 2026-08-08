@@ -1,5 +1,6 @@
 import {
 	basename,
+	dirname,
 } from 'node:path';
 
 import {
@@ -32,19 +33,8 @@ import {
 
 const sources: string[] = [];
 
-for await (const path of glob(`${import.meta.dirname}/dist/*.json`)) {
-	const file = `./${basename(path)}`;
-
-	if (
-		Web.is_source(file)
-		|| Web.is_mod_ids_list(file)
-	) {
-		sources.push(file);
-	}
-}
-
-for await (const path of glob(`${import.meta.dirname}/dist/mod-ids/*.json`)) {
-	const file = `./mod-ids/${basename(path)}`;
+for await (const path of glob(`${import.meta.dirname}/dist/data/*/*.json`)) {
+	const file = `./data/${basename(dirname(path))}/${basename(path)}`;
 
 	if (
 		Web.is_source(file)

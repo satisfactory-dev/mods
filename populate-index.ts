@@ -7,8 +7,6 @@ import {
 } from 'node:fs';
 
 import {
-	glob,
-	unlink,
 	writeFile,
 } from 'node:fs/promises';
 
@@ -160,7 +158,7 @@ for (
 
 	const cache_file = `${
 		import.meta.dirname
-	}/.cache/mod-ids/${basename}.${
+	}/.cache/data/mod-ids/${basename}.${
 		sha512.substring(0, 8)
 	}.json`;
 
@@ -198,7 +196,7 @@ for (const [index_key, index] of indices) {
 
 	const cache_file = `${
 		import.meta.dirname
-	}/dist/lunr.${
+	}/.cache/data/lunr/lunr.${
 		index_key
 	}.${
 		sha512.substring(0, 8)
@@ -222,7 +220,7 @@ for (const [tag_id, mods] of mods_by_tag) {
 
 	const cache_file = `${
 		import.meta.dirname
-	}/dist/tags.${
+	}/.cache/data/tags/tags.${
 		tag_id
 	}.${
 		sha512.substring(0, 8)
@@ -233,19 +231,4 @@ for (const [tag_id, mods] of mods_by_tag) {
 	}
 
 	tag_files.add(cache_file);
-}
-
-for (const [prefix, check] of [
-	['lunr', cache_files],
-	['tags', tag_files],
-] as const) {
-	for await (const match of glob(`${
-		import.meta.dirname
-	}/dist/${
-		prefix
-	}.*.json`)) {
-		if (!check.has(match)) {
-			await unlink(match);
-		}
-	}
 }
