@@ -108,6 +108,27 @@ ${sources.map((source) => html`<link
 	padding: 0 ;
 }
 
+body
+{
+	display: flex ;
+	flex-direction: column ;
+	height: 100vh ;
+	overflow: hidden ;
+
+	> output
+	{
+		flex: 1 ;
+		overflow-y: auto ;
+	}
+
+	> footer
+	{
+		border-top: 1px solid ;
+		margin-top: 1ch ;
+		padding: .25em ;
+	}
+}
+
 ul,
 ol
 {

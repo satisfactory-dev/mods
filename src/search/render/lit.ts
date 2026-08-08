@@ -624,7 +624,10 @@ export default class Ui {
 					),
 				),
 			),
-		)}</output>`;
+		)}</output>
+		<footer>
+			${Ui.#copyright_notice()}
+		</footer>`;
 	}
 
 	#render() {
@@ -757,5 +760,24 @@ export default class Ui {
 			(maybe instanceof HTMLButtonElement)
 			&& maybe.matches('button[aria-controls="filters"')
 		);
+	}
+
+	static #copyright_notice() {
+		return html`
+			<p>An experimental forked search alternative of <a
+				target="_blank"
+				href="https://ficsit.app/mods"
+			>https://ficsit.app/mods</a>.</p>
+			<p>Fork &copy; ${
+				(new Date()).getFullYear()
+			} <a
+				target="_blank"
+				href="https://github.com/satisfactory-dev/mods/"
+			>SignpostMarv</a>.</p>
+			<p>Original data / content managed by <a
+				target="_blank"
+				href="https://ficsit.app/tos"
+			>ficsit.app</a>.</p>
+		`;
 	}
 }
