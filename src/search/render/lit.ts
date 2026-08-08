@@ -548,6 +548,8 @@ export default class Ui {
 		},
 	};
 
+	#copyright_notice: DocumentFragment;
+
 	constructor({
 		target,
 		search,
@@ -563,6 +565,18 @@ export default class Ui {
 		this.#search = search;
 		this.#provider = provider;
 		this.#initial_query = initial_query || '';
+
+		const copyright_notice = (
+			document.querySelector(
+				'template#copyright-notice',
+			) as unknown as HTMLTemplateElement | null
+		)?.content;
+
+		if (!copyright_notice) {
+			throw new Error('Could not find copyright notice!');
+		}
+
+		this.#copyright_notice = document.importNode(copyright_notice, true);
 	}
 
 	get template() {
@@ -694,7 +708,7 @@ export default class Ui {
 			),
 		)}</output>
 		<footer>
-			${Ui.#copyright_notice()}
+			${this.#copyright_notice}
 		</footer>`;
 	}
 
@@ -828,30 +842,5 @@ export default class Ui {
 			(maybe instanceof HTMLButtonElement)
 			&& maybe.matches('button[aria-controls="filters"')
 		);
-	}
-
-	static #copyright_notice() {
-		const now = new Date();
-
-		return html`
-			<p>An experimental forked search alternative of <a
-				target="_blank"
-				href="https://ficsit.app/mods"
-			>https://ficsit.app/mods</a>.</p>
-			<p>Fork &copy; ${
-				now.getFullYear()
-			} <a
-				target="_blank"
-				href="https://github.com/satisfactory-dev/mods/"
-			>SignpostMarv</a>, last build at ${
-				now.toTimeString()
-			} on ${
-				now.toDateString()
-			}.</p>
-			<p>Original data / content managed by <a
-				target="_blank"
-				href="https://ficsit.app/tos"
-			>ficsit.app</a>.</p>
-		`;
 	}
 }
