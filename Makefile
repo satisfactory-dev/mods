@@ -1,10 +1,6 @@
 install:
 	@npm install
 
-build:
-	@echo 'building from ./tsconfig.app.json'
-	@./node_modules/.bin/tsc --project ./tsconfig.app.json
-
 lint--tsc:
 	@echo 'running syntax check'
 	@./node_modules/.bin/tsc --project ./tsconfig.app-check.json
