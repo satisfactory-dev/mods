@@ -1,0 +1,10 @@
+import type { StandaloneDataValidationCxt } from '@satisfactory-dev/ajv-utilities';
+import type { TagIndex } from '../src/search.ts';
+import type { CommandChoice, ResultsChoice } from '../src/search/thread.ts';
+export declare const validator_tag_index: typeof validate20;
+declare function validate20(data: unknown, { instancePath, parentData, parentDataProperty, rootData, dynamicAnchors }?: Partial<StandaloneDataValidationCxt>): data is TagIndex;
+export declare const validator_thread_cmd: typeof validate22;
+declare function validate22(data: unknown, { instancePath, parentData, parentDataProperty, rootData, dynamicAnchors }?: Partial<StandaloneDataValidationCxt>): data is CommandChoice;
+export declare const validator_search_results: typeof validate23;
+declare function validate23(data: unknown, { instancePath, parentData, parentDataProperty, rootData, dynamicAnchors }?: Partial<StandaloneDataValidationCxt>): data is ResultsChoice;
+export {};
