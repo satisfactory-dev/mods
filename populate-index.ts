@@ -113,7 +113,8 @@ for await (const mod of getMods(ids_in_cache())) {
 	}
 
 	if (
-		'ai_usage' === mod.ai_use_disclosure?.disclosure_type
+		null === mod.ai_use_disclosure
+		|| 'ai_usage' === mod.ai_use_disclosure?.disclosure_type
 		|| 'runtime_ai_usage' === mod.ai_use_disclosure?.disclosure_type
 	) {
 		has_ai.add(mod.id);
