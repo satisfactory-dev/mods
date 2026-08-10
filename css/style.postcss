@@ -93,24 +93,39 @@ ol
 {
 	> li
 	{
-		&:focus-within > aside,
-		> label:hover ~ aside
+		&:focus-within aside,
+		> button:hover > aside
 		{
 			display: block ;
 		}
 
-		> input
+		> button
 		{
-			display: none ;
+			background: light-dark(#fff, #000) ;
+			color: light-dark(#000, #fff) ;
+			padding: .125em ;
+			border: 1px solid ;
 
-			&:checked + label::before
+			&::before
 			{
-				background: light-dark(#000, #fff) ;
-				color: light-dark(#fff, #000) ;
+				content: '#' ;
+				padding: .125em ;
+                outline: 1px solid light-dark(#000, #fff) ;
+                margin: -0.125em 0 -0.125em -0.125em;
+			}
+
+			&[aria-checked="true"]::before
+			{
+				color: #0f0 ;
+			}
+
+			&[aria-checked="false"]::before
+			{
+				color: #f00 ;
 			}
 		}
 
-		> aside
+		> button > aside
 		{
 			position: absolute ;
 			top: 100% ;

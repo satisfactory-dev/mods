@@ -455,6 +455,8 @@ export default class Search {
 
 	#tags: Promise<TagIndex[]>;
 
+	#mod_tags: Promise<Map<string, Set<string>>>;
+
 	#toggles_providers: TogglesProviders;
 
 	#results = new Map<string, Promise<IndexResult[]>>();
@@ -472,6 +474,25 @@ export default class Search {
 		});
 		this.#tags = tags_provider;
 		this.#toggles_providers = toggles_providers;
+		this.#mod_tags = this.#tags.then((tag_index) => {
+			const mod_tags = new Map<string, Set<string>>();
+
+			for (const {tag_id, mods} of tag_index) {
+				for (const mod_id of mods) {
+					let mod_tags_set = mod_tags.get(mod_id);
+
+					if (!mod_tags_set) {
+						mod_tags_set = new Set();
+
+						mod_tags.set(mod_id, mod_tags_set);
+					}
+
+					mod_tags_set.add(tag_id);
+				}
+			}
+
+			return mod_tags;
+		});
 	}
 
 	async search(
@@ -504,44 +525,30 @@ export default class Search {
 				: this.#search_query_cached(query)
 		);
 
-		if (tags_query_include.length) {
-			const [
-				results,
-				tags,
-			] = await Promise.all([
+		if (tags_query_include.length || tags_query_exclude.length) {
+			results_promise = Promise.all([
 				results_promise,
-				this.#tags,
-			]);
-
-			const mods_matching_tags = new Set(tags
-				.filter(({
-					tag_id,
-				}) => tags_query_include.includes(tag_id))
-				.flatMap(({mods}) => mods));
-
-			results_promise = Promise.resolve(results.filter(({
-				ref: id,
-			}) => mods_matching_tags.has(id)));
-		}
-
-		if (tags_query_exclude.length) {
-			const [
+				this.#mod_tags,
+			]).then(([
 				results,
-				tags,
-			] = await Promise.all([
-				results_promise,
-				this.#tags,
-			]);
+				mod_tags,
+			]) => {
+				return results.filter(({ref: maybe}) => {
+					for (const tag_id of tags_query_include) {
+						if (!mod_tags.get(maybe)?.has(tag_id)) {
+							return false;
+						}
+					}
 
-			const mods_matching_tags = new Set(tags
-				.filter(({
-					tag_id,
-				}) => !tags_query_exclude.includes(tag_id))
-				.flatMap(({mods}) => mods));
+					for (const tag_id of tags_query_exclude) {
+						if (mod_tags.get(maybe)?.has(tag_id)) {
+							return false;
+						}
+					}
 
-			results_promise = Promise.resolve(results.filter(({
-				ref: id,
-			}) => mods_matching_tags.has(id)));
+					return true;
+				});
+			});
 		}
 
 		if (noai) {

@@ -496,7 +496,6 @@ type Toggles = (
 		[k in SupportedToggles]: () => void;
 	}
 	& {
-		it: () => void,
 		any_compat: () => void,
 	}
 );
@@ -524,8 +523,6 @@ export default class Ui {
 
 	#provider: Provider;
 
-	#invert_tags = false;
-
 	#working_on_stable_only = true;
 
 	#controller_supported_or_moot = false;
@@ -550,9 +547,6 @@ export default class Ui {
 		noai: () => {
 			this.#no_ai = !this.#no_ai;
 		},
-		it: () => {
-			this.#invert_tags = !this.#invert_tags;
-		},
 		brokensource: () => {
 			this.#broken_source = !this.#broken_source;
 
@@ -567,6 +561,8 @@ export default class Ui {
 	};
 
 	#copyright_notice: DocumentFragment;
+
+	#tag_status = new Map<string, 0|1|2>();
 
 	constructor({
 		target,
@@ -705,19 +701,6 @@ export default class Ui {
 									'No AI'
 								}</label>
 							</li>
-							<li>
-								<input
-									type="checkbox"
-									name="it"
-									id="invert-tags"
-									?checked=${this.#invert_tags}
-								>
-								<label
-									for="invert-tags"
-								>${
-									'Tag Filter excludes instead of includes'
-								}</label>
-							</li>
 						</ul>
 					</fieldset>
 					<ul
@@ -730,20 +713,41 @@ export default class Ui {
 							description,
 						},
 					]) => html`<li>
-						<input
+						<button
+							type="button"
 							name="tags[]"
 							value="${id}"
-							id="tag-${id}"
-							type="checkbox"
-						>
-						<label
-							for="tag-${id}"
+							role="checkbox"
+							aria-checked="${
+								[
+									'mixed',
+									'true',
+									'false',
+								][this.#tag_status.get(id) || 0]
+							}"
+							aria-label="${
+								`${
+									name
+								}, ${
+									[
+										'ignored by filter',
+										'required by filter',
+										'excluded by filter',
+									][this.#tag_status.get(id) || 0]
+								}`
+							}"
 							aria-describedby="tag-tooltip-${id}"
-						>${name}</label>
+						>
+							<span
+								id="tag-name-${id}"
+								inert
+								aria-hidden="true"
+							>${name}</span>
 						<aside
 							id="tag-tooltip-${id}"
 							role="tooltip"
 						>${description}</aside>
+						</button>
 					</li>`)}</ul>
 				</fieldset>
 			</fieldset>
@@ -789,19 +793,22 @@ export default class Ui {
 		this.#debounce = setTimeout(() => {
 			this.#debounced = true;
 
-			const tag_match = [...form.querySelectorAll<HTMLInputElement>(
-				'input[name="tags[]"]:checked',
-			)].map((e) => e.value);
+			const tags_query_include: string[] = [];
+			const tags_query_exclude: string[] = [];
+
+			for (const [tag, status] of this.#tag_status) {
+				if (1 === status) {
+					tags_query_include.push(tag);
+				} else if (2 === status) {
+					tags_query_exclude.push(tag);
+				}
+			}
 
 			void this.#search.search(
 				search_value,
 				{
-					tags_query_exclude: (
-						this.#invert_tags ? tag_match : []
-					),
-					tags_query_include: (
-						this.#invert_tags ? [] : tag_match
-					),
+					tags_query_exclude,
+					tags_query_include,
 					noai: this.#no_ai,
 					woso: this.#working_on_stable_only,
 					controller: this.#controller_supported_or_moot,
@@ -862,7 +869,7 @@ export default class Ui {
 
 			if (
 				coerced.matches([
-					'input[name][type="checkbox"]:not([name="tags[]"])',
+					'input[name][type="checkbox"]',
 					'input[name="compatibility"][type="radio"]',
 				].join(','))
 			) {
@@ -884,6 +891,29 @@ export default class Ui {
 		});
 
 		form.addEventListener('click', (e) => {
+			if (Ui.#is_tag_toggle(e.target)) {
+				const status = (
+					Math.max(0, Math.min(2, (
+						this.#tag_status.get(e.target.value)
+						|| 0
+					)))
+					+ 1
+				) % 3 as 0|1|2;
+
+				this.#tag_status.set(
+					e.target.value,
+					status,
+				);
+				this.#render();
+
+				this.#debounced_search(
+					form,
+					search.value,
+				);
+
+				return;
+			}
+
 			if (!Ui.#is_filter_button(e.target)) {
 				return;
 			}
@@ -905,6 +935,18 @@ export default class Ui {
 		return (
 			(maybe instanceof HTMLButtonElement)
 			&& maybe.matches('button[aria-controls="filters"')
+		);
+	}
+
+	static #is_tag_toggle(maybe: unknown): maybe is (
+		& HTMLButtonElement
+		& {
+			name: 'tags[]',
+		}
+	) {
+		return (
+			(maybe instanceof HTMLButtonElement)
+			&& maybe.matches('button[name="tags[]"]')
 		);
 	}
 }
