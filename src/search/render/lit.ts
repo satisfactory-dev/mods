@@ -497,6 +497,7 @@ type Toggles = (
 	}
 	& {
 		it: () => void,
+		any_compat: () => void,
 	}
 );
 
@@ -559,6 +560,10 @@ export default class Ui {
 				this.#working_on_stable_only = false;
 			}
 		},
+		any_compat: () => {
+			this.#broken_source = false;
+			this.#working_on_stable_only = false;
+		},
 	};
 
 	#copyright_notice: DocumentFragment;
@@ -618,7 +623,27 @@ export default class Ui {
 					aria-label="Search Filters"
 				>
 					<fieldset>
+						<legend>Compatibility</legend>
 						<ul>
+							<li>
+								<input
+									type="radio"
+									name="compatibility"
+									value="any_compat"
+									id="any-compatibility"
+									?checked=${
+										(
+											!this.#working_on_stable_only
+											&& !this.#broken_source
+										)
+									}
+								>
+								<label
+									for="any-compatibility"
+								>${
+									'Ignore compatibility'
+								}</label>
+							</li>
 							<li>
 								<input
 									type="radio"
@@ -662,6 +687,11 @@ export default class Ui {
 									'Works with Controller (or moot)'
 								}</label>
 							</li>
+						</ul>
+					</fieldset>
+					<fieldset>
+						<legend>Additional Filters</legend>
+						<ul>
 							<li>
 								<input
 									type="checkbox"
