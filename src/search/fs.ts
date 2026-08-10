@@ -99,4 +99,17 @@ export const toggles_providers: TogglesProviders = {
 
 		throw new Error('Could not find file!');
 	})(),
+	brokensource: (async () => {
+		for await (const path of glob(`${
+			import.meta.dirname
+		}/../../dist/mod-ids/broken-with-source-linked.mod-ids.*.json`)) {
+			return import(path, {
+				with: {
+					type: 'json',
+				},
+			}).then(({default: ids}) => new Set(ids as string[]));
+		}
+
+		throw new Error('Could not find file!');
+	})(),
 };

@@ -443,6 +443,7 @@ export type SupportedToggles = (
 	| 'woso' // working on stable only
 	| 'controller' // controller supported or moot
 	| 'noai' // because reasons
+	| 'brokensource' // broken with source linked
 );
 
 export type TogglesProviders = {
@@ -481,6 +482,7 @@ export default class Search {
 			noai = false,
 			woso = false,
 			controller = false,
+			brokensource = false,
 		}: (
 			& {
 				tags_query_include: string[],
@@ -558,6 +560,13 @@ export default class Search {
 			]).then(([results, works_on_stable]) => results.filter((
 				{ref: maybe},
 			) => works_on_stable.has(maybe)));
+		} else if (brokensource) {
+			results_promise = Promise.all([
+				results_promise,
+				this.#toggles_providers.brokensource,
+			]).then(([results, broken_with_source_linked]) => results.filter((
+				{ref: maybe},
+			) => broken_with_source_linked.has(maybe)));
 		}
 
 		if (controller) {

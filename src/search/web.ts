@@ -38,6 +38,7 @@ export default class Web {
 					noai: this.#noai(),
 					woso: this.#woso(),
 					controller: this.#controller(),
+					brokensource: this.#brokensource(),
 				},
 				this.#thread_source,
 			);
@@ -165,6 +166,33 @@ export default class Web {
 
 								// oxlint-disable-next-line @stylistic/max-len
 								'Supports controller json contained something other than a string array!',
+							);
+						}
+
+						return maybe;
+					})),
+			]);
+		}
+
+		return ids;
+	}
+
+	async #brokensource(): Promise<Set<string>> {
+		let ids = new Set<string>();
+
+		for (const source of this.#sources.filter((
+			maybe,
+		) => /broken-with-source-linked\.mod-ids\..+\.json$/.test(maybe))) {
+			ids = new Set([
+				...ids,
+				...(await fetch(source)
+					.then((e) => e.json())
+					.then((maybe): string[] => {
+						if (!Web.#is_ids(maybe)) {
+							throw new Error(
+
+								// oxlint-disable-next-line @stylistic/max-len
+								'Broken with source linked json contained something other than a string array!',
 							);
 						}
 

@@ -31,7 +31,7 @@ import type {
 
 import {
 	cached as getMods,
-} from './src/api/getMods--reduced.ts';
+} from './src/api/getMods.ts';
 
 import {
 	cached as single_record,
@@ -61,6 +61,8 @@ const has_ai = new Set<doc['id']>();
 const stable_mods = new Set<doc['id']>();
 
 const controller_supported_or_moot_mods = new Set<doc['id']>();
+
+const broken_source = new Set<doc['id']>();
 
 for await (const mod of getMods(ids_in_cache())) {
 	if (mod.hidden) {
@@ -127,6 +129,14 @@ for await (const mod of getMods(ids_in_cache())) {
 	) {
 		controller_supported_or_moot_mods.add(mod.id);
 	}
+
+	if (
+		'' !== mod.source_url
+		&& 'Works' !== mod.compatibility?.EA.state
+		&& 'Works' !== mod.compatibility?.EXP.state
+	) {
+		broken_source.add(mod.id);
+	}
 }
 
 await writeFile(
@@ -150,6 +160,10 @@ for (
 		[
 			'controller-supported-or-moot.mod-ids',
 			controller_supported_or_moot_mods,
+		],
+		[
+			'broken-with-source-linked.mod-ids',
+			broken_source,
 		],
 	] as const
 ) {

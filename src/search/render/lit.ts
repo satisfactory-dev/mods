@@ -531,9 +531,15 @@ export default class Ui {
 
 	#no_ai = true;
 
+	#broken_source = false;
+
 	#toggles: Toggles = {
 		woso: () => {
 			this.#working_on_stable_only = !this.#working_on_stable_only;
+
+			if (this.#working_on_stable_only) {
+				this.#broken_source = false;
+			}
 		},
 		controller: () => {
 			this.#controller_supported_or_moot = (
@@ -545,6 +551,13 @@ export default class Ui {
 		},
 		it: () => {
 			this.#invert_tags = !this.#invert_tags;
+		},
+		brokensource: () => {
+			this.#broken_source = !this.#broken_source;
+
+			if (this.#broken_source) {
+				this.#working_on_stable_only = false;
+			}
 		},
 	};
 
@@ -608,8 +621,9 @@ export default class Ui {
 						<ul>
 							<li>
 								<input
-									type="checkbox"
-									name="woso"
+									type="radio"
+									name="compatibility"
+									value="woso"
 									id="working-on-stable-only"
 									?checked=${this.#working_on_stable_only}
 								>
@@ -617,6 +631,20 @@ export default class Ui {
 									for="working-on-stable-only"
 								>${
 									'Working on stable only'
+								}</label>
+							</li>
+							<li>
+								<input
+									type="radio"
+									name="compatibility"
+									value="brokensource"
+									id="broken-with-source-linked"
+									?checked=${this.#broken_source}
+								>
+								<label
+									for="broken-with-source-linked"
+								>${
+									'Broken, source linked'
 								}</label>
 							</li>
 							<li>
@@ -747,6 +775,7 @@ export default class Ui {
 					noai: this.#no_ai,
 					woso: this.#working_on_stable_only,
 					controller: this.#controller_supported_or_moot,
+					brokensource: this.#broken_source,
 				},
 				'' === search_value ? mod_ids : undefined,
 			)
@@ -802,11 +831,16 @@ export default class Ui {
 			const coerced = target as HTMLElement;
 
 			if (
-				coerced.matches(
+				coerced.matches([
 					'input[name][type="checkbox"]:not([name="tags[]"])',
-				)
+					'input[name="compatibility"][type="radio"]',
+				].join(','))
 			) {
-				const name = (coerced as HTMLInputElement).name;
+				let name = (coerced as HTMLInputElement).name;
+
+				if ('compatibility' === name) {
+					name = (coerced as HTMLInputElement).value;
+				}
 
 				if (this.#is_toggle(name)) {
 					this.#toggles[name]();
