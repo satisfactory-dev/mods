@@ -1,3 +1,7 @@
+import type {
+	mod_ids_prefix,
+} from '../../populate-index.ts';
+
 import {
 	assert_non_empty,
 } from '../helper/array.ts';
@@ -35,10 +39,38 @@ export default class Web {
 				this.#lunr(),
 				this.#tags(),
 				{
-					noai: this.#noai(),
-					woso: this.#woso(),
-					controller: this.#controller(),
-					brokensource: this.#brokensource(),
+					compatibility: {
+						unknown: this.#mod_ids('compat-unknown'),
+						EA: {
+							Works: this.#mod_ids('compat-EA-Works'),
+							Broken: this.#mod_ids('compat-EA-Broken'),
+							Damaged: this.#mod_ids('compat-EA-Damaged'),
+						},
+						EXP: {
+							Works: this.#mod_ids('compat-EXP-Works'),
+							Broken: this.#mod_ids('compat-EXP-Broken'),
+							Damaged: this.#mod_ids('compat-EXP-Damaged'),
+						},
+						Controller: {
+							Untested: this.#mod_ids(
+								'compat-Controller-Untested',
+							),
+							Unsupported: this.#mod_ids(
+								'compat-Controller-Unsupported',
+							),
+							Partial: this.#mod_ids(
+								'compat-Controller-Partial',
+							),
+							Implicit: this.#mod_ids(
+								'compat-Controller-Implicit',
+							),
+							Supported: this.#mod_ids(
+								'compat-Controller-Supported',
+							),
+						},
+					},
+					has_source_linked: this.#mod_ids('has-source-linked'),
+					has_ai: this.#mod_ids('has-ai'),
 				},
 				this.#thread_source,
 			);
@@ -96,12 +128,18 @@ export default class Web {
 		);
 	}
 
-	async #noai(): Promise<Set<string>> {
+	async #mod_ids(
+		prefix: mod_ids_prefix,
+	): Promise<Set<string>> {
 		let ids = new Set<string>();
+
+		const regex = new RegExp(`\\/${
+			RegExp.escape(prefix)
+		}.\\d{4,}\\..+\\.json$`);
 
 		for (const source of this.#sources.filter((
 			maybe,
-		) => /ai\.mod-ids\..+\.json$/.test(maybe))) {
+		) => regex.test(maybe))) {
 			ids = new Set([
 				...ids,
 				...(await fetch(source)
@@ -112,87 +150,6 @@ export default class Web {
 
 								// oxlint-disable-next-line @stylistic/max-len
 								'No-ai json contained something other than a string array!',
-							);
-						}
-
-						return maybe;
-					})),
-			]);
-		}
-
-		return ids;
-	}
-
-	async #woso(): Promise<Set<string>> {
-		let ids = new Set<string>();
-
-		for (const source of this.#sources.filter((
-			maybe,
-		) => /stable\.mod-ids\..+\.json$/.test(maybe))) {
-			ids = new Set([
-				...ids,
-				...(await fetch(source)
-					.then((e) => e.json())
-					.then((maybe): string[] => {
-						if (!Web.#is_ids(maybe)) {
-							throw new Error(
-
-								// oxlint-disable-next-line @stylistic/max-len
-								'Stable mods json contained something other than a string array!',
-							);
-						}
-
-						return maybe;
-					})),
-			]);
-		}
-
-		return ids;
-	}
-
-	async #controller(): Promise<Set<string>> {
-		let ids = new Set<string>();
-
-		for (const source of this.#sources.filter((
-			maybe,
-		) => /controller-supported-or-moot\.mod-ids\..+\.json$/.test(maybe))) {
-			ids = new Set([
-				...ids,
-				...(await fetch(source)
-					.then((e) => e.json())
-					.then((maybe): string[] => {
-						if (!Web.#is_ids(maybe)) {
-							throw new Error(
-
-								// oxlint-disable-next-line @stylistic/max-len
-								'Supports controller json contained something other than a string array!',
-							);
-						}
-
-						return maybe;
-					})),
-			]);
-		}
-
-		return ids;
-	}
-
-	async #brokensource(): Promise<Set<string>> {
-		let ids = new Set<string>();
-
-		for (const source of this.#sources.filter((
-			maybe,
-		) => /broken-with-source-linked\.mod-ids\..+\.json$/.test(maybe))) {
-			ids = new Set([
-				...ids,
-				...(await fetch(source)
-					.then((e) => e.json())
-					.then((maybe): string[] => {
-						if (!Web.#is_ids(maybe)) {
-							throw new Error(
-
-								// oxlint-disable-next-line @stylistic/max-len
-								'Broken with source linked json contained something other than a string array!',
 							);
 						}
 

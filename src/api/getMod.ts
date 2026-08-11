@@ -21,7 +21,7 @@ import {
 	stringify,
 } from '../helper/json.ts';
 
-type Compatibility = {
+export type Compatibility = {
 	state: (
 		| 'Works'
 		| 'Damaged'
@@ -30,7 +30,7 @@ type Compatibility = {
 	note: string,
 };
 
-type ControllerCompatibility = {
+export type ControllerCompatibility = {
 	state: (
 		| 'Untested'
 		| 'Unsupported'

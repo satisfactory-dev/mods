@@ -15,6 +15,10 @@ import {
 	get_tags_index_validator,
 } from '../search.ts';
 
+import type {
+	mod_ids_prefix,
+} from '../../populate-index.ts';
+
 export async function lunr(): Promise<[string, ...string[]]> {
 	const indices: Promise<string>[] = [];
 
@@ -59,57 +63,53 @@ export async function tags(): Promise<TagIndex[]> {
 	return Promise.all(indices);
 }
 
+async function mod_ids(
+	prefix: mod_ids_prefix,
+): Promise<Set<string>> {
+		for await (const path of glob(`${
+			import.meta.dirname
+	}/../../dist/mod-ids/${prefix}.mod-ids.*.json`)) {
+			return import(path, {
+				with: {
+					type: 'json',
+				},
+			}).then(({default: ids}) => new Set(ids as string[]));
+		}
+
+		throw new Error('Could not find file!');
+}
+
 export const toggles_providers: TogglesProviders = {
-	woso: (async () => {
-		for await (const path of glob(`${
-			import.meta.dirname
-		}/../../dist/mod-ids/stable.mod-ids.*.json`)) {
-			return import(path, {
-				with: {
-					type: 'json',
-				},
-			}).then(({default: ids}) => new Set(ids as string[]));
-		}
-
-		throw new Error('Could not find file!');
-	})(),
-	controller: (async () => {
-		for await (const path of glob(`${
-			import.meta.dirname
-		}/../../dist/mod-ids/controller-supported-or-moot.mod-ids.*.json`)) {
-			return import(path, {
-				with: {
-					type: 'json',
-				},
-			}).then(({default: ids}) => new Set(ids as string[]));
-		}
-
-		throw new Error('Could not find file!');
-	})(),
-	noai: (async () => {
-		for await (const path of glob(`${
-			import.meta.dirname
-		}/../../dist/mod-ids/ai.mod-ids.*.json`)) {
-			return import(path, {
-				with: {
-					type: 'json',
-				},
-			}).then(({default: ids}) => new Set(ids as string[]));
-		}
-
-		throw new Error('Could not find file!');
-	})(),
-	brokensource: (async () => {
-		for await (const path of glob(`${
-			import.meta.dirname
-		}/../../dist/mod-ids/broken-with-source-linked.mod-ids.*.json`)) {
-			return import(path, {
-				with: {
-					type: 'json',
-				},
-			}).then(({default: ids}) => new Set(ids as string[]));
-		}
-
-		throw new Error('Could not find file!');
-	})(),
+	compatibility: {
+		unknown: mod_ids('compat-unknown'),
+		EA: {
+			Works: mod_ids('compat-EA-Works'),
+			Broken: mod_ids('compat-EA-Broken'),
+			Damaged: mod_ids('compat-EA-Damaged'),
+		},
+		EXP: {
+			Works: mod_ids('compat-EXP-Works'),
+			Broken: mod_ids('compat-EXP-Broken'),
+			Damaged: mod_ids('compat-EXP-Damaged'),
+		},
+		Controller: {
+			Untested: mod_ids(
+				'compat-Controller-Untested',
+			),
+			Unsupported: mod_ids(
+				'compat-Controller-Unsupported',
+			),
+			Partial: mod_ids(
+				'compat-Controller-Partial',
+			),
+			Implicit: mod_ids(
+				'compat-Controller-Implicit',
+			),
+			Supported: mod_ids(
+				'compat-Controller-Supported',
+			),
+		},
+	},
+	has_source_linked: mod_ids('has-source-linked'),
+	has_ai: mod_ids('has-ai'),
 };

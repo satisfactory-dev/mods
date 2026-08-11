@@ -33,6 +33,10 @@ import {
 	cached as getMods,
 } from './src/api/getMods.ts';
 
+import type {
+	Compatibility,
+	ControllerCompatibility,
+} from './src/api/getMod.ts';
 import {
 	cached as single_record,
 } from './src/api/getMod.ts';
@@ -40,6 +44,14 @@ import {
 import {
 	stringify,
 } from './src/helper/json.ts';
+
+export type mod_ids_prefix = (
+	| 'compat-unknown'
+	| `compat-${'EA'|'EXP'}-${Compatibility['state']}`
+	| `compat-Controller-${ControllerCompatibility['state']}`
+	| 'has-source-linked'
+	| 'has-ai'
+);
 
 const md = new MarkdownIt();
 
@@ -56,13 +68,73 @@ const mods_by_tag = new Map<string, Set<result['id']>>();
 
 const mod_ids = new Set<doc['id']>();
 
-const has_ai = new Set<doc['id']>();
+const has_ai: index_by_year = new Map();
 
-const stable_mods = new Set<doc['id']>();
+type index_by_year = Map<`${number}`, Set<doc['id']>>;
 
-const controller_supported_or_moot_mods = new Set<doc['id']>();
+const compat_unknown: index_by_year = new Map();
 
-const broken_source = new Set<doc['id']>();
+const has_source_linked: index_by_year = new Map();
+
+const compat_ea = new Map<Compatibility['state'], index_by_year>([
+	['Works', new Map()],
+	['Damaged', new Map()],
+	['Broken', new Map()],
+]);
+const compat_exp = new Map<Compatibility['state'], index_by_year>([
+	['Works', new Map()],
+	['Damaged', new Map()],
+	['Broken', new Map()],
+]);
+const compat_controller = new Map<
+	ControllerCompatibility['state'],
+	index_by_year
+>([
+	['Untested', new Map()],
+	['Unsupported', new Map()],
+	['Partial', new Map()],
+	['Implicit', new Map()],
+	['Supported', new Map()],
+]);
+
+function index_for_year(
+	index: index_by_year,
+	index_key: `${number}`,
+): Set<doc['id']> {
+	const maybe = index.get(index_key);
+
+	if (maybe) {
+		return maybe;
+	}
+
+	const fresh = new Set<doc['id']>();
+
+	index.set(index_key, fresh);
+
+	return fresh;
+}
+
+function index_for_state<
+	Type extends (
+		| Compatibility
+		| ControllerCompatibility
+	),
+	State extends Type['state'],
+>(
+	index: Map<Type['state'], index_by_year>,
+	state: State,
+	index_key: `${number}`,
+): Set<doc['id']> {
+	let maybe = index.get(state);
+
+	if (!maybe) {
+		maybe = new Map();
+
+		index.set(state, maybe);
+	}
+
+	return index_for_year(maybe, index_key);
+}
 
 for await (const mod of getMods(ids_in_cache())) {
 	if (mod.hidden) {
@@ -87,9 +159,11 @@ for await (const mod of getMods(ids_in_cache())) {
 
 	const [
 		year,
-	] = created_at.split('T')[0].split('-');
+	] = created_at.split('T')[0].split('-') as [
+		`${number}`,
+	];
 
-	const index_key = year;
+	const index_key: `${number}` = year;
 
 	let add_to = docs_by_index_key.get(index_key);
 	if (!add_to) {
@@ -117,26 +191,31 @@ for await (const mod of getMods(ids_in_cache())) {
 		|| 'ai_usage' === mod.ai_use_disclosure?.disclosure_type
 		|| 'runtime_ai_usage' === mod.ai_use_disclosure?.disclosure_type
 	) {
-		has_ai.add(mod.id);
+		index_for_year(has_ai, index_key).add(mod.id);
 	}
 
-	if ('Works' === mod.compatibility?.EA.state) {
-		stable_mods.add(mod.id);
+	if (mod.source_url) {
+		index_for_year(has_source_linked, index_key).add(mod.id);
 	}
 
-	if (
-		'Implicit' === mod.compatibility?.Controller.state
-		|| 'Supported' === mod.compatibility?.Controller.state
-	) {
-		controller_supported_or_moot_mods.add(mod.id);
-	}
-
-	if (
-		'' !== mod.source_url
-		&& 'Works' !== mod.compatibility?.EA.state
-		&& 'Works' !== mod.compatibility?.EXP.state
-	) {
-		broken_source.add(mod.id);
+	if (null === mod.compatibility) {
+		index_for_year(compat_unknown, index_key).add(mod.id);
+	} else {
+		index_for_state(
+			compat_ea,
+			mod.compatibility.EA.state,
+			index_key,
+		).add(mod.id);
+		index_for_state(
+			compat_exp,
+			mod.compatibility.EA.state,
+			index_key,
+		).add(mod.id);
+		index_for_state(
+			compat_controller,
+			mod.compatibility.Controller.state,
+			index_key,
+		).add(mod.id);
 	}
 }
 
@@ -145,28 +224,73 @@ await writeFile(
 	stringify([...mod_ids]),
 );
 
+const mod_id_indices: [
+	`${string}.mod-ids` | `${string}.${number}.mod-ids`,
+	Set<doc['id']>,
+][] = [];
+
+for (
+	const [
+		prefix,
+		mod_id_sets,
+	] of [
+		[
+			'has-ai',
+			has_ai,
+		],
+		[
+			'compat-unknown',
+			compat_unknown,
+		],
+		[
+			'has-source-linked',
+			has_source_linked,
+		],
+	] as const
+) {
+	for (const [index_key, mod_ids] of mod_id_sets) {
+		mod_id_indices.push([
+			`${prefix}.${index_key}.mod-ids`,
+			mod_ids,
+		]);
+	}
+}
+
+for (const [type, mod_id_sets] of [
+	[
+		'EA',
+		compat_ea,
+	],
+	[
+		'EXP',
+		compat_exp,
+	],
+	[
+		'Controller',
+		compat_controller,
+	],
+] as const) {
+	for (const [compat_state, mod_ids_by_state] of mod_id_sets) {
+		for (const [index_key, mod_ids] of mod_ids_by_state) {
+			mod_id_indices.push([
+				`compat-${
+					type
+				}-${
+					compat_state
+				}.${
+					index_key
+				}.mod-ids`,
+				mod_ids,
+			]);
+		}
+	}
+}
+
 for (
 	const [
 		basename,
 		data,
-	] of [
-		[
-			'ai.mod-ids',
-			has_ai,
-		],
-		[
-			'stable.mod-ids',
-			stable_mods,
-		],
-		[
-			'controller-supported-or-moot.mod-ids',
-			controller_supported_or_moot_mods,
-		],
-		[
-			'broken-with-source-linked.mod-ids',
-			broken_source,
-		],
-	] as const
+	] of mod_id_indices
 ) {
 	const index_string = stringify([...data]);
 	const sha512 = hash('sha-512', index_string, 'hex');

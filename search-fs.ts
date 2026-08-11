@@ -28,8 +28,31 @@ query = query
 void search.search(
 	query.join(' '),
 	{
-		tags_query_include,
-		tags_query_exclude,
+		tags: {
+			include: tags_query_include,
+			exclude: tags_query_exclude,
+		},
+		has_ai: undefined,
+		has_source_linked: undefined,
+		compatibility: {
+			EA: {
+				Works: undefined,
+				Damaged: undefined,
+				Broken: undefined,
+			},
+			EXP: {
+				Works: undefined,
+				Damaged: undefined,
+				Broken: undefined,
+			},
+			Controller: {
+				Untested: undefined,
+				Unsupported: undefined,
+				Partial: undefined,
+				Implicit: undefined,
+				Supported: undefined,
+			},
+		},
 	},
 )
 	.then((yup) => {

@@ -21,6 +21,11 @@ import type {
 	ResultsChoice,
 } from './search/thread.ts';
 
+import type {
+	Compatibility,
+	ControllerCompatibility,
+} from './api/getMod.ts';
+
 type Success<
 	Required extends [string, ...string[]],
 	Properties extends {
@@ -447,7 +452,18 @@ export type SupportedToggles = (
 );
 
 export type TogglesProviders = {
-	[key in SupportedToggles]: Promise<Set<string>>;
+	compatibility: {
+		unknown: Promise<Set<string>>,
+		EA: {[k in Compatibility['state']]: Promise<Set<string>>},
+		EXP: {[k in Compatibility['state']]: Promise<Set<string>>},
+		Controller: {
+			[k in ControllerCompatibility[
+				'state'
+			]]: Promise<Set<string>>
+		},
+	},
+	has_source_linked: Promise<Set<string>>,
+	has_ai: Promise<Set<string>>,
 };
 
 export default class Search {
@@ -498,21 +514,59 @@ export default class Search {
 	async search(
 		query: string,
 		{
-			tags_query_include = [],
-			tags_query_exclude = [],
-			noai = false,
-			woso = false,
-			controller = false,
-			brokensource = false,
-		}: (
-			& {
-				tags_query_include: string[],
-				tags_query_exclude: string[],
-			}
-			& {
-				[k in SupportedToggles]?: boolean;
-			}
-		),
+			tags: {
+				include: tags_query_include = [],
+				exclude: tags_query_exclude = [],
+			},
+			compatibility: {
+				EA: {
+					Works: EA_Works,
+					Damaged: EA_Damaged,
+					Broken: EA_Broken,
+				},
+				EXP: {
+					Works: EXP_Works,
+					Damaged: EXP_Damaged,
+					Broken: EXP_Broken,
+				},
+				Controller: {
+					Untested: Controller_Untested,
+					Unsupported: Controller_Unsupported,
+					Partial: Controller_Partial,
+					Implicit: Controller_Implicit,
+					Supported: Controller_Supported,
+				},
+			},
+			has_ai,
+			has_source_linked: source_linked,
+		}: {
+			tags: {
+				include: string[],
+				exclude: string[],
+			},
+			compatibility: {
+				EA: {
+					[k in Compatibility['state']]: (
+						| boolean
+						| undefined
+					)
+				},
+				EXP: {
+					[k in Compatibility['state']]: (
+						| boolean
+						| undefined
+					)
+				},
+				Controller: {
+					[k in ControllerCompatibility['state']]: (
+						| boolean
+						| undefined
+					)
+				},
+			},
+			has_ai: boolean | undefined,
+			has_source_linked: boolean | undefined,
+		},
 		override_results?: [string, ...string[]],
 	) {
 		let results_promise = (
@@ -551,38 +605,112 @@ export default class Search {
 			});
 		}
 
-		if (noai) {
-			results_promise = Promise.all([
-				results_promise,
-				this.#toggles_providers.noai,
-			]).then(([results, has_ai]) => results.filter((
-				{ref: maybe},
-			) => !has_ai.has(maybe)));
-		}
+		const groups = ([
+			[
+				[
+					has_ai,
+					this.#toggles_providers.has_ai,
+				],
+			],
+			[
+				[
+					source_linked,
+					this.#toggles_providers.has_source_linked,
+				],
+			],
+			[
+				[
+					EA_Works,
+					this.#toggles_providers.compatibility.EA.Works,
+				],
+				[
+					EA_Damaged,
+					this.#toggles_providers.compatibility.EA.Damaged,
+				],
+				[
+					EA_Broken,
+					this.#toggles_providers.compatibility.EA.Broken,
+				],
+			],
+			[
+				[
+					EXP_Works,
+					this.#toggles_providers.compatibility.EXP.Works,
+				],
+				[
+					EXP_Damaged,
+					this.#toggles_providers.compatibility.EXP.Damaged,
+				],
+				[
+					EXP_Broken,
+					this.#toggles_providers.compatibility.EXP.Broken,
+				],
+			],
+			[
+				[
+					Controller_Untested,
+					this.#toggles_providers.compatibility.Controller.Untested,
+				],
+				[
+					Controller_Unsupported,
+					this.#toggles_providers.compatibility.Controller
+						.Unsupported,
+				],
+				[
+					Controller_Partial,
+					this.#toggles_providers.compatibility.Controller.Partial,
+				],
+				[
+					Controller_Implicit,
+					this.#toggles_providers.compatibility.Controller.Implicit,
+				],
+				[
+					Controller_Supported,
+					this.#toggles_providers.compatibility.Controller.Supported,
+				],
+			],
+		] as const)
+			.map((
+				filters,
+			): [
+				boolean,
+				Promise<Set<string>>,
+			][] => filters.filter((maybe): maybe is [
+				boolean,
+				Promise<Set<string>>,
+			] => undefined !== maybe[0]))
+			.filter((maybe_empty): maybe_empty is [
+				[boolean, Promise<Set<string>>],
+				...[boolean, Promise<Set<string>>][],
+			] => maybe_empty.length >= 1);
 
-		if (woso) {
+		for (const group of groups) {
 			results_promise = Promise.all([
 				results_promise,
-				this.#toggles_providers.woso,
-			]).then(([results, works_on_stable]) => results.filter((
-				{ref: maybe},
-			) => works_on_stable.has(maybe)));
-		} else if (brokensource) {
-			results_promise = Promise.all([
-				results_promise,
-				this.#toggles_providers.brokensource,
-			]).then(([results, broken_with_source_linked]) => results.filter((
-				{ref: maybe},
-			) => broken_with_source_linked.has(maybe)));
-		}
+				Promise.all(group.map(([
+					setting,
+					source,
+				]) => source.then((dataset): [
+					boolean,
+					Set<string>,
+				] => [
+					setting,
+					dataset,
+				]))),
+			]).then(([
+				mod_ids,
+				filters,
+			]) => {
+				return mod_ids.filter(({ref: maybe}) => {
+					for (const [setting, filter] of filters) {
+						if (setting === filter.has(maybe)) {
+							return true;
+						}
+					}
 
-		if (controller) {
-			results_promise = Promise.all([
-				results_promise,
-				this.#toggles_providers.controller,
-			]).then(([results, works_on_controller]) => results.filter((
-				{ref: maybe},
-			) => works_on_controller.has(maybe)));
+					return false;
+				});
+			});
 		}
 
 		return results_promise;

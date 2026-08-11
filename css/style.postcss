@@ -56,15 +56,87 @@ ol
 }
 
 #tags,
-.tags
+.tags,
+fieldset > legend + ul:has(button),
+fieldset > fieldset > fieldset:has(legend + fieldset)
 {
 	display: flex ;
 	flex-wrap: wrap ;
+}
 
+fieldset > fieldset:has(legend):not(:has(fieldset))
+{
+	margin: .25em ;
+}
+
+#tags,
+.tags,
+fieldset > legend + ul:has(button)
+{
+	> li
+	{
+		margin: .125em ;
+	}
+}
+
+#tags,
+.tags
+{
 	> li
 	{
 		position: relative ;
-		margin: .125em ;
+	}
+}
+
+button[role="checkbox"]:not([name="tags[]"])
+{
+	&[name="preset"]
+	{
+		&::before
+		{
+			content: '❌' ;
+		}
+
+		&[aria-checked="true"]
+		{
+			content: '✔️' ;
+		}
+	}
+
+	&::before
+	{
+		padding: .125em ;
+		content: '🤷' ;
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(1)
+		;
+	}
+
+	&[aria-checked="true"]::before
+	{
+		content: '👍' ;
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(20)
+			hue-rotate(45deg)
+		;
+	}
+
+	&[aria-checked="false"]::before
+	{
+		content: '👎' ;
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(20)
+			hue-rotate(-45deg)
+		;
 	}
 }
 
