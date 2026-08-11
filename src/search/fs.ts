@@ -66,17 +66,17 @@ export async function tags(): Promise<TagIndex[]> {
 async function mod_ids(
 	prefix: mod_ids_prefix,
 ): Promise<Set<string>> {
-		for await (const path of glob(`${
-			import.meta.dirname
+	for await (const path of glob(`${
+		import.meta.dirname
 	}/../../dist/mod-ids/${prefix}.mod-ids.*.json`)) {
-			return import(path, {
-				with: {
-					type: 'json',
-				},
-			}).then(({default: ids}) => new Set(ids as string[]));
-		}
+		return import(path, {
+			with: {
+				type: 'json',
+			},
+		}).then(({default: ids}) => new Set(ids as string[]));
+	}
 
-		throw new Error('Could not find file!');
+	throw new Error('Could not find file!');
 }
 
 export const toggles_providers: TogglesProviders = {

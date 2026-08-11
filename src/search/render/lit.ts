@@ -800,52 +800,52 @@ export default class Ui {
 						</ul>
 					</fieldset>
 					<fieldset>
-							<legend>Tags</legend>
-					<ul
-						id="tags"
-					>${repeat(Object.entries(tags), ([id]) => id, ([
-						id,
-						{
-							name,
-							description,
-						},
-					]) => html`<li>
-						<button
-							type="button"
-							name="tags[]"
-							value="${id}"
-							role="checkbox"
-							aria-checked="${
-								[
-									'mixed',
-									'true',
-									'false',
-								][this.#tag_status.get(id) || 0]
-							}"
-							aria-label="${
-								`${
-									name
-								}, ${
+						<legend>Tags</legend>
+						<ul
+							id="tags"
+						>${repeat(Object.entries(tags), ([id]) => id, ([
+							id,
+							{
+								name,
+								description,
+							},
+						]) => html`<li>
+							<button
+								type="button"
+								name="tags[]"
+								value="${id}"
+								role="checkbox"
+								aria-checked="${
 									[
-										'ignored by filter',
-										'required by filter',
-										'excluded by filter',
+										'mixed',
+										'true',
+										'false',
 									][this.#tag_status.get(id) || 0]
-								}`
-							}"
-							aria-describedby="tag-tooltip-${id}"
-						>
-							<span
-								id="tag-name-${id}"
-								inert
-								aria-hidden="true"
-							>${name}</span>
-						<aside
-							id="tag-tooltip-${id}"
-							role="tooltip"
-						>${description}</aside>
-						</button>
-					</li>`)}</ul>
+								}"
+								aria-label="${
+									`${
+										name
+									}, ${
+										[
+											'ignored by filter',
+											'required by filter',
+											'excluded by filter',
+										][this.#tag_status.get(id) || 0]
+									}`
+								}"
+								aria-describedby="tag-tooltip-${id}"
+							>
+								<span
+									id="tag-name-${id}"
+									inert
+									aria-hidden="true"
+								>${name}</span>
+							<aside
+								id="tag-tooltip-${id}"
+								role="tooltip"
+							>${description}</aside>
+							</button>
+						</li>`)}</ul>
 					</fieldset>
 				</fieldset>
 			</fieldset>
