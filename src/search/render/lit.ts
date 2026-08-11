@@ -807,19 +807,16 @@ export default class Ui {
 			void this.#search.search(
 				search_value,
 				{
-					tags_query_exclude,
-					tags_query_include,
-					noai: this.#no_ai,
-					woso: this.#working_on_stable_only,
-					controller: this.#controller_supported_or_moot,
-					brokensource: this.#broken_source,
+					...this.#search_toggles,
+					tags: {
+						include: tags_query_include,
+						exclude: tags_query_exclude,
+					},
 				},
 				'' === search_value ? mod_ids : undefined,
 			)
 				.then(
 					(results) => {
-						console.log(results);
-
 						this.#debounced = results;
 
 						this.#render();
