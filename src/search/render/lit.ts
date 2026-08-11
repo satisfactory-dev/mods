@@ -651,8 +651,6 @@ export default class Ui {
 		},
 	};
 
-	#copyright_notice: DocumentFragment;
-
 	#tag_status = new Map<string, 0|1|2>();
 
 	constructor({
@@ -670,18 +668,6 @@ export default class Ui {
 		this.#search = search;
 		this.#provider = provider;
 		this.#initial_query = initial_query || '';
-
-		const copyright_notice = (
-			document.querySelector(
-				'template#copyright-notice',
-			) as unknown as HTMLTemplateElement | null
-		)?.content;
-
-		if (!copyright_notice) {
-			throw new Error('Could not find copyright notice!');
-		}
-
-		this.#copyright_notice = document.importNode(copyright_notice, true);
 	}
 
 	get template() {
@@ -867,9 +853,7 @@ export default class Ui {
 				),
 			),
 		)}</output>
-		<footer>
-			${this.#copyright_notice}
-		</footer>`;
+		`;
 	}
 
 	#search_toggle_button(
@@ -999,7 +983,9 @@ export default class Ui {
 	}
 
 	#render() {
-		render(this.template, this.#target);
+		render(this.template, this.#target, {
+			renderBefore: this.#target.querySelector('footer'),
+		});
 	}
 
 	#debounced_search(

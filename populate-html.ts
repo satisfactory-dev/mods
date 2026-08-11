@@ -123,26 +123,6 @@ ${sources.map((source) => html`<link
 	crossorigin="anonymous"
 >`)}
 <link rel="stylesheet" href="./css/${files.style}">
-<template id="copyright-notice">
-	<p>An experimental forked search alternative of <a
-		target="_blank"
-		href="https://ficsit.app/mods"
-	>https://ficsit.app/mods</a>.</p>
-	<p>Fork &copy; ${
-		unsafeStatic(now.getFullYear().toString())
-	} <a
-		target="_blank"
-		href="https://github.com/satisfactory-dev/mods/"
-	>SignpostMarv</a>, last build at ${
-		unsafeStatic(now.toTimeString())
-	} on ${
-		unsafeStatic(now.toDateString())
-	}.</p>
-	<p>Original data / content managed by <a
-		target="_blank"
-		href="https://ficsit.app/tos"
-	>ficsit.app</a>.</p>
-</template>
 </head>
 <body>
 <script type="importmap">${unsafeStatic(stringify({
@@ -174,6 +154,26 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 });
 </script>
+<footer>
+	<p>An experimental forked search alternative of <a
+		target="_blank"
+		href="https://ficsit.app/mods"
+	>https://ficsit.app/mods</a>.</p>
+	<p>Fork &copy; ${
+		unsafeStatic(now.getFullYear().toString())
+	} <a
+		target="_blank"
+		href="https://github.com/satisfactory-dev/mods/"
+	>SignpostMarv</a>, last build at ${
+		unsafeStatic(now.toTimeString())
+	} on ${
+		unsafeStatic(now.toDateString())
+	}.</p>
+	<p>Original data / content managed by <a
+		target="_blank"
+		href="https://ficsit.app/tos"
+	>ficsit.app</a>.</p>
+</footer>
 </body>
 </html>`;
 
