@@ -659,11 +659,15 @@ export default class Ui {
 		initial_query,
 		provider,
 	}: {
-		target: HTMLElement,
+		target: HTMLElement | null,
 		search: Search,
 		provider: Provider,
 		initial_query?: string,
 	}) {
+		if (!target) {
+			throw new Error('Could not find target!');
+		}
+
 		this.#target = target;
 		this.#search = search;
 		this.#provider = provider;
@@ -983,9 +987,7 @@ export default class Ui {
 	}
 
 	#render() {
-		render(this.template, this.#target, {
-			renderBefore: this.#target.querySelector('footer'),
-		});
+		render(this.template, this.#target);
 	}
 
 	#debounced_search(

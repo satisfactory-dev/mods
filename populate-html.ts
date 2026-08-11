@@ -154,6 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 });
 </script>
+<main></main>
 <footer>
 	<p>An experimental forked search alternative of <a
 		target="_blank"

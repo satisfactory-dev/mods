@@ -49,7 +49,7 @@ export default ({
 	).mods = search;
 
 	(new Ui({
-		target: document.body,
+		target: document.querySelector('main'),
 		search,
 		provider,
 		initial_query: params.get('q') || '',
