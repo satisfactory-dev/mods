@@ -180,6 +180,10 @@ function has_expected_sizes(maybe: logo_size[]): maybe is [
 }
 
 async function logo(mod: result) {
+	if (process.env.GITHUB_ACTIONS) {
+		return;
+	}
+
 	if (!has_logo(mod)) {
 		return;
 	}

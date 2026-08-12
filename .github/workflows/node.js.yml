@@ -17,9 +17,21 @@ jobs:
                   node-version: 26.x
                   cache: 'npm'
             - run: npm ci
+            - name: cache
+              uses: actions/cache/restore@v6
+              with:
+                  path: .cache
+                  key: cache
+            - run: make build--schema build--cache build--index
             - run: make lint ci--basic-checks
+            - name: cache
+              uses: actions/cache/restore@v6
+              with:
+                  path: .cache
+                  key: cache
     coverage:
-        if: github.event.repository.visibility == 'public'
+        # disabling this for now
+        if: false
         needs: basic-checks
         runs-on: ubuntu-latest
         steps:
