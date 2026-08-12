@@ -610,63 +610,76 @@ export default class Search {
 				[
 					has_ai,
 					this.#toggles_providers.has_ai,
+					'has-ai',
 				],
 			],
 			[
 				[
 					source_linked,
 					this.#toggles_providers.has_source_linked,
+					'has-source-linked',
 				],
 			],
 			[
 				[
 					EA_Works,
 					this.#toggles_providers.compatibility.EA.Works,
+					'compat-EA-Works',
 				],
 				[
 					EA_Damaged,
 					this.#toggles_providers.compatibility.EA.Damaged,
+					'compat-EA-Damaged',
 				],
 				[
 					EA_Broken,
 					this.#toggles_providers.compatibility.EA.Broken,
+					'compat-EA-Broken',
 				],
 			],
 			[
 				[
 					EXP_Works,
 					this.#toggles_providers.compatibility.EXP.Works,
+					'compat-EXP-Works',
 				],
 				[
 					EXP_Damaged,
 					this.#toggles_providers.compatibility.EXP.Damaged,
+					'compat-EXP-Damaged',
 				],
 				[
 					EXP_Broken,
 					this.#toggles_providers.compatibility.EXP.Broken,
+					'compat-EXP-Broken',
 				],
 			],
 			[
 				[
 					Controller_Untested,
 					this.#toggles_providers.compatibility.Controller.Untested,
+					'compat-Controller-Untested',
 				],
 				[
 					Controller_Unsupported,
 					this.#toggles_providers.compatibility.Controller
 						.Unsupported,
+					'compat-Controller-Unsupported',
 				],
 				[
 					Controller_Partial,
 					this.#toggles_providers.compatibility.Controller.Partial,
+					'compat-Controller-Partial',
 				],
 				[
 					Controller_Implicit,
 					this.#toggles_providers.compatibility.Controller.Implicit,
+					'compat-Controller-Implicit',
 				],
 				[
 					Controller_Supported,
 					this.#toggles_providers.compatibility.Controller.Supported,
+					'compat-Controller-Supported',
 				],
 			],
 		] as const)
@@ -675,13 +688,15 @@ export default class Search {
 			): [
 				boolean,
 				Promise<Set<string>>,
+				string,
 			][] => filters.filter((maybe): maybe is [
 				boolean,
 				Promise<Set<string>>,
+				typeof maybe[2],
 			] => undefined !== maybe[0]))
 			.filter((maybe_empty): maybe_empty is [
-				[boolean, Promise<Set<string>>],
-				...[boolean, Promise<Set<string>>][],
+				[boolean, Promise<Set<string>>, string],
+				...[boolean, Promise<Set<string>>, string][],
 			] => maybe_empty.length >= 1);
 
 		for (const group of groups) {
@@ -690,19 +705,22 @@ export default class Search {
 				Promise.all(group.map(([
 					setting,
 					source,
+					label,
 				]) => source.then((dataset): [
 					boolean,
 					Set<string>,
+					string,
 				] => [
 					setting,
 					dataset,
+					label,
 				]))),
 			]).then(([
 				mod_ids,
 				filters,
 			]) => {
 				return mod_ids.filter(({ref: maybe}) => {
-					for (const [setting, filter] of filters) {
+					for (const [setting, filter, _label] of filters) {
 						if (setting === filter.has(maybe)) {
 							return true;
 						}
