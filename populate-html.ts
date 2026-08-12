@@ -108,6 +108,7 @@ const index = html`<html
 		'An experimental forked search alternative of https://ficsit.app/mods.'
 	}"
 >
+<base href="/">
 ${[...modulepreloads].map((filename) => html`
 <link
 	rel="modulepreload"
@@ -137,10 +138,13 @@ ${sources.map((source) => html`<link
 import init from './js/ui.js';
 import Provider from './js/provider.js';
 
-const params = new URLSearchParams(location.search);
+let params = new URLSearchParams(location.search);
 
 const url = new URL(import.meta.url);
-url.search = '';
+
+if ('' === location.search) {
+	params = undefined;
+}
 
 const provider = new Provider(url + '/api/');
 

@@ -524,7 +524,10 @@ export default class Ui {
 
 	#target: HTMLElement;
 
-	#initial_query: URLSearchParams;
+	#initial_query: (
+		| URLSearchParams
+		| undefined
+	);
 
 	#hide_filters = true;
 
@@ -664,7 +667,10 @@ export default class Ui {
 		target: HTMLElement | null,
 		search: Search,
 		provider: Provider,
-		initial_query: URLSearchParams,
+		initial_query: (
+			| URLSearchParams
+			| undefined
+		),
 	}) {
 		if (!target) {
 			throw new Error('Could not find target!');
@@ -1324,8 +1330,12 @@ export default class Ui {
 			this.#render();
 		});
 
-		this.#replace_state = false;
-		this.params = this.#initial_query;
+		if (this.#initial_query) {
+			this.#replace_state = false;
+			this.params = this.#initial_query;
+		} else {
+			this.#debounced_search('', false);
+		}
 	}
 
 	static #is_filter_button(maybe: unknown): maybe is HTMLButtonElement {
