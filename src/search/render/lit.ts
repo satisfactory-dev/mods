@@ -313,6 +313,7 @@ export class DeferredModFetch extends LitElement {
 							}) => html`<span
 								aria-label="${state}"
 								class="icon"
+								title="${state}"
 							>${
 								'Works' === state
 									? '👍'
