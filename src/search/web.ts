@@ -33,6 +33,10 @@ export default class Web {
 		this.#thread_source = thread;
 	}
 
+	get has_source_linked() {
+		return this.#mod_ids('has-source-linked');
+	}
+
 	get search() {
 		if (!this.#search) {
 			this.#search = new Search(

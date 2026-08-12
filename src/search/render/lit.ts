@@ -96,11 +96,16 @@ export class DeferredModFetch extends LitElement {
 		provider: {
 			type: Object,
 		},
+		has_source_link_provider: {
+			type: Object,
+		},
 	};
 
 	results!: IndexResult[];
 
 	provider!: Provider;
+
+	has_source_link_provider!: Promise<Set<string>>;
 
 	#controller!: IntersectionController<Set<Mod['id']>>;
 
@@ -365,6 +370,8 @@ export class DeferredModFetch extends LitElement {
 							}</span>`,
 						)}
 						</li>
+						${this.#ai_disclosure(data)}
+						${this.#source_link_available(data)}
 					</ul>
 				</li>
 			</ul>
@@ -443,6 +450,92 @@ export class DeferredModFetch extends LitElement {
 				),
 			)}
 		</footer>`;
+	}
+
+	#ai_disclosure(mod: Mod | undefined) {
+		return when(
+			mod,
+			({ai_use_disclosure}) => html`${
+				when(
+					ai_use_disclosure,
+					({disclosure_type}) => {
+						if ('no_ai_usage' === disclosure_type) {
+							return '';
+						}
+
+						return html`<li
+							class="ai-disclosure"
+							class=${classMap({
+								'ai-disclosure': true,
+								'ai-disclosure--yes': true,
+							})}
+							aria-label="Uses AI"
+							title="Uses AI"
+						><span
+							aria-hidden="true"
+						>✨</span></li>`;
+					},
+					() => html`<li
+						class="${[
+							'ai-disclosure',
+							'ai-disclosure--unknown',
+						].join(' ')}"
+						aria-label="No AI Disclosure given"
+						title="No AI Disclosure given"
+					><span
+						aria-hidden="true"
+					>🤷</span></li>`,
+				)
+			}`,
+		);
+	}
+
+	// oxlint-disable-next-line no-unused-vars
+	#source_link_available(mod: Mod | undefined) {
+		return '';
+
+		/*
+		return when(
+			mod,
+			({id}) => html`${
+				until(
+					this.has_source_link_provider.then((
+						has_source_linked,
+					) => html`<li
+							class=${classMap({
+								'has-source-linked': true,
+								'has-source-linked--yes': (
+									has_source_linked.has(id)
+								),
+								'has-source-linked--no': (
+									!has_source_linked.has(id)
+								),
+							})}
+							aria-label="${
+								'Link to source available on mod page'
+							}"
+							title="${
+								'Link to source available on mod page'
+							}"
+						><span
+							aria-hidden="true"
+						>${
+							has_source_linked.has(id)
+								? '👍'
+								: '👎'
+						}</span></li>`,
+					),
+					() => html`<li
+						class="has-source-linked has-source-linked--unknown"
+						aria-label="Unknown status of source availability"
+						title="Unknown status of source availability"
+					><span
+						aria-hidden="true"
+					>⏳</span></li>`,
+				)
+			}`,
+		);
+		*/
 	}
 
 	render() {
@@ -661,11 +754,14 @@ export default class Ui {
 
 	#tag_status = new Map<string, 0|1|2>();
 
+	#has_source_linked: Promise<Set<string>>;
+
 	constructor({
 		target,
 		search,
 		initial_query,
 		provider,
+		has_source_linked,
 	}: {
 		target: HTMLElement | null,
 		search: Search,
@@ -674,6 +770,7 @@ export default class Ui {
 			| URLSearchParams
 			| undefined
 		),
+		has_source_linked: Promise<Set<string>>,
 	}) {
 		if (!target) {
 			throw new Error('Could not find target!');
@@ -684,6 +781,7 @@ export default class Ui {
 		this.#provider = provider;
 
 		this.#initial_query = initial_query;
+		this.#has_source_linked = has_source_linked;
 	}
 
 	get template() {
@@ -863,6 +961,9 @@ export default class Ui {
 						() => html`<satisfactory-dev-mods-deferred
 							.provider=${this.#provider}
 							.results=${this.#debounced}
+							.has_source_link_provider=${
+								this.#has_source_linked
+							}
 						></satisfactory-dev-mods-deferred>`,
 						() => html`<p>An error occurred!</p>`,
 					),

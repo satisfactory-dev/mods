@@ -168,6 +168,60 @@ button[role="checkbox"]:not([name="tags[]"])
 	}
 }
 
+.ai-disclosure::before
+{
+	content: 'AI' ;
+}
+
+.has-source-linked::before
+{
+	content: '🔗' ;
+}
+
+.ai-disclosure,
+.has-source-linked
+{
+	> span
+	{
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(1)
+		;
+	}
+}
+
+.ai-disclosure--no,
+.has-source-linked--yes
+{
+	> span
+	{
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(20)
+			hue-rotate(45deg)
+		;
+	}
+}
+
+.ai-disclosure--yes,
+.has-source-linked--no
+{
+	> span
+	{
+		filter:
+			grayscale(1)
+			sepia(1)
+			contrast(.2)
+			saturate(20)
+			hue-rotate(-45deg)
+		;
+	}
+}
+
 #tags
 {
 	> li

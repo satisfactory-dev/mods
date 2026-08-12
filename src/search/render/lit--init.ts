@@ -29,7 +29,7 @@ export default ({
 
 	customElements.define('satisfactory-dev-mods-deferred', DeferredModFetch);
 
-	const search = (new Web(
+	const web = new Web(
 		[...document.querySelectorAll<HTMLLinkElement>(
 			'head > link[rel="preload"][as="fetch"]',
 		)].map((e) => e.href),
@@ -37,7 +37,9 @@ export default ({
 			thread_source.href,
 			import.meta.url,
 		),
-	)).search;
+	);
+
+	const search = web.search;
 
 	(
 		globalThis as (
@@ -53,6 +55,7 @@ export default ({
 		search,
 		provider,
 		initial_query: params,
+		has_source_linked: web.has_source_linked,
 	});
 
 	ui.init();
