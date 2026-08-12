@@ -444,13 +444,6 @@ export function get_tags_index_validator() {
 	).then(({validator_tag_index}) => validator_tag_index);
 }
 
-export type SupportedToggles = (
-	| 'woso' // working on stable only
-	| 'controller' // controller supported or moot
-	| 'noai' // because reasons
-	| 'brokensource' // broken with source linked
-);
-
 export type TogglesProviders = {
 	compatibility: {
 		unknown: Promise<Set<string>>,

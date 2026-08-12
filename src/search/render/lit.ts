@@ -43,10 +43,6 @@ import {
 
 import type Provider from '../../provider/interface.ts';
 
-import type {
-	SupportedToggles,
-} from '../../search.ts';
-
 import tags from '../../../.cache/api/tags.json' with {type: 'json'};
 
 import _mod_ids from '../../../.cache/indexed-mod-ids.json' with {
@@ -497,12 +493,17 @@ assert_non_empty(_mod_ids);
 
 const mod_ids = _mod_ids;
 
-type Toggles = (
+type SupportedPresets = (
+	| 'woso' // working on stable only
+	| 'controller' // controller supported or moot
+	| 'noai' // because reasons
+	| 'brokensource' // broken with source linked
+	| 'any_compat' // ignore compatibility
+);
+
+type Presets = (
 	& {
-		[k in SupportedToggles]: () => void;
-	}
-	& {
-		any_compat: () => void,
+		[k in SupportedPresets]: () => void;
 	}
 );
 
@@ -600,7 +601,7 @@ export default class Ui {
 		),
 	};
 
-	#presets: Toggles = {
+	#presets: Presets = {
 		woso: () => {
 			this.#search_toggles.compatibility.EA = {
 				Works: true,
@@ -962,7 +963,7 @@ export default class Ui {
 	}
 
 	#preset_button(
-		preset: keyof Toggles,
+		preset: keyof Presets,
 		label: string,
 	) {
 		const active = this.#preset_check[preset]();
@@ -1296,7 +1297,7 @@ export default class Ui {
 		return undefined;
 	}
 
-	#is_search_preset(maybe: string): maybe is keyof Toggles {
+	#is_search_preset(maybe: string): maybe is keyof Presets {
 		return maybe in this.#presets;
 	}
 
@@ -1304,7 +1305,7 @@ export default class Ui {
 		& HTMLButtonElement
 		& {
 			name: 'preset',
-			value: keyof Toggles,
+			value: keyof Presets,
 		}
 	) {
 		return (
