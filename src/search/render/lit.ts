@@ -956,10 +956,6 @@ export default class Ui {
 
 		this.#search_input.value = value.get('q') || '';
 
-		const tags = value.getAll('tags');
-
-		console.log(tags);
-
 		this.#tag_status.clear();
 
 		const tag_regex = /^tags\[([^]+)\]$/;
