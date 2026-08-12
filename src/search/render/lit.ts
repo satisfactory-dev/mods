@@ -245,17 +245,18 @@ export class DeferredModFetch extends LitElement {
 				() => name,
 			)}</h1>
 			<ul>
-				<li aria-label="Views">${this.#conditionally(
+				<li
+					aria-label="Views"
+					title="Views"
+				>${this.#conditionally(
 					'👁️',
 					data,
 					'views',
 				)}</li>
-				<li aria-label="Downloads">${this.#conditionally(
-					'⬇️',
-					data,
-					'downloads',
-				)}</li>
-				<li aria-label="Downloads">${this.#conditionally(
+				<li
+					aria-label="Downloads"
+					title="Downloads"
+				>${this.#conditionally(
 					'⬇️',
 					data,
 					'downloads',
@@ -328,6 +329,7 @@ export class DeferredModFetch extends LitElement {
 								},
 							}) => html`<span
 								aria-label="${state}"
+								title="${state}"
 								class="icon"
 							>${
 								'Works' === state
@@ -347,6 +349,7 @@ export class DeferredModFetch extends LitElement {
 								},
 							}) => html`<span
 								aria-label="${state}"
+								title="${state}"
 								class="icon"
 							>${
 								(
