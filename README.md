@@ -19,7 +19,10 @@ Including, but not limited to:
 
 ## Example
 
-[<picture>
+<a
+	href="https://mods.satisfactory.dev/"
+	style="display: block ;">
+<picture>
 <source media="(prefers-color-scheme: dark)" srcset="./.github/landing-page--dark-mode.avif">
 <source media="(prefers-color-scheme: light)" srcset="./.github/landing-page--light-mode.avif">
 <img
@@ -29,4 +32,5 @@ Including, but not limited to:
 		height="1305"
 		style="max-width:100%;height:auto;"
 	>
-</picture>](https://mods.satisfactory.dev/)
+</picture>
+</a>
