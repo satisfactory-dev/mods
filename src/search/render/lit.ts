@@ -538,8 +538,8 @@ export default class Ui {
 		compatibility: {
 			EA: {
 				Works: true,
-				Damaged: false,
-				Broken: false,
+				Damaged: undefined,
+				Broken: undefined,
 			},
 			EXP: {
 				Works: undefined,
@@ -559,12 +559,12 @@ export default class Ui {
 	};
 
 	#preset_check: {
-		[k in keyof Toggles]: () => boolean;
+		[k in keyof Presets]: () => boolean;
 	} = {
 		woso: () => (
 			true === this.#search_toggles.compatibility.EA.Works
-			&& false === this.#search_toggles.compatibility.EA.Broken
-			&& false === this.#search_toggles.compatibility.EA.Damaged
+			&& undefined === this.#search_toggles.compatibility.EA.Broken
+			&& undefined === this.#search_toggles.compatibility.EA.Damaged
 			&& undefined === this.#search_toggles.compatibility.EXP.Works
 			&& undefined === this.#search_toggles.compatibility.EXP.Broken
 			&& undefined === this.#search_toggles.compatibility.EXP.Damaged
