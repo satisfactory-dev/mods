@@ -524,7 +524,7 @@ export default class Ui {
 
 	#target: HTMLElement;
 
-	#initial_query: string;
+	#initial_query: URLSearchParams;
 
 	#hide_filters = true;
 
@@ -664,7 +664,7 @@ export default class Ui {
 		target: HTMLElement | null,
 		search: Search,
 		provider: Provider,
-		initial_query?: string,
+		initial_query: URLSearchParams,
 	}) {
 		if (!target) {
 			throw new Error('Could not find target!');
@@ -673,7 +673,8 @@ export default class Ui {
 		this.#target = target;
 		this.#search = search;
 		this.#provider = provider;
-		this.#initial_query = initial_query || '';
+
+		this.#initial_query = initial_query;
 	}
 
 	get template() {
@@ -862,6 +863,178 @@ export default class Ui {
 		`;
 	}
 
+	get #form(): HTMLFormElement {
+		const form = this.#target.querySelector('form');
+
+		if (!form) {
+			throw new Error('Could not find form!');
+		}
+
+		return form;
+	}
+
+	get #search_input() {
+		const search = this.#form.querySelector<(
+			& HTMLInputElement
+			& {type: 'search'}
+		)>('input[type="search"]');
+
+		if (!search) {
+			throw new Error('Could not find search input!');
+		}
+
+		return search;
+	}
+
+	#replace_state: (
+		| undefined
+		| boolean
+	) = undefined;
+
+	get params(): URLSearchParams {
+		const params = new URLSearchParams();
+
+		const form = this.#form;
+
+		params.set('q', this.#search_input.value);
+
+		for (const [tag, status] of this.#tag_status) {
+			if (0 === status) {
+				continue;
+			}
+
+			params.append(`tags[${tag}]`, 1 === status ? '1' : '0');
+		}
+
+		const toggles = form.querySelectorAll<(
+			& HTMLButtonElement
+			& {
+				dataset: (
+					& DOMStringMap
+					& {
+						action: 'search-toggle',
+						searchToggle: string,
+					}
+				),
+				ariaChecked: (
+					| 'mixed'
+					| 'true'
+					| 'false'
+				),
+			}
+		)>(
+
+			// oxlint-disable-next-line @stylistic/max-len
+			'button[role="checkbox"][data-action="search-toggle"][data-search-toggle][aria-checked]',
+		);
+
+		for (const toggle of toggles) {
+			const checked = toggle.ariaChecked;
+
+			if ('mixed' === checked) {
+				continue;
+			}
+
+			if ('true' === checked) {
+				params.append(
+					'search-toggle-on',
+					toggle.dataset.searchToggle,
+				);
+			} else {
+				params.append(
+					'search-toggle-off',
+					toggle.dataset.searchToggle,
+				);
+			}
+		}
+
+		return params;
+	}
+
+	set params(value: URLSearchParams) {
+		const form = this.#form;
+
+		this.#search_input.value = value.get('q') || '';
+
+		const tags = value.getAll('tags');
+
+		console.log(tags);
+
+		this.#tag_status.clear();
+
+		const tag_regex = /^tags\[([^]+)\]$/;
+
+		for (const [k, v] of value) {
+			const maybe_tag = tag_regex.exec(k);
+
+			if (maybe_tag) {
+				this.#tag_status.set(maybe_tag[1], '1' === v ? 1 : 2);
+			}
+		}
+
+		const toggles = new Map([...form.querySelectorAll<(
+			& HTMLButtonElement
+			& {
+				dataset: (
+					& DOMStringMap
+					& {
+						action: 'search-toggle',
+						searchToggle: string,
+					}
+				),
+				ariaChecked: (
+					| 'mixed'
+					| 'true'
+					| 'false'
+				),
+			}
+		)>(
+
+			// oxlint-disable-next-line @stylistic/max-len
+			'button[role="checkbox"][data-action="search-toggle"][data-search-toggle][aria-checked]',
+		)].map((toggle) => [
+			toggle.dataset.searchToggle,
+			toggle,
+		]));
+
+		for (const toggle of toggles.values()) {
+			const maybe = Ui.#maybe_search_toggle(toggle);
+
+			if (!maybe) {
+				throw new Error('Found a toggle that isn\'t');
+			}
+
+			maybe(this, 0);
+		}
+
+		for (const toggle of value.getAll('search-toggle-on')) {
+			const maybe = Ui.#maybe_search_toggle(toggles.get(toggle));
+
+			if (!maybe) {
+				throw new Error('Found a toggle that isn\'t');
+			}
+
+			maybe(this, 1);
+		}
+
+		for (const toggle of value.getAll('search-toggle-off')) {
+			const maybe = Ui.#maybe_search_toggle(toggles.get(toggle));
+
+			if (!maybe) {
+				throw new Error('Found a toggle that isn\'t');
+			}
+
+			maybe(this, 2);
+		}
+
+		this.#debounced_search(
+			this.#search_input.value,
+			this.#replace_state,
+		);
+
+		this.#replace_state = undefined;
+	}
+
 	#search_toggle_button(
 		search_toggle: string,
 		value_as_integer: 0|1|2,
@@ -993,8 +1166,11 @@ export default class Ui {
 	}
 
 	#debounced_search(
-		form: HTMLFormElement,
 		search: string,
+		replace_state: (
+			| boolean
+			| undefined
+		),
 	) {
 		const search_value = search.trim();
 
@@ -1045,6 +1221,18 @@ export default class Ui {
 				});
 
 			this.#render();
+
+			if (undefined !== replace_state) {
+				history[
+					replace_state
+						? 'replaceState'
+						: 'pushState'
+				](
+					undefined,
+					'',
+					`?${this.params}`,
+				);
+			}
 		}, 100);
 	}
 
@@ -1074,19 +1262,13 @@ export default class Ui {
 		form.addEventListener('input', ({target}) => {
 			const coerced = target as HTMLElement;
 
-			if (
-				coerced.matches('input[name="preset"][type="radio"]')
-			) {
-				const input = coerced as HTMLInputElement;
-
-				if (this.#is_search_preset(input.value)) {
-					this.#presets[input.value]();
-				}
+			if (!coerced.matches('input[type="search"]')) {
+				return;
 			}
 
 			this.#debounced_search(
-				form,
 				search.value,
+				true,
 			);
 		});
 
@@ -1107,8 +1289,8 @@ export default class Ui {
 				this.#render();
 
 				this.#debounced_search(
-					form,
 					search.value,
+					false,
 				);
 
 				return;
@@ -1116,8 +1298,8 @@ export default class Ui {
 				this.#presets[e.target.value]();
 				this.#render();
 				this.#debounced_search(
-					form,
 					search.value,
+					false,
 				);
 
 				return;
@@ -1130,7 +1312,7 @@ export default class Ui {
 
 				this.#render();
 
-				this.#debounced_search(form, search.value);
+				this.#debounced_search(search.value, false);
 
 				return;
 			}
@@ -1146,10 +1328,8 @@ export default class Ui {
 			this.#render();
 		});
 
-		this.#debounced_search(
-			form,
-			this.#initial_query,
-		);
+		this.#replace_state = false;
+		this.params = this.#initial_query;
 	}
 
 	static #is_filter_button(maybe: unknown): maybe is HTMLButtonElement {
@@ -1208,7 +1388,12 @@ export default class Ui {
 
 	static #maybe_search_toggle(maybe: unknown): (
 		| undefined
-		| ((ui: Ui) => void)
+		| ((ui: Ui, value?: (
+			| undefined
+			| 0
+			| 1
+			| 2
+		)) => void)
 	) {
 		if (!this.#is_search_toggle(maybe)) {
 			return undefined;
@@ -1225,12 +1410,27 @@ export default class Ui {
 				Compatibility['state'],
 			];
 
-			return (ui: Ui) => {
+			return (ui: Ui, value?: (
+				| undefined
+				| 0
+				| 1
+				| 2
+			)) => {
 				const current = ui.#search_toggles.compatibility[
 					branch
 				][
 					status
 				];
+
+				if (value !== undefined) {
+					ui.#search_toggles.compatibility[branch][status] = [
+						undefined,
+						true,
+						false,
+					][value];
+
+					return;
+				}
 
 				if (undefined === current) {
 					ui.#search_toggles.compatibility[branch][status] = true;
@@ -1251,10 +1451,25 @@ export default class Ui {
 				ControllerCompatibility['state'],
 			];
 
-			return (ui: Ui) => {
+			return (ui: Ui, value?: (
+				| undefined
+				| 0
+				| 1
+				| 2
+			)) => {
 				const current = ui.#search_toggles.compatibility.Controller[
 					status
 				];
+
+				if (value !== undefined) {
+					ui.#search_toggles.compatibility.Controller[status] = [
+						undefined,
+						true,
+						false,
+					][value];
+
+					return;
+				}
 
 				if (undefined === current) {
 					ui.#search_toggles.compatibility.Controller[status] = true;
@@ -1269,8 +1484,23 @@ export default class Ui {
 				}
 			};
 		} else if ('has-ai' === maybe.dataset.searchToggle) {
-			return (ui: Ui) => {
+			return (ui: Ui, value?: (
+				| undefined
+				| 0
+				| 1
+				| 2
+			)) => {
 				const current = ui.#search_toggles.has_ai;
+
+				if (value !== undefined) {
+					ui.#search_toggles.has_ai = [
+						undefined,
+						true,
+						false,
+					][value];
+
+					return;
+				}
 
 				if (undefined === current) {
 					ui.#search_toggles.has_ai = true;
@@ -1281,8 +1511,23 @@ export default class Ui {
 				}
 			};
 		} else if ('has-source-linked' === maybe.dataset.searchToggle) {
-			return (ui: Ui) => {
+			return (ui: Ui, value?: (
+				| undefined
+				| 0
+				| 1
+				| 2
+			)) => {
 				const current = ui.#search_toggles.has_source_linked;
+
+				if (value !== undefined) {
+					ui.#search_toggles.has_source_linked = [
+						undefined,
+						true,
+						false,
+					][value];
+
+					return;
+				}
 
 				if (undefined === current) {
 					ui.#search_toggles.has_source_linked = true;

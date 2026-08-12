@@ -48,10 +48,16 @@ export default ({
 		)
 	).mods = search;
 
-	(new Ui({
+	const ui = new Ui({
 		target: document.querySelector('main'),
 		search,
 		provider,
-		initial_query: params.get('q') || '',
-	})).init();
+		initial_query: params,
+	});
+
+	ui.init();
+
+	addEventListener('popstate', () => {
+		ui.params = new URLSearchParams(location.search);
+	});
 };
