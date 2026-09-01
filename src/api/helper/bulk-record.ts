@@ -243,6 +243,7 @@ export async function* cached<
 ): AsyncGenerator<ResultType> {
 	const reusable = await Array.fromAsync(ids);
 	const current_state = await async_generator_to_set(get_current_state);
+	const skip = new Set<ResultType['id']>();
 
 	if (auto_refresh) {
 		const possibly_stale = (
@@ -281,6 +282,8 @@ export async function* cached<
 				}
 
 				console.error(`${maybe.id} not found`);
+
+				skip.add(maybe.id);
 
 				continue;
 			}
@@ -384,6 +387,10 @@ export async function* cached<
 	}
 
 	for (const id of reusable) {
+		if (skip.has(id)) {
+			continue;
+		}
+
 		if (current_state.has(id)) {
 			yield* maybe_yield_and_cache();
 
