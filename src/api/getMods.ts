@@ -50,7 +50,7 @@ export async function* cached<
 		validator,
 		freshness_validator,
 		'getMods',
-		'mods',
+		'ids',
 		yield_error,
 	);
 }
