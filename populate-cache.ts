@@ -340,7 +340,7 @@ while (pass.size > 0) {
 
 	let mods = 0;
 
-	for await (const mod of getMods(pass)) {
+	for await (const mod of getMods(pass, true)) {
 		++mods;
 
 		console.log(`Checking mod ${
@@ -352,6 +352,12 @@ while (pass.size > 0) {
 		} ${
 			mod.id
 		}`);
+
+		if (mod instanceof NotFound) {
+			console.log(`${mod.id} does not exist!`);
+
+			continue;
+		}
 
 		filtered_add(mod.creator_id, user_ids, known_missing_users);
 

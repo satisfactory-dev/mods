@@ -38,6 +38,7 @@ export async function* cached<
 	Id extends result['id'],
 >(
 	ids: Iterable<Id>|AsyncIterable<Id>,
+	yield_error = false,
 ) {
 	yield* bulk_record_cached<result>(
 		'getMods',
@@ -48,5 +49,8 @@ export async function* cached<
 		single_record,
 		validator,
 		freshness_validator,
+		'getMods',
+		'mods',
+		yield_error,
 	);
 }
