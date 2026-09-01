@@ -25,6 +25,10 @@ import {
 } from './src/api/getMods.ts';
 
 import {
+	cached as getMods_reduced,
+} from './src/api/getMods--reduced.ts';
+
+import {
 	live as getUsers,
 } from './src/api/getUsers-reduced.ts';
 
@@ -489,5 +493,11 @@ await writeFile(
 	full_mod_api_hash_cache_file,
 	stringify(Object.fromEntries(full_mod_api_hash_cache)),
 );
+
+console.log('Updating reduced cache');
+
+const mod_ids = await Array.fromAsync(getMod_ids());
+
+await Array.fromAsync(getMods_reduced(mod_ids));
 
 console.log(`finished after ${performance.now() - start}ms`);
