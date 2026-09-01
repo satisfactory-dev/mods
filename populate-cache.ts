@@ -60,6 +60,10 @@ import type {
 	result,
 } from './src/api/getMod.ts';
 
+import {
+	NotFound,
+} from './src/api/helper/bulk-record.ts';
+
 const start = performance.now();
 
 const logo_sizes_cache_file = `${
@@ -411,7 +415,13 @@ while (pass.size > 0) {
 
 	let version_check = 0;
 
-	for await (const version of getVersions(version_ids_to_check)) {
+	for await (const version of getVersions(version_ids_to_check, true)) {
+		if (version instanceof NotFound) {
+			console.error(`${version.id} not found`);
+
+			continue;
+		}
+
 		++version_check;
 
 		console.log(`checking dependencies for version ${

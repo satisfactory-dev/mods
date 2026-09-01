@@ -275,7 +275,8 @@ export async function* cached<
 	Id extends result['id'],
 >(
 	ids: Iterable<Id>|AsyncIterable<Id>,
-) {
+	yield_error = false,
+): AsyncGenerator<result> {
 	yield* bulk_record_cached<result>(
 		'getVersions',
 		'versions',
@@ -285,5 +286,8 @@ export async function* cached<
 		single_record,
 		validator,
 		freshness_validator,
+		'getVersions',
+		'ids',
+		yield_error,
 	);
 }

@@ -1,8 +1,13 @@
 import {
 	stat,
+	unlink,
 	utimes,
 	writeFile,
 } from 'node:fs/promises';
+
+import {
+	existsSync,
+} from 'node:fs';
 
 import {
 	async_generator_to_set,
@@ -103,6 +108,57 @@ type Validator<
 	IterateOn
 >>;
 
+export class NotFound<
+	Id extends Exclude<string, ''>,
+> extends Error {
+	readonly id: Id;
+
+	constructor(id: Id, message: string) {
+		super(message);
+
+		this.id = id;
+	}
+}
+
+export function live<
+	ResultType extends {id: Exclude<string, ''>},
+	Operation extends string = string,
+	IterateOn extends string|undefined = string|undefined,
+>(
+	operation: Operation,
+	iterate_on: IterateOn,
+	sub_query: string,
+	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
+	validator: Validator<ResultType, Operation, IterateOn>,
+	filter_key: string,
+	yield_error: true,
+): AsyncGenerator<ResultType|NotFound<ResultType['id']>>;
+export function live<
+	ResultType extends {id: Exclude<string, ''>},
+	Operation extends string = string,
+	IterateOn extends string|undefined = string|undefined,
+>(
+	operation: Operation,
+	iterate_on: IterateOn,
+	sub_query: string,
+	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
+	validator: Validator<ResultType, Operation, IterateOn>,
+	filter_key?: string,
+	yield_error?: false,
+): AsyncGenerator<ResultType>;
+export function live<
+	ResultType extends {id: Exclude<string, ''>},
+	Operation extends string = string,
+	IterateOn extends string|undefined = string|undefined,
+>(
+	operation: Operation,
+	iterate_on: IterateOn,
+	sub_query: string,
+	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
+	validator: Validator<ResultType, Operation, IterateOn>,
+	filter_key: string,
+	yield_error: boolean,
+): AsyncGenerator<ResultType|NotFound<ResultType['id']>>;
 export async function* live<
 	ResultType extends {id: Exclude<string, ''>},
 	Operation extends string = string,
@@ -114,7 +170,8 @@ export async function* live<
 	ids: Iterable<Exclude<string, ''>>|AsyncIterable<Exclude<string, ''>>,
 	validator: Validator<ResultType, Operation, IterateOn>,
 	filter_key = 'ids',
-) {
+	yield_error?: boolean,
+): AsyncGenerator<ResultType|NotFound<ResultType['id']>> {
 	for await (const chunk of chunk_ids(ids)) {
 		const result = validated(validator, await run(
 			operation,
@@ -142,6 +199,17 @@ export async function* live<
 			) => maybe === id_in_request_order);
 
 			if (!result_in_request_order) {
+				if (yield_error) {
+					yield new NotFound(
+						id_in_request_order,
+						`${
+							id_in_request_order
+						} not found in results!`,
+					);
+
+					continue;
+				}
+
 				throw new Error(`${
 					id_in_request_order
 				} not found in results!`);
@@ -171,7 +239,8 @@ export async function* cached<
 	) = undefined,
 	cache_dir = operation,
 	filter_key = 'ids',
-) {
+	yield_error = false,
+): AsyncGenerator<ResultType> {
 	const reusable = await Array.fromAsync(ids);
 	const current_state = await async_generator_to_set(get_current_state);
 
@@ -196,6 +265,7 @@ export async function* cached<
 			possibly_stale,
 			auto_refresh,
 			filter_key,
+			yield_error,
 		)) {
 			const cache_file = `${
 				import.meta.dirname
@@ -204,6 +274,16 @@ export async function* cached<
 			}/${
 				maybe.id
 			}.json`;
+
+			if (maybe instanceof NotFound) {
+				if (existsSync(cache_file)) {
+					await unlink(cache_file);
+				}
+
+				console.error(`${maybe.id} not found`);
+
+				continue;
+			}
 
 			if (
 				(
@@ -226,12 +306,23 @@ export async function* cached<
 			update_cache,
 			validator,
 			filter_key,
+			yield_error,
 		)) {
 			const cache_file = `${
 				import.meta.dirname
 			}/../../../.cache/api/${
 				cache_dir
 			}/${fresh.id}.json`;
+
+			if (fresh instanceof NotFound) {
+				if (existsSync(cache_file)) {
+					await unlink(cache_file);
+				}
+
+				console.error(`${fresh.id} not found`);
+
+				continue;
+			}
 
 			await writeFile(
 				cache_file,
@@ -259,6 +350,7 @@ export async function* cached<
 				current_defer_page,
 				validator,
 				filter_key,
+				yield_error,
 			)) {
 				if (!/^[A-Za-z0-9]+$/.test(result.id)) {
 					throw new Error(
@@ -271,6 +363,16 @@ export async function* cached<
 				const cache_file = `${
 					import.meta.dirname
 				}/../../../.cache/api/${cache_dir}/${result.id}.json`;
+
+				if (result instanceof NotFound) {
+					if (existsSync(cache_file)) {
+						await unlink(cache_file);
+					}
+
+					console.error(`${result.id} not found`);
+
+					continue;
+				}
 
 				await writeFile(cache_file, stringify(result));
 
