@@ -173,7 +173,7 @@ ${sources.map((source) => html`<link
 <body>
 <script
 	type="module"
-	integrity="sha256,${init_hash}"
+	integrity="sha256-${init_hash}"
 >${unsafeStatic(init)}</script>
 <main></main>
 <footer>
