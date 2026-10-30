@@ -103,6 +103,10 @@
 											},
 											{
 												"type": "string",
+												"pattern": "^=\\d+(?:\\.\\d+)*$"
+											},
+											{
+												"type": "string",
 												"pattern": "^\\d+$"
 											}
 										]
