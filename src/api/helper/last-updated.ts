@@ -25,9 +25,9 @@ export default async function last_updated<
 
 	const last_updated: string[] = [];
 
-		for await (const version of single_record_version(versions)) {
-			last_updated.push(version.created_at);
-		}
+	for await (const version of single_record_version(versions)) {
+		last_updated.push(version.created_at);
+	}
 
 	last_updated.sort((a, b) => {
 		return (new Date(b)).getTime() - (new Date(a)).getTime();
