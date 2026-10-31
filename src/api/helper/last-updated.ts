@@ -27,7 +27,7 @@ export default async function last_updated<
 
 	for (const version_id of versions) {
 		for await (const version of single_record_version([version_id])) {
-				last_updated.push(version.created_at);
+			last_updated.push(version.created_at);
 		}
 	}
 
