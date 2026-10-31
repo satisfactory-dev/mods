@@ -26,14 +26,8 @@ export default async function last_updated<
 	const last_updated: string[] = [];
 
 	for (const version_id of versions) {
-		try {
-			for await (const version of single_record_version(version_id)) {
+		for await (const version of single_record_version([version_id])) {
 				last_updated.push(version.created_at);
-			}
-		} catch (err) {
-			console.error(err);
-
-			continue;
 		}
 	}
 
