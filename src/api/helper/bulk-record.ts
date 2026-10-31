@@ -203,6 +203,8 @@ export async function* live<
 					yield new NotFound(
 						id_in_request_order,
 						`${
+							operation
+						}: ${
 							id_in_request_order
 						} not found in results!`,
 					);
@@ -211,6 +213,8 @@ export async function* live<
 				}
 
 				throw new Error(`${
+					operation
+				}: ${
 					id_in_request_order
 				} not found in results!`);
 			}
