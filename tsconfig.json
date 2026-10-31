@@ -18,5 +18,5 @@
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true
 	},
-	"lib": ["esnext"]
+	"lib": ["esnext", "browser"]
 }

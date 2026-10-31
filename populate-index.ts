@@ -136,6 +136,8 @@ function index_for_state<
 	return index_for_year(maybe, index_key);
 }
 
+const updated_dates = new Map<string, number>();
+
 for await (const mod of getMods(ids_in_cache())) {
 	if (mod.hidden) {
 		continue;
@@ -144,6 +146,7 @@ for await (const mod of getMods(ids_in_cache())) {
 	const {
 		created_at,
 		full_description,
+		updated_at,
 	} = await single_record(mod.id);
 
 	const doc = {
@@ -153,7 +156,10 @@ for await (const mod of getMods(ids_in_cache())) {
 		full_description: convert(md.render(full_description), {
 			decodeEntities: true,
 		}),
+		updated_at,
 	};
+
+	updated_dates.set(mod.id, (new Date(updated_at)).getTime());
 
 	mod_ids.add(doc.id);
 
@@ -221,7 +227,9 @@ for await (const mod of getMods(ids_in_cache())) {
 
 await writeFile(
 	`${import.meta.dirname}/.cache/indexed-mod-ids.json`,
-	stringify([...mod_ids]),
+	stringify([...mod_ids].sort((a, b) => (
+		(updated_dates.get(b) || 0) - (updated_dates.get(a) || 0)
+	))),
 );
 
 const mod_id_indices: [

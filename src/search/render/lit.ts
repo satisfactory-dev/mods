@@ -28,6 +28,10 @@ import {
 } from 'lit/directives/class-map.js';
 
 import {
+	asyncReplace,
+} from 'lit/directives/async-replace.js';
+
+import {
 	IntersectionController,
 } from '@lit-labs/observers/intersection-controller.js';
 
@@ -109,6 +113,10 @@ export class DeferredModFetch extends LitElement {
 
 	#controller!: IntersectionController<Set<Mod['id']>>;
 
+	#formatter: Intl.DurationFormat;
+
+	#timezone: string;
+
 	constructor() {
 		super();
 
@@ -146,6 +154,13 @@ export class DeferredModFetch extends LitElement {
 		});
 
 		this.#controller = controller;
+
+		this.#timezone = Temporal.Now.timeZoneId();
+
+		this.#formatter = new Intl.DurationFormat(undefined, {
+			style: 'long',
+			fractionalDigits: 0,
+		});
 	}
 
 	connectedCallback(): void {
@@ -236,6 +251,27 @@ export class DeferredModFetch extends LitElement {
 		>${content(mod)}</a>`;
 	}
 
+	async* #timestamp(
+		datetime: string,
+	) {
+		while (true) {
+			yield this.#formatter.format(Temporal.Now.instant().since(
+				Temporal.Instant.from(
+					datetime,
+				).toZonedDateTimeISO(this.#timezone),
+				{
+					largestUnit: 'auto',
+					smallestUnit: 'minutes',
+				},
+			));
+			await new Promise((yup) => {
+				requestIdleCallback(() => {
+					setTimeout(yup, 60 * 5 * 1000);
+				});
+			});
+		}
+	}
+
 	#content({
 		name,
 		data,
@@ -266,6 +302,20 @@ export class DeferredModFetch extends LitElement {
 					data,
 					'downloads',
 				)}</li>
+				${
+					'Temporal' in globalThis
+						? when(
+							data?.updated_at,
+							(
+								updated_at,
+							) => html`<li>Last Updated: <time
+								datetime="${updated_at}"
+							>${
+								asyncReplace(this.#timestamp(updated_at))
+							}</time> ago.</li>`,
+						)
+						: ''
+				}
 				<li aria-label="Compatibility" class="compatibility">
 					<ul class=${classMap(
 						Object.fromEntries(
