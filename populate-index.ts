@@ -163,7 +163,7 @@ for await (const mod of getMods(ids_in_cache())) {
 	};
 
 	if (updated_at) {
-	updated_dates.set(mod.id, (new Date(updated_at)).getTime());
+		updated_dates.set(mod.id, (new Date(updated_at)).getTime());
 	}
 
 	mod_ids.add(doc.id);
