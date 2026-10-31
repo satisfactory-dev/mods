@@ -41,6 +41,8 @@ import {
 	cached as single_record,
 } from './src/api/getMod.ts';
 
+import last_updated from './src/api/helper/last-updated.ts';
+
 import {
 	stringify,
 } from './src/helper/json.ts';
@@ -146,8 +148,9 @@ for await (const mod of getMods(ids_in_cache())) {
 	const {
 		created_at,
 		full_description,
-		updated_at,
 	} = await single_record(mod.id);
+
+	const updated_at = await last_updated(mod);
 
 	const doc = {
 		id: mod.id,
@@ -159,7 +162,9 @@ for await (const mod of getMods(ids_in_cache())) {
 		updated_at,
 	};
 
+	if (updated_at) {
 	updated_dates.set(mod.id, (new Date(updated_at)).getTime());
+	}
 
 	mod_ids.add(doc.id);
 

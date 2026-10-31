@@ -33,7 +33,6 @@ const import_fields = [
 	'ai_use_disclosure',
 	'tags',
 	'network_use_disclosure',
-	'updated_at',
 ] as const;
 
 export type Logo<
@@ -163,7 +162,6 @@ export const sub_query = `
 			note
 		}
 	}
-	updated_at
 	network_use_disclosure
 	ai_use_disclosure{
 		message

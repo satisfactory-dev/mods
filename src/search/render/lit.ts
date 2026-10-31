@@ -303,6 +303,8 @@ export class DeferredModFetch extends LitElement {
 					'downloads',
 				)}</li>
 				${
+
+					/*
 					'Temporal' in globalThis
 						? when(
 							data?.updated_at,
@@ -315,6 +317,9 @@ export class DeferredModFetch extends LitElement {
 							}</time> ago.</li>`,
 						)
 						: ''
+					*/
+
+					''
 				}
 				<li aria-label="Compatibility" class="compatibility">
 					<ul class=${classMap(
