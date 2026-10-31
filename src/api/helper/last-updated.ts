@@ -25,7 +25,17 @@ export default async function last_updated<
 
 	const last_updated: string[] = [];
 
-	for await (const version of single_record_version(versions)) {
+	for await (const version of single_record_version(versions, true)) {
+		if (version instanceof Error) {
+			console.error(`latest version for ${
+				mod.id
+			} not found: ${
+				version.id
+			}`);
+
+			continue;
+		}
+
 		last_updated.push(version.created_at);
 	}
 
