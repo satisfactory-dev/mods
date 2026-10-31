@@ -1,5 +1,6 @@
 import {
 	glob,
+	writeFile,
 } from 'node:fs/promises';
 
 import {
@@ -11,6 +12,7 @@ import {
 } from './getMod.ts';
 
 import type {
+	amended_result,
 	result,
 } from './getMod--reduced.ts';
 import {
@@ -31,6 +33,10 @@ import {
 	cached as bulk_record_cached,
 	live as bulk_record_live,
 } from './helper/bulk-record.ts';
+
+import {
+	stringify,
+} from '../helper/json.ts';
 
 export function compile_schema(): SchemaObject {
 	const _schema = single_compile_schema();
@@ -112,6 +118,19 @@ export async function* cached<
 		validator,
 		freshness_validator,
 		'getMod--reduced',
+	);
+}
+
+export async function amend_cache(
+	mod: amended_result,
+) {
+	await writeFile(
+		`${
+			import.meta.dirname
+		}/../../.cache/api/getMod--reduced/${
+			mod.id
+		}.json`,
+		stringify(mod),
 	);
 }
 

@@ -25,6 +25,7 @@ import {
 } from './src/api/getMods.ts';
 
 import {
+	amend_cache,
 	cached as getMods_reduced,
 } from './src/api/getMods--reduced.ts';
 
@@ -64,9 +65,14 @@ import type {
 	result,
 } from './src/api/getMod.ts';
 
+import type {
+	result as result_reduced,
+} from './src/api/getMod--reduced.ts';
+
 import {
 	NotFound,
 } from './src/api/helper/bulk-record.ts';
+import last_updated from './src/api/helper/last-updated.ts';
 
 const start = performance.now();
 
@@ -505,5 +511,34 @@ console.log('Updating reduced cache');
 const mod_ids = await Array.fromAsync(getMod_ids());
 
 await Array.fromAsync(getMods_reduced(mod_ids));
+
+const populate_latest_version_updated = new Map<
+	result['id'],
+	result_reduced
+>();
+
+for await (const mod of getMods_reduced(mod_ids)) {
+	populate_latest_version_updated.set(mod.id, mod);
+}
+
+for await (const mod of getMods(populate_latest_version_updated.keys())) {
+	const reduced = populate_latest_version_updated.get(mod.id);
+
+	if (!reduced) {
+		throw new Error(`${
+			mod.id
+		} not found in latest version updated map!`);
+	}
+
+	const amended_value = await last_updated(mod);
+
+	await amend_cache(Object.assign(
+		{},
+		reduced,
+		{
+			latest_version_updated: (!amended_value ? null : amended_value),
+		},
+	));
+}
 
 console.log(`finished after ${performance.now() - start}ms`);

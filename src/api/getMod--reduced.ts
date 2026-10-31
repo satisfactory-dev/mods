@@ -47,12 +47,33 @@ export type Logoless<
 	DateTimeType extends string | Date = string,
 > = Pick<_result<Id, DateTimeType>, (typeof import_fields)[number]>;
 
-export type result<
+type result_from_api<
 	Id extends _result['id'] = _result['id'],
 	DateTimeType extends string | Date = string,
 > = (
 	& Logo<Id>
 	& Pick<_result<Id, DateTimeType>, (typeof import_fields)[number]>
+);
+
+export type amended_result<
+	Id extends _result['id'] = _result['id'],
+	DateTimeType extends string | Date = string,
+> = (
+	& result_from_api<Id, DateTimeType>
+	& {
+		latest_version_updated: (
+			| DateTimeType
+			| null
+		),
+	}
+);
+
+export type result<
+	Id extends _result['id'] = _result['id'],
+	DateTimeType extends string | Date = string,
+> = (
+	| result_from_api<Id, DateTimeType>
+	| amended_result<Id, DateTimeType>
 );
 
 const imported_Mod_props = Object.entries(_schema.$defs.Mod.properties)

@@ -303,11 +303,13 @@ export class DeferredModFetch extends LitElement {
 					'downloads',
 				)}</li>
 				${
-
-					/*
-					'Temporal' in globalThis
+					(
+						'Temporal' in globalThis
+						&& data
+						&& 'latest_version_updated' in data
+					)
 						? when(
-							data?.updated_at,
+							data?.latest_version_updated,
 							(
 								updated_at,
 							) => html`<li>Last Updated: <time
@@ -317,9 +319,6 @@ export class DeferredModFetch extends LitElement {
 							}</time> ago.</li>`,
 						)
 						: ''
-					*/
-
-					''
 				}
 				<li aria-label="Compatibility" class="compatibility">
 					<ul class=${classMap(
