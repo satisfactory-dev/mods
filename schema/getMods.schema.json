@@ -122,6 +122,11 @@
 							"$comment": "plain-old http really should not be allowed",
 							"type": "string",
 							"pattern": "^http:\\/\\/"
+						},
+						{
+							"$comment": "leading space in a url should really not be allowed",
+							"type": "string",
+							"pattern": "^\\s+https:\\/\\/"
 						}
 					]
 				},
