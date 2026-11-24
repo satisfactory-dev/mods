@@ -99,7 +99,11 @@
 										"oneOf": [
 											{
 												"type": "string",
-												"pattern": "^>=\\d+$"
+												"pattern": "^>=\\d+(?: <\\d+)?$"
+											},
+											{
+												"type": "string",
+												"pattern": "^>=\\d+ <\\d+(?: \\|\\| >=\\d+ <\\d+)+$"
 											},
 											{
 												"type": "string",
